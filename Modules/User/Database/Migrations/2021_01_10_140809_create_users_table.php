@@ -46,7 +46,7 @@ class CreateUsersTable extends Migration
             $table->string('key')->comment("forgot key")->nullable();
             $table->integer('role_id')->unsigned();
             $table->rememberToken();
-            $table->string('timezone');
+            $table->string('timezone')->nullable();
             $table->string('locale')->default("en");
             $table->integer('created_by')->default(0);
             $table->integer('updated_by')->default(0);

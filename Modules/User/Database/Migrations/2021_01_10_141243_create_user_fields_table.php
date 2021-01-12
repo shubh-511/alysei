@@ -19,6 +19,9 @@ class CreateUserFieldsTable extends Migration
             $table->string('type');
             $table->string('description')->nullable();
             $table->string('hint')->nullable();
+            $table->enum('required',['yes','no'])->default('no');
+            $table->text('css')->nullable();
+            $table->string('class_name')->nullable();
             $table->timestamps();
         });
 
