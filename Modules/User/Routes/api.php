@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::get('get/registration/form/{id}', 'Api\UserController@getRegistrationForm');
-
+Route::get('get/roles', 'Api\UserController@getRegistrationRoles');
 // Route::prefix('get/registration/form')->group(function() {
     
 // });
