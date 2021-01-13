@@ -17,7 +17,7 @@ class CreateUserFieldMapRolesTable extends Migration
             $table->increments('user_field_map_role_id');
             $table->integer('user_field_id');
             $table->integer('role_id');
-            $table->integer('step');
+            $table->string('step')->nullable();
             $table->integer('order')->default(1);
             $table->timestamps();
         });
