@@ -16,12 +16,14 @@ class CreateUserFieldsTable extends Migration
         Schema::create('user_fields', function (Blueprint $table) {
             $table->increments('user_field_id');
             $table->string('title');
+            $table->string('name')->nullable();
             $table->string('type');
             $table->string('description')->nullable();
             $table->string('hint')->nullable();
             $table->enum('required',['yes','no'])->default('no');
             $table->text('css')->nullable();
             $table->string('class_name')->nullable();
+            $table->enum('contiditional',['yes','no'])->default('no');
             $table->timestamps();
         });
 

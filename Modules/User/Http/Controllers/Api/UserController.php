@@ -52,6 +52,7 @@ class UserController extends CoreController
                     $roleFields = DB::table('user_field_map_roles')
                                       ->join('user_fields', 'user_fields.user_field_id', '=', 'user_field_map_roles.user_field_id')
                                       ->where("role_id","=",$role_id)
+                                      ->where("user_fields.contiditional","=","no")
                                       ->orderBy("order","asc")
                                       ->get();
 
@@ -67,8 +68,10 @@ class UserController extends CoreController
                                 if(!empty($value->values)){
                                     foreach ($value->values as $k => $v) {
                                         $data = $this->getUserFieldOptionsNoneParent($value->user_field_id,$v->user_field_option_id);
-                                        if(!empty($data)){
-                                            $value->values[$k]->values = $data;
+                                        $value->values[$k]->values = $data;
+                                        foreach ($value->values[$k]->values as $optionKey => $optionValue) {
+                                            $options = $this->getUserFieldOptionsNoneParent($optionValue->user_field_id,$optionValue->user_field_option_id);
+                                            $value->values[$k]->values[$optionKey]->values = $options;
                                         }
                                     }
                                 }
@@ -275,7 +278,29 @@ class UserController extends CoreController
 
     }
 
+    /*
+     * Segregate user input data
+     * @Params $input and @userFields
+     */
     public function segregateInputData($input,$userFields){
+
+        $inputData = [];
+
+        foreach($userFields as $key => $field){
+            if(array_key_exists($field->user_field_id, $input)){
+                $inputData[$field->name] = $input[$field->user_field_id];
+            }
+        }
+
+        return $inputData;
+
+    }
+
+    /*
+     * Get Field Options
+     * @Params $request
+     */
+    public function getFieldOption(Request $request){
 
         $inputData = [];
 

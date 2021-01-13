@@ -35,55 +35,69 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
         13  Country
         14  Speciality
         15  Zip/Postal Code
+        16  Email
+        17  Password
+        18  First Name
+        19  Last Name
+        20  Country
         */
 
         $data = array(
-                        array("user_field_id"=>16,'role_id'=>3,'step'=>1,'order'=>1),
-                        array("user_field_id"=>17,'role_id'=>3,'step'=>1,'order'=>2),
-                        array("user_field_id"=>1,'role_id'=>3,'step'=>1,'order'=>3),
-                        array("user_field_id"=>2,'role_id'=>3,'step'=>1,'order'=>4),
-                        array("user_field_id"=>3,'role_id'=>3,'step'=>1,'order'=>5),
-                        array("user_field_id"=>4,'role_id'=>3,'step'=>2,'order'=>6),
-                        array("user_field_id"=>5,'role_id'=>3,'step'=>2,'order'=>7),
-                        array("user_field_id"=>6,'role_id'=>3,'step'=>2,'order'=>8),
+                        //Producers
+                        array("user_field_id"=>16,'role_id'=>3,'step'=>'step_1','order'=>1),
+                        array("user_field_id"=>17,'role_id'=>3,'step'=>'step_1','order'=>2),
+                        array("user_field_id"=>1,'role_id'=>3,'step'=>'step_1','order'=>3),
+                        array("user_field_id"=>2,'role_id'=>3,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>3,'role_id'=>3,'step'=>'step_1','order'=>5),
+                        array("user_field_id"=>4,'role_id'=>3,'step'=>'step_2','order'=>6),
+                        array("user_field_id"=>5,'role_id'=>3,'step'=>'step_2','order'=>7),
+                        array("user_field_id"=>6,'role_id'=>3,'step'=>'step_2','order'=>8),
 
-                        array("user_field_id"=>16,'role_id'=>6,'step'=>1,'order'=>1),
-                        array("user_field_id"=>17,'role_id'=>6,'step'=>1,'order'=>2),
-                        array("user_field_id"=>1,'role_id'=>6,'step'=>1,'order'=>3),
-                        array("user_field_id"=>2,'role_id'=>6,'step'=>1,'order'=>4),
-                        array("user_field_id"=>3,'role_id'=>6,'step'=>1,'order'=>5),
-                        array("user_field_id"=>4,'role_id'=>6,'step'=>2,'order'=>6),
-                        array("user_field_id"=>5,'role_id'=>6,'step'=>2,'order'=>7),
-                        array("user_field_id"=>6,'role_id'=>6,'step'=>2,'order'=>8),
+                        //Impoters & Distributor
+                        array("user_field_id"=>16,'role_id'=>6,'step'=>'step_1','order'=>1),
+                        array("user_field_id"=>17,'role_id'=>6,'step'=>'step_1','order'=>2),
+                        array("user_field_id"=>1,'role_id'=>6,'step'=>'step_1','order'=>3),
+                        array("user_field_id"=>2,'role_id'=>6,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>3,'role_id'=>6,'step'=>'step_1','order'=>5),
+                        array("user_field_id"=>4,'role_id'=>6,'step'=>'step_2','order'=>6),
+                        array("user_field_id"=>5,'role_id'=>6,'step'=>'step_2','order'=>7),
+                        array("user_field_id"=>6,'role_id'=>6,'step'=>'step_2','order'=>8),
 
-                        array("user_field_id"=>16,'role_id'=>9,'step'=>1,'order'=>1),
-                        array("user_field_id"=>17,'role_id'=>9,'step'=>1,'order'=>2),
-                        array("user_field_id"=>7,'role_id'=>9,'step'=>1,'order'=>3),
-                        array("user_field_id"=>8,'role_id'=>9,'step'=>2,'order'=>4),
-                        array("user_field_id"=>9,'role_id'=>9,'step'=>2,'order'=>5),
-                        array("user_field_id"=>10,'role_id'=>9,'step'=>2,'order'=>6),
+                        //Restaurents
+                        array("user_field_id"=>16,'role_id'=>9,'step'=>'step_1','order'=>1),
+                        array("user_field_id"=>17,'role_id'=>9,'step'=>'step_1','order'=>2),
+                        array("user_field_id"=>7,'role_id'=>9,'step'=>'step_1','order'=>3),
+                        array("user_field_id"=>8,'role_id'=>9,'step'=>'step_2','order'=>4),
+                        array("user_field_id"=>9,'role_id'=>9,'step'=>'step_2','order'=>5),
+                        array("user_field_id"=>10,'role_id'=>9,'step'=>'step_2','order'=>6),
+                        array("user_field_id"=>13,'role_id'=>9,'step'=>'step_2','order'=>7),
+                        array("user_field_id"=>21,'role_id'=>9,'step'=>'step_2','order'=>8),
+                        array("user_field_id"=>22,'role_id'=>9,'step'=>'step_2','order'=>9),
+                        array("user_field_id"=>23,'role_id'=>9,'step'=>'step_2','order'=>10),
 
-                        array("user_field_id"=>16,'role_id'=>8,'step'=>1,'order'=>1),
-                        array("user_field_id"=>17,'role_id'=>8,'step'=>1,'order'=>2),
-                        array("user_field_id"=>1,'role_id'=>8,'step'=>1,'order'=>3),
-                        array("user_field_id"=>14,'role_id'=>8,'step'=>1,'order'=>4),
-                        array("user_field_id"=>13,'role_id'=>8,'step'=>1,'order'=>5),
+                        //Travel Agencies
+                        array("user_field_id"=>16,'role_id'=>8,'step'=>'step_1','order'=>1),
+                        array("user_field_id"=>17,'role_id'=>8,'step'=>'step_1','order'=>2),
+                        array("user_field_id"=>1,'role_id'=>8,'step'=>'step_1','order'=>3),
+                        array("user_field_id"=>14,'role_id'=>8,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>13,'role_id'=>8,'step'=>'step_1','order'=>5),
 
-                        array("user_field_id"=>16,'role_id'=>10,'step'=>1,'order'=>1),
-                        array("user_field_id"=>17,'role_id'=>10,'step'=>1,'order'=>2),
-                        array("user_field_id"=>18,'role_id'=>10,'step'=>1,'order'=>3),
-                        array("user_field_id"=>19,'role_id'=>10,'step'=>1,'order'=>4),
-                        array("user_field_id"=>13,'role_id'=>10,'step'=>2,'order'=>5),
-                        array("user_field_id"=>15,'role_id'=>10,'step'=>2,'order'=>6),
+                        //Voyagers
+                        array("user_field_id"=>16,'role_id'=>10,'step'=>'step_1','order'=>1),
+                        array("user_field_id"=>17,'role_id'=>10,'step'=>'step_1','order'=>2),
+                        array("user_field_id"=>18,'role_id'=>10,'step'=>'step_1','order'=>3),
+                        array("user_field_id"=>19,'role_id'=>10,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>20,'role_id'=>10,'step'=>'step_2','order'=>5),
+                        array("user_field_id"=>15,'role_id'=>10,'step'=>'step_2','order'=>6),
                         
-                        array("user_field_id"=>16,'role_id'=>7,'step'=>1,'order'=>1),
-                        array("user_field_id"=>17,'role_id'=>7,'step'=>1,'order'=>2),
-                        array("user_field_id"=>18,'role_id'=>7,'step'=>1,'order'=>3),
-                        array("user_field_id"=>19,'role_id'=>7,'step'=>1,'order'=>4),
-                        array("user_field_id"=>11,'role_id'=>7,'step'=>2,'order'=>5),
-                        array("user_field_id"=>12,'role_id'=>7,'step'=>2,'order'=>6),
-                        array("user_field_id"=>13,'role_id'=>7,'step'=>2,'order'=>7)
-
+                        //Voice Of Expert
+                        array("user_field_id"=>16,'role_id'=>7,'step'=>'step_1','order'=>1),
+                        array("user_field_id"=>17,'role_id'=>7,'step'=>'step_1','order'=>2),
+                        array("user_field_id"=>18,'role_id'=>7,'step'=>'step_1','order'=>3),
+                        array("user_field_id"=>19,'role_id'=>7,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>11,'role_id'=>7,'step'=>'step_2','order'=>5),
+                        array("user_field_id"=>12,'role_id'=>7,'step'=>'step_2','order'=>6),
+                        array("user_field_id"=>13,'role_id'=>7,'step'=>'step_2','order'=>7)
 
                     );
 
