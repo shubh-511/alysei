@@ -35,7 +35,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('user_activation_key')->nullable();
             $table->string('display_name')->nullable();
-            $table->enum('account_enabled',[0,1,2,3])->default(0)->comment("1=Active,0=Inactive,2=Expired,3=Not Verified");
+            $table->enum('account_enabled',['active','inactive','expired','incomplete'])->default('incomplete');
             $table->enum('subscription_type',[0,1])->default(0)->comment("0=Without Subscription,1=Subscription,2=Trial");
             $table->enum('social_user',[0,1])->default(0)->comment("0=No,1=Yes");
             $table->string('social_provider')->nullable();

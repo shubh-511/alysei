@@ -13,13 +13,14 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('get/registration/form/{id}', 'Api\UserController@getRegistrationForm');
-Route::get('get/roles', 'Api\UserController@getRegistrationRoles');
+Route::get('get/registration/fields/{id}', 'Api\UserController@getRegistrationFormFields');
+Route::get('get/roles', 'Api\UserController@getRoles');
 Route::post('user/register', 'Api\UserController@register');
+Route::post('user/login', 'Api\UserController@login');
 
-// Route::prefix('get/registration/form')->group(function() {
-    
-// });
+Route::group(['middleware' => 'auth:api'], function(){
+	Route::post('userinfo', 'Api\UserController@userinfo');
+});
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
