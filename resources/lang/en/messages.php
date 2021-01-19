@@ -16,5 +16,8 @@ return [
  "Canned goods" => "Canned goods",
  "inactive" => "Your account is inactive",
  "expired" => "Your account has been Expired",
- "login_failed" => "Username or Password is not correct"
+ "login_failed" => "Username or Password is not correct",
+ "Lorem Ispum" => "Lorem Ispum",
+ "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
+
 ];

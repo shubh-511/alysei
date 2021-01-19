@@ -13,8 +13,9 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('get/registration/fields/{id}', 'Api\UserController@getRegistrationFormFields');
 Route::get('get/roles', 'Api\UserController@getRoles');
+Route::get('get/walkthroughscreens/{role_id}', 'Api\UserController@getWalkThroughScreens');
+Route::get('get/registration/fields/{role_id}', 'Api\UserController@getRegistrationFormFields');
 Route::post('user/register', 'Api\UserController@register');
 Route::post('user/login', 'Api\UserController@login');
 

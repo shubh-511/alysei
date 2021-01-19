@@ -442,4 +442,31 @@ class UserController extends CoreController
         return $inputData;
 
     }
+
+    /*
+     * Get Walk Through Screens
+     * @Params $request and $roleId
+     */
+    public function getWalkThroughScreens(Request $request,$roleId){
+
+        try{
+
+            $response_time = (microtime(true) - LARAVEL_START)*1000;
+            $screens = DB::table('walk_through_screens')
+                        ->select('title','description','order','role_id')
+                        ->where('role_id','=',$roleId)
+                        ->orderBy('order','asc')->get();
+
+            foreach ($screens as $key => $screen) {
+                $screens[$key]->title = trans('messages.'.$screen->title,[$screen->title]);
+                $screens[$key]->description = trans('messages.'.$screen->description,[$screen->description]);
+            }
+
+            return response()->json(['success'=>true,'screen' =>$screens,'response_time'=>$response_time]); 
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+        }
+
+    }
 }
