@@ -16,6 +16,12 @@ class UserDatabaseSeeder extends Seeder
     {
         Model::unguard();
 
-        $this->call("SeedRolesTableSeeder");
+        $this->call(SeedRolesTableSeeder::class);
+        $this->call(SeedUserFieldMapRolesTableSeeder::class);
+        $this->call(SeedUserFieldOptionsTableSeeder::class);
+        $this->call(SeedUserFieldsTableSeeder::class);
+        $this->call(SeedWalkThroughScreensTableSeeder::class);
+        $this->call(SeedUserFiledMapsTableSeeder::class);
+        
     }
 }

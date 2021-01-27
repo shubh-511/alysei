@@ -28,19 +28,20 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes'),
                         array("title"=>"Provide Pick Up And/Or Delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes'),
                         array("title"=>"Restaurent Type",'type'=>'select','name'=>'restaurent_type','required'=>'yes'),
-                        array("title"=>"Expertise",'type'=>'select','name'=>'expertise','required'=>'yes'),
+                        array("title"=>"Expertise",'type'=>'multiselect','name'=>'expertise','required'=>'yes'),
                         array("title"=>"Title",'type'=>'select','name'=>'title','required'=>'yes'),
                         array("title"=>"Country",'type'=>'checkbox','name'=>'country','required'=>'yes'),
-                        array("title"=>"Speciality",'type'=>'select','name'=>'speciality','required'=>'yes'),
+                        array("title"=>"Speciality",'type'=>'multiselect','name'=>'speciality','required'=>'yes'),
                         array("title"=>"Zip/Postal Code",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
                         array("title"=>"Email",'type'=>'email','name'=>'email','required'=>'yes'),
                         array("title"=>"Password",'type'=>'password','name'=>'password','required'=>'yes'),
                         array("title"=>"First Name",'type'=>'text','name'=>'first_name','required'=>'yes'),
                         array("title"=>"Last Name",'type'=>'text','name'=>'last_name','required'=>'yes'),
                         array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes'),
-                        array("title"=>"Pick Up Disocunt For Alysei Voyagers",'type'=>'select','name'=>'pick_up_discount_for_alysei_voyagers','required'=>'no','contiditional'=>'yes'),
-                        array("title"=>"Delivery Disocunt For Alysei Voyagers",'type'=>'select','name'=>'delivery_discount_for_alysei_voyagers','required'=>'no','contiditional'=>'yes'),
-                        array("title"=>"Neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','contiditional'=>'yes')
+                        array("title"=>"Pick Up Disocunt For Alysei Voyagers",'type'=>'select','name'=>'pick_up_discount_for_alysei_voyagers','required'=>'no','conditional'=>'yes'),
+                        array("title"=>"Delivery Disocunt For Alysei Voyagers",'type'=>'select','name'=>'delivery_discount_for_alysei_voyagers','required'=>'no','conditional'=>'yes'),
+                        array("title"=>"Neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','conditional'=>'yes'),
+                        array("title"=>"Region",'type'=>'select','name'=>'region','required'=>'no','conditional'=>'yes')
 
                     );
 

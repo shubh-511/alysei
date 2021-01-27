@@ -1,6 +1,6 @@
 <?php
 return [
- "Importer & Distributer" => "Importatore e distributore",
+ "Importer & Distributer" => "Importatore e distributore it",
  "Italian F&B Producers" => "Produttori italiani di cibo è bevande",
  "Voice Of Expert" => "Voce di esperto",
  "Travel Agencies" => "Agenzie di viaggio",
@@ -13,5 +13,6 @@ return [
  "password" => "Parola d'ordine",
  "Baby food" => "Cibo per bambini",
  "Conservation method" => "Metodo di conservazione",
- "Canned goods" => "In scatola merce"
+ "Canned goods" => "In scatola merce",
+ "name" => "Nome"
 ];

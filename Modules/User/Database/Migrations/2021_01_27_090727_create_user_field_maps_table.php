@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateUserFieldMapStepsTable extends Migration
+class CreateUserFieldMapsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateUserFieldMapStepsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_field_map_steps', function (Blueprint $table) {
-            $table->increments('user_field_map_step_id');
+        Schema::create('user_field_maps', function (Blueprint $table) {
             $table->integer('user_field_id');
-            $table->integer('step_id');
-            $table->timestamps();
+            $table->integer('option_id');
+            $table->integer('child_id');
         });
     }
 
@@ -28,6 +27,6 @@ class CreateUserFieldMapStepsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_field_map_steps');
+        Schema::dropIfExists('user_field_maps');
     }
 }

@@ -15,8 +15,7 @@ class SeedWalkThroughScreensTableSeeder extends Seeder
      */
     public function run()
     {
-        Model::unguard();
-
+        
         Model::unguard();
 
         $data = array(
@@ -68,6 +67,16 @@ class SeedWalkThroughScreensTableSeeder extends Seeder
                         array("role_id"=>"10",'step'=>'step3','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>3),
 
                         array("role_id"=>"10",'step'=>'step4','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>4),
+
+                        array("role_id"=>"0",'step'=>'step4','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>4),
+
+                        array("role_id"=>"0",'step'=>'step4','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>4),
+
+                        array("role_id"=>"0",'step'=>'step4','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>4),
+
+                        array("role_id"=>"0",'step'=>'step4','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>4),
+
+                        array("role_id"=>"0",'step'=>'step4','title'=>'Lorem Ispum','description'=>'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua','order'=>4),
                         
 
                     );

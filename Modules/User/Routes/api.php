@@ -13,14 +13,21 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::get('get/roles', 'Api\UserController@getRoles');
-Route::get('get/walkthroughscreens/{role_id}', 'Api\UserController@getWalkThroughScreens');
-Route::get('get/registration/fields/{role_id}', 'Api\UserController@getRegistrationFormFields');
-Route::post('user/register', 'Api\UserController@register');
-Route::post('user/login', 'Api\UserController@login');
+Route::get('get/roles', 'Api\RegisterController@getRoles');
+Route::get('get/walkthroughscreens/{role_id?}', 'Api\RegisterController@getWalkThroughScreens');
+Route::get('get/registration/fields/{role_id}', 'Api\RegisterController@getRegistrationFormFields');
+Route::post('user/register', 'Api\RegisterController@register');
+Route::post('user/login', 'Api\LoginController@login');
+Route::post('forgot/password', 'Api\ResetPasswordController@forgotPassword');
+Route::post('verfiy/password/otp', 'Api\ResetPasswordController@verifyForgotPasswordOtp');
+Route::post('reset/password', 'Api\ResetPasswordController@resetPassword');
+
 
 Route::group(['middleware' => 'auth:api'], function(){
-	Route::post('userinfo', 'Api\UserController@userinfo');
+	Route::get('userinfo', 'Api\UserController@userinfo');
+	Route::get('user/settings', 'Api\UserController@userSettings');
+	Route::post('update/user/settings', 'Api\UserController@updateUserSettings');
+	Route::post('change/password', 'Api\ResetPasswordController@changePassword');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {

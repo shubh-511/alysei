@@ -23,7 +23,7 @@ class CreateUserFieldsTable extends Migration
             $table->enum('required',['yes','no'])->default('no');
             $table->text('css')->nullable();
             $table->string('class_name')->nullable();
-            $table->enum('contiditional',['yes','no'])->default('no');
+            $table->enum('conditional',['yes','no'])->default('no');
             $table->timestamps();
         });
 

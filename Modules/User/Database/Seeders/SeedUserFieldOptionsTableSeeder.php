@@ -761,7 +761,12 @@ class SeedUserFieldOptionsTableSeeder extends Seeder
                         array("user_field_id" => 22,"option"=>"30%"),
 
                         array("user_field_id" => 23,"option"=>"Riverdale"),
-                        array("user_field_id" => 23,"option"=>"lincoln Park")
+                        array("user_field_id" => 23,"option"=>"lincoln Park"),
+
+                        array("user_field_id" => 24,"option"=>"Abruzzo"),
+                        array("user_field_id" => 24,"option"=>"Aosta Valley"),
+
+
                 );
 
         foreach ($data as $key => $value) {

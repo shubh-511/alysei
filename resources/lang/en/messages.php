@@ -19,5 +19,10 @@ return [
  "login_failed" => "Username or Password is not correct",
  "Lorem Ispum" => "Lorem Ispum",
  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua" => "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua",
-
+ "Reset password otp has been sent on your email" => "Reset password otp has been sent on your email",
+"Invalid OTP" => "Invalid OTP",
+"OTP Verified" => "OTP Verified",
+"locale" => "Language",
+"name" => "Name",
+"display_name" => "Display Name"
 ];
