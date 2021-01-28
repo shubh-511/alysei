@@ -41,7 +41,11 @@ class RegisterController extends CoreController
                 $importerRoles[$key]->image = env("APP_URL")."/images/roles/".$role->slug.".png";
             }
 
-            return response()->json(['success'=>true,'roles' =>$roles,'importer_roles'=>$importerRoles]); 
+            return response()->json(['success'=>true,
+                'title' => 'Select your role',
+                'subtitle' => 'Join Alysei Today',
+                'description' => 'Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.',
+                'roles' =>$roles,'importer_roles'=>$importerRoles]); 
 
         }catch(\Exception $e){
             return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
