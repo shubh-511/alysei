@@ -16,6 +16,7 @@ class CreateUserFieldsTable extends Migration
         Schema::create('user_fields', function (Blueprint $table) {
             $table->increments('user_field_id');
             $table->string('title');
+            $table->string('placeholder')->nullable();
             $table->string('name')->nullable();
             $table->string('type');
             $table->string('description')->nullable();
