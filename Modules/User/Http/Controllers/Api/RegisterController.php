@@ -286,7 +286,7 @@ class RegisterController extends CoreController
                     
                 }
 
-                return response()->json(['success'=>$this->userFieldsArray,'data' =>$steps,'response_time'=>$response_time]); 
+                return response()->json(['success'=>$this->successStatus,'data' =>$steps,'response_time'=>$response_time]); 
                 
                 
         }catch(\Exception $e){
