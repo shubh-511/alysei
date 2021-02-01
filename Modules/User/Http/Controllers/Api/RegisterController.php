@@ -74,7 +74,7 @@ class RegisterController extends CoreController
                 $screens[$key]->description = $this->translate('messages.'.$screen->description,$screen->description);
             }
 
-            return response()->json(['success'=>$this->userFieldsArray,'data' =>$screens,'response_time'=>$response_time]); 
+            return response()->json(['success'=>$this->successStatus,'data' =>$screens,'response_time'=>$response_time]); 
 
         }catch(\Exception $e){
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
