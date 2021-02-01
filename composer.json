@@ -13,8 +13,9 @@
         "laravel/framework": "5.8.*",
         "laravel/passport": "^7.5",
         "laravel/tinker": "^1.0",
-        "nwidart/laravel-modules": "^4.1",
-        "lcobucci/jwt": "3.3.2"
+        "lcobucci/jwt": "3.3.2",
+        "league/flysystem-aws-s3-v2": "^1.0",
+        "nwidart/laravel-modules": "^4.1"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^1.0",

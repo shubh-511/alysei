@@ -18,7 +18,10 @@ class HubTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("title" => "Chikago","img_id"=>"",'status'=>'1'),
+                        array("role_id" => "3", "title" => "Chikago","img_id"=>"",'status'=>'1'),
+                        array("role_id" => "7", "title" => "Hongkong","img_id"=>"",'status'=>'1'),
+                        array("role_id" => "8", "title" => "Denmark","img_id"=>"",'status'=>'1'),
+                        array("role_id" => "9", "title" => "Chikago","img_id"=>"",'status'=>'1'),
                     );
 
         foreach ($data as $key => $value) {

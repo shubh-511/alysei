@@ -22,7 +22,7 @@ Route::post('forgot/password', 'Api\ResetPasswordController@forgotPassword');
 Route::post('verfiy/password/otp', 'Api\ResetPasswordController@verifyForgotPasswordOtp');
 Route::post('reset/password', 'Api\ResetPasswordController@resetPassword');
 
-Route::get('get/hubs', 'Api\HubController@getHubs');
+Route::get('get/hubs/{role_id}', 'Api\HubController@getHubs');
 
 
 Route::group(['middleware' => 'auth:api'], function(){

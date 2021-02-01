@@ -17,6 +17,8 @@ use Hash;
 class ResetPasswordController extends CoreController
 {
     public $successStatus = 200;
+    public $validationStatus = 422;
+    public $exceptionStatus = 409;
 
     /** 
      * Forgot password api 
@@ -50,7 +52,7 @@ class ResetPasswordController extends CoreController
 
                 $message = $this->translate('messages.Reset password otp has been sent on your email','Reset password otp has been sent on your email');
 
-                return response()->json(['success' => true,
+                return response()->json(['success' => $this->successStatus,
                                          'message' => $message,
                                          //'otp' => $forgotKey,
                                         ], $this->successStatus); 
@@ -58,13 +60,13 @@ class ResetPasswordController extends CoreController
             else
             {
                 $message = $this->translate("messages.Invalid email","Invalid email");
-                return response()->json(['success'=>false,'errors' =>['exception' => [$message]]], $this->successStatus); 
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$message]]], $this->successStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
         } 
     }
 
@@ -94,20 +96,20 @@ class ResetPasswordController extends CoreController
 
                 $message = $this->translate("messages.OTP Verified","OTP Verified");
 
-                return response()->json(['success' => true,
+                return response()->json(['success' => $this->successStatus,
                                          'message' => $message,
                                         ], $this->successStatus); 
             }
             else
             {
                 $message = $this->translate("messages.Invalid OTP","Invalid OTP");
-                return response()->json(['success'=>false,'errors' =>['opt_failed' => [$message]]], $this->successStatus); 
+                return response()->json(['success'=>$this->validationStatus,'errors' =>['opt_failed' => [$message]]], $this->successStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
         }
     }
 
@@ -138,20 +140,20 @@ class ResetPasswordController extends CoreController
 
                 $message = $this->translate("passwords.reset");
 
-                return response()->json(['success' => true,
+                return response()->json(['success' => $this->successStatus,
                                          'message' => $message,
-                                         'user' => $userDetail,
+                                         'data' => $userDetail,
                                         ], $this->successStatus); 
             }
             else
             {
-                return response()->json(['success'=>false,'errors' =>['exception' => ['The token has been expired']]], $this->successStatus); 
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => ['The token has been expired']]], $this->successStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
         }
     }
 
@@ -185,24 +187,24 @@ class ResetPasswordController extends CoreController
                     $userUpdate->save();
 
 
-                    return response()->json(['success' => true,
+                    return response()->json(['success' => $this->successStatus,
                                              'message' => $this->translate("passwords.reset"),
                                             ], $this->successStatus);
                 }else{
-                    return response()->json(['success'=>false,'errors' =>['failed' => [$this->translate("passwords.old_password")]]], $this->successStatus); 
+                    return response()->json(['success'=>$this->validationStatus,'errors' =>['failed' => [$this->translate("passwords.old_password")]]], $this->successStatus); 
                 }
 
                  
             }
             else
             {
-                return response()->json(['success'=>false,'errors' =>['failed' => [$this->translate("passwords.user")]]], $this->successStatus); 
+                return response()->json(['success'=>$this->validationStatus,'errors' =>['failed' => [$this->translate("passwords.user")]]], $this->successStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
         }
     }
 }

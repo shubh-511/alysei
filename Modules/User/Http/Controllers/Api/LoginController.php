@@ -15,6 +15,8 @@ use Hash;
 class LoginController extends CoreController
 {
     public $successStatus = 200;
+    public $validationStatus = 422;
+    public $exceptionStatus = 409;
     
     public $userFieldsArray = ['user_id', 'name', 'email','first_name','last_name','middle_name','phone','postal_code','last_login_date','roles'];
     /** 
@@ -39,7 +41,7 @@ class LoginController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors(),'success' => false], $this->successStatus);
+                return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->successStatus);
             }
 
             //Check Auth 
@@ -52,8 +54,8 @@ class LoginController extends CoreController
                     Auth::user()->roles;
                     $token =  $user->createToken('yss')->accessToken; 
 
-                    return response()->json(['success' => true,
-                                         'user' => $user->only($this->userFieldsArray),
+                    return response()->json(['success' => $this->successStatus,
+                                         'data' => $user->only($this->userFieldsArray),
                                          'token'=> $token
                                         ], $this->successStatus); 
                 }else{
@@ -71,7 +73,7 @@ class LoginController extends CoreController
             }
             
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus);
+            return response()->json(['success'=>$this->validationStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus);
         }
     }
 }

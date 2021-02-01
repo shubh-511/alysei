@@ -16,6 +16,8 @@ use App\Events\Welcome;
 class RegisterController extends CoreController
 {
     public $successStatus = 200;
+    public $validationStatus = 422;
+    public $exceptionStatus = 409;
 
     /* 
         Get Registration Roles
@@ -41,14 +43,14 @@ class RegisterController extends CoreController
                 $importerRoles[$key]->image = env("APP_URL")."/images/roles/".$role->slug.".png";
             }
 
-            return response()->json(['success'=>true,
+            return response()->json(['success'=>$this->successStatus,
                 'title' => 'Select your role',
                 'subtitle' => 'Join Alysei Today',
                 'description' => 'Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.',
-                'roles' =>$roles,'importer_roles'=>$importerRoles]); 
+                'data' =>$roles,'importer_roles'=>$importerRoles]); 
 
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
         }
 
     }
@@ -72,10 +74,10 @@ class RegisterController extends CoreController
                 $screens[$key]->description = $this->translate('messages.'.$screen->description,$screen->description);
             }
 
-            return response()->json(['success'=>true,'screen' =>$screens,'response_time'=>$response_time]); 
+            return response()->json(['success'=>$this->userFieldsArray,'data' =>$screens,'response_time'=>$response_time]); 
 
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
         }
 
     }
@@ -94,13 +96,13 @@ class RegisterController extends CoreController
             $validator = Validator::make($input, $rules);
 
             if ($validator->fails()) { 
-                return response()->json(['sucess'=>false,'errors'=>$validator->errors()], 200);
+                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], 200);
             }
 
             $roleFields = $this->checkFieldsByRoleId($input['role_id']);
 
             if(count($roleFields) == 0){
-                return response()->json(['success'=>false,'errors' =>['role_id'=>['Sorry,There are no fields for current role_id']]], 200);
+                return response()->json(['success'=>$this->validationStatus,'errors' =>['role_id'=>['Sorry,There are no fields for current role_id']]], 200);
             }else{
 
                 $rules = $this->makeValidationRules($roleFields);
@@ -112,7 +114,7 @@ class RegisterController extends CoreController
                 $validator = Validator::make($inputData, $rules);
 
                 if ($validator->fails()) { 
-                    return response()->json(['sucess'=>false,'errors'=>$validator->errors()], 200);
+                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], 200);
                 }
 
                 if(array_key_exists('email',$inputData) && array_key_exists('password',$inputData)
@@ -180,13 +182,13 @@ class RegisterController extends CoreController
                 
                         event(new Welcome($user->user_id));
 
-                        return response()->json(['success' => true,
-                                     'user' => $user->only($this->userFieldsArray),
+                        return response()->json(['success' => $this->successStatus,
+                                     'data' => $user->only($this->userFieldsArray),
                                      'token' => $token
                                     ], 200); 
 
                     }else{
-                        return response()->json(['success' => false,
+                        return response()->json(['success' => $this->exceptionStatus,
                                      'errors' => ['Something went wrong'],
                                     ], 200); 
                     }
@@ -198,7 +200,7 @@ class RegisterController extends CoreController
             
 
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], 200); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], 200); 
         }
         
     }
@@ -284,11 +286,11 @@ class RegisterController extends CoreController
                     
                 }
 
-                return response()->json(['success'=>true,'steps' =>$steps,'response_time'=>$response_time]); 
+                return response()->json(['success'=>$this->userFieldsArray,'data' =>$steps,'response_time'=>$response_time]); 
                 
                 
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
         }
     }
 

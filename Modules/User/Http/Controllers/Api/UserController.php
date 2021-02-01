@@ -17,6 +17,9 @@ use App\Events\Welcome;
 class UserController extends CoreController
 {
     public $successStatus = 200;
+    public $validationStatus = 422;
+    public $exceptionStatus = 409;
+
     public $user = '';
 
     public function __construct(){
@@ -32,7 +35,7 @@ class UserController extends CoreController
      */
     public function userinfo(){
         
-        return response()->json(['success' => true,
+        return response()->json(['success' => $this->successStatus,
                                  'user' => $this->user->only($this->userFieldsArray),
                                 ], $this->successStatus);  
     }
@@ -52,12 +55,12 @@ class UserController extends CoreController
                     $userFieldInfo[$key] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
                 }
 
-                return response()->json(['success' => true,
-                                 'user' => $userFieldInfo,
+                return response()->json(['success' => $this->successStatus,
+                                 'data' => $userFieldInfo,
                                 ], $this->successStatus);
 
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
         }
     }
 
@@ -75,17 +78,17 @@ class UserController extends CoreController
                 ]);
 
                 if ($validator->fails()) { 
-                    return response()->json(['errors'=>$validator->errors(),'success' => false], $this->successStatus);
+                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->successStatus);
                 }
                 
                 $user = User::where('user_id','=',$this->user->user_id)->update($input);
 
-                return response()->json(['success' => true,
-                                 'user' => $user,
+                return response()->json(['success' => $this->successStatus,
+                                 'data' => $user,
                                 ], $this->successStatus);
                                   
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
         }
     }
     

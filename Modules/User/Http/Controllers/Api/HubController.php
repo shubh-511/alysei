@@ -9,33 +9,36 @@ use Illuminate\Routing\Controller;
 
 class HubController extends Controller
 {
+    public $successStatus = 200;
+    public $validationStatus = 422;
+    public $exceptionStatus = 409;
     /* 
         Get All Hubs
     */
-    public function getHubs(){
+    public function getHubs($role){
 
         try
         {
             $response_time = (microtime(true) - LARAVEL_START)*1000;
 
-            $hubs = Hub::where('status', '1')->get();
+            $hubs = Hub::where('status', '1')->where('role_id', $role)->get();
             if(count($hubs) > 0)
             {
-                return response()->json(['success'=>true,
+                return response()->json(['success'=>$this->successStatus,
                 'title' => 'What are hubs?',
                 'description' => 'Hubs allow you to connect with other located or working in specific loactions.',
-                'hubs' => $hubs]);
+                'data' => $hubs]);
             }
             else
             {
-                return response()->json(['success'=>true,
+                return response()->json(['success'=>$this->successStatus,
                 'title' => 'What are hubs?',
                 'description' => 'Hubs allow you to connect with other located or working in specific loactions.',
                 'message' => "currently no hubs found"]); 
             }
             
         }catch(\Exception $e){
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
         }
 
     }
