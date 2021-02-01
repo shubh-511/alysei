@@ -48,9 +48,7 @@ class RegisterController extends CoreController
                 'subtitle' => 'Join Alysei Today',
                 'description' => 'Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.' ];
 
-            return response()->json(['success'=>$this->successStatus,
-               
-                'data' =>$data]); 
+            return response()->json(['success'=>$this->successStatus,'data' =>$data]); 
 
         }catch(\Exception $e){
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
