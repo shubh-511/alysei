@@ -201,7 +201,7 @@ class RegisterController extends CoreController
             
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus,); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
         
     }
