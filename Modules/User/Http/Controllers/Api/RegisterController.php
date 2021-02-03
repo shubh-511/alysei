@@ -93,7 +93,7 @@ class RegisterController extends CoreController
 
             $input = $request->all();
             $rules = [];
-            $rules['role_id'] = 'required|digits:2';
+            $rules['role_id'] = 'required';
             $validator = Validator::make($input, $rules);
 
             if ($validator->fails()) { 
