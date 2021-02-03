@@ -97,13 +97,13 @@ class RegisterController extends CoreController
             $validator = Validator::make($input, $rules);
 
             if ($validator->fails()) { 
-                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], 200);
+                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], $this->validationStatus);
             }
 
             $roleFields = $this->checkFieldsByRoleId($input['role_id']);
 
             if(count($roleFields) == 0){
-                return response()->json(['success'=>$this->validationStatus,'errors' =>['role_id'=>['Sorry,There are no fields for current role_id']]], 200);
+                return response()->json(['success'=>$this->validationStatus,'errors' =>['role_id'=>['Sorry,There are no fields for current role_id']]], $this->validationStatus);
             }else{
 
                 $rules = $this->makeValidationRules($roleFields);
@@ -115,7 +115,7 @@ class RegisterController extends CoreController
                 $validator = Validator::make($inputData, $rules);
 
                 if ($validator->fails()) { 
-                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], 200);
+                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], $this->validationStatus);
                 }
 
                 if(array_key_exists('email',$inputData) && array_key_exists('password',$inputData)
@@ -186,12 +186,12 @@ class RegisterController extends CoreController
                         return response()->json(['success' => $this->successStatus,
                                      'data' => $user->only($this->userFieldsArray),
                                      'token' => $token
-                                    ], 200); 
+                                    ], $this->successStatus); 
 
                     }else{
                         return response()->json(['success' => $this->exceptionStatus,
                                      'errors' => ['Something went wrong'],
-                                    ], 200); 
+                                    ], $this->exceptionStatus); 
                     }
 
                 }
@@ -201,7 +201,7 @@ class RegisterController extends CoreController
             
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], 200); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus,); 
         }
         
     }
