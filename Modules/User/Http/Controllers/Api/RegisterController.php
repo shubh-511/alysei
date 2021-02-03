@@ -48,10 +48,10 @@ class RegisterController extends CoreController
                 'subtitle' => 'Join Alysei Today',
                 'description' => 'Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.' ];
 
-            return response()->json(['success'=>$this->successStatus,'data' =>$data]); 
+            return response()->json(['success'=>$this->successStatus,'data' =>$data],$this->successStatus); 
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]],$this->exceptionStatus); 
         }
 
     }
@@ -75,10 +75,10 @@ class RegisterController extends CoreController
                 $screens[$key]->description = $this->translate('messages.'.$screen->description,$screen->description);
             }
 
-            return response()->json(['success'=>$this->successStatus,'data' =>$screens,'response_time'=>$response_time]); 
+            return response()->json(['success'=>$this->successStatus,'data' =>$screens,'response_time'=>$response_time],$this->successStatus); 
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]],$this->exceptionStatus); 
         }
 
     }
@@ -287,11 +287,11 @@ class RegisterController extends CoreController
                     
                 }
 
-                return response()->json(['success'=>$this->successStatus,'data' =>$steps,'response_time'=>$response_time]); 
+                return response()->json(['success'=>$this->successStatus,'data' =>$steps,'response_time'=>$response_time], $this->successStatus); 
                 
                 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 

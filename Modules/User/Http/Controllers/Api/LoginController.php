@@ -41,7 +41,7 @@ class LoginController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->successStatus);
+                return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
             //Check Auth 
@@ -73,7 +73,7 @@ class LoginController extends CoreController
             }
             
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->validationStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus);
+            return response()->json(['success'=>$this->validationStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->validationStatus);
         }
     }
 }

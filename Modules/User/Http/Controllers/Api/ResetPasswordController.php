@@ -34,7 +34,7 @@ class ResetPasswordController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->successStatus);            
+                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->first();
@@ -60,13 +60,13 @@ class ResetPasswordController extends CoreController
             else
             {
                 $message = $this->translate("messages.Invalid email","Invalid email");
-                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$message]]], $this->successStatus); 
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$message]]], $this->exceptionStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         } 
     }
 
@@ -85,7 +85,7 @@ class ResetPasswordController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->successStatus);            
+                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->where('otp', $request->otp)->first();
@@ -103,13 +103,13 @@ class ResetPasswordController extends CoreController
             else
             {
                 $message = $this->translate("messages.Invalid OTP","Invalid OTP");
-                return response()->json(['success'=>$this->validationStatus,'errors' =>['opt_failed' => [$message]]], $this->successStatus); 
+                return response()->json(['success'=>$this->validationStatus,'errors' =>['opt_failed' => [$message]]], $this->validationStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 
@@ -129,7 +129,7 @@ class ResetPasswordController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->successStatus);            
+                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->first();
@@ -147,13 +147,13 @@ class ResetPasswordController extends CoreController
             }
             else
             {
-                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => ['The token has been expired']]], $this->successStatus); 
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => ['The token has been expired']]], $this->exceptionStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 
@@ -173,7 +173,7 @@ class ResetPasswordController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->successStatus);            
+                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
             }
 
             $userId = Auth()->user()->user_id;
@@ -191,20 +191,20 @@ class ResetPasswordController extends CoreController
                                              'message' => $this->translate("passwords.reset"),
                                             ], $this->successStatus);
                 }else{
-                    return response()->json(['success'=>$this->validationStatus,'errors' =>['failed' => [$this->translate("passwords.old_password")]]], $this->successStatus); 
+                    return response()->json(['success'=>$this->validationStatus,'errors' =>['failed' => [$this->translate("passwords.old_password")]]], $this->validationStatus); 
                 }
 
                  
             }
             else
             {
-                return response()->json(['success'=>$this->validationStatus,'errors' =>['failed' => [$this->translate("passwords.user")]]], $this->successStatus); 
+                return response()->json(['success'=>$this->validationStatus,'errors' =>['failed' => [$this->translate("passwords.user")]]], $this->validationStatus); 
             }
 
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->successStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 }

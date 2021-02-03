@@ -60,7 +60,7 @@ class UserController extends CoreController
                                 ], $this->successStatus);
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 
@@ -78,7 +78,7 @@ class UserController extends CoreController
                 ]);
 
                 if ($validator->fails()) { 
-                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->successStatus);
+                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
                 }
                 
                 $user = User::where('user_id','=',$this->user->user_id)->update($input);
@@ -88,7 +88,7 @@ class UserController extends CoreController
                                 ], $this->successStatus);
                                   
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
     
