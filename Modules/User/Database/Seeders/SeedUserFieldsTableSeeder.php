@@ -34,7 +34,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Speciality",'type'=>'multiselect','name'=>'speciality','required'=>'yes'),
                         array("title"=>"Zip/Postal Code",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
                         array("title"=>"Email",'type'=>'email','name'=>'email','required'=>'yes'),
-                        array("title"=>"Password",'type'=>'password','name'=>'password','required'=>'yes'),
+                        array("title"=>"Password",'type'=>'password','name'=>'password','required'=>'yes','hint'=>'Password must be at least 8 characters and contain at least one numeric digit and a special character.'),
                         array("title"=>"First Name",'type'=>'text','name'=>'first_name','required'=>'yes'),
                         array("title"=>"Last Name",'type'=>'text','name'=>'last_name','required'=>'yes'),
                         array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes'),
