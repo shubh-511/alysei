@@ -41,7 +41,7 @@ class LoginController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
             //Check Auth 
@@ -62,18 +62,18 @@ class LoginController extends CoreController
 
                     $message = $this->translate('messages.'.$user->account_enabled,$user->account_enabled);
                     
-                    return response()->json(['error'=> ['login_failed' => [$message]]], 401);  
+                    return response()->json(['error'=> $message], 401);  
                 }
             } 
             else{ 
 
                 $message = $this->translate('messages.'."login_failed","Login Failed");
 
-                return response()->json(['error'=> ['login_failed' => [$message]]], 401); 
+                return response()->json(['error'=> $message], 401); 
             }
             
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->validationStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->validationStatus);
+            return response()->json(['success'=>$this->validationStatus,'errors' =>$e->getMessage()], $this->validationStatus);
         }
     }
 }

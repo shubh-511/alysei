@@ -51,7 +51,7 @@ class RegisterController extends CoreController
             return response()->json(['success'=>$this->successStatus,'data' =>$data],$this->successStatus); 
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]],$this->exceptionStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
         }
 
     }
@@ -78,7 +78,7 @@ class RegisterController extends CoreController
             return response()->json(['success'=>$this->successStatus,'data' =>$screens,'response_time'=>$response_time],$this->successStatus); 
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]],$this->exceptionStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
         }
 
     }
@@ -97,13 +97,13 @@ class RegisterController extends CoreController
             $validator = Validator::make($input, $rules);
 
             if ($validator->fails()) { 
-                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], $this->validationStatus);
+                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
             }
 
             $roleFields = $this->checkFieldsByRoleId($input['role_id']);
 
             if(count($roleFields) == 0){
-                return response()->json(['success'=>$this->validationStatus,'errors' =>['role_id'=>['Sorry,There are no fields for current role_id']]], $this->validationStatus);
+                return response()->json(['success'=>$this->validationStatus,'errors' =>'Sorry,There are no fields for current role_id'], $this->validationStatus);
             }else{
 
                 $rules = $this->makeValidationRules($roleFields);
@@ -115,7 +115,8 @@ class RegisterController extends CoreController
                 $validator = Validator::make($inputData, $rules);
 
                 if ($validator->fails()) { 
-                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()], $this->validationStatus);
+
+                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
                 }
 
                 if(array_key_exists('email',$inputData) && array_key_exists('password',$inputData)
@@ -201,7 +202,7 @@ class RegisterController extends CoreController
             
 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
         }
         
     }
@@ -291,7 +292,7 @@ class RegisterController extends CoreController
                 
                 
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
         }
     }
 
