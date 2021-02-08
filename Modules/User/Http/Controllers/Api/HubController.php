@@ -38,7 +38,7 @@ class HubController extends Controller
             }
             
         }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]]); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()]); 
         }
 
     }
