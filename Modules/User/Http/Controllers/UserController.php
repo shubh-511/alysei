@@ -3,78 +3,70 @@
 namespace Modules\User\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Routing\Controller;
-use App\Http\Controllers\CoreController;
+use App\Http\Controllers\Controller;
+use Modules\User\Entities\User; 
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth; 
+use Validator;
+//use App\Events\UserRegisterEvent;
 
-class UserController extends CoreController
+class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     * @return Response
+     * Create a new controller instance.
+     *
+     * @return void
      */
-    public function index()
+    // public function __construct()
+    // {
+    //     $this->middleware('auth');
+    // }
+
+    /***
+    dashboard
+    ***/
+    public function dashboard(Request $request)
     {
-        return view('user::index');
+        return view('admin.home');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Response
-     */
-    public function create()
+    
+    /***
+    logout
+    ***/
+    public function logout(Request $request)
     {
-        return view('user::create');
+        Auth::logout();
+        return Redirect('login');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-        //
+    /***
+    user list method
+    ***/
+    public function list(Request $request)
+    { 
+        $users = User::where('role_id','!=',1)->paginate(25);
+        return view('admin.user.list', compact('users'));
     }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function show($id)
+    /***
+    update user status
+    ***/
+    public function userStatus(Request $request)
     {
-        return view('user::show');
+        $sql= User::whereIn('user_id',$request->id)
+        ->update(['account_enabled' => $request->status]);
+             
+        return $sql;
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        return view('user::edit');
+    /***
+    user edit method
+    ***/
+    public function edit(Request $request, $id)
+    { 
+        $user = User::where('user_id',$id)->first();
+        return view('admin.user.edit', compact('user'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        User::select('title')->find($user_id)->first();
-    }
 }

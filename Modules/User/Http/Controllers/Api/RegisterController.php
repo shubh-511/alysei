@@ -224,6 +224,9 @@ class RegisterController extends CoreController
                                       ->where("conditional","=",'no')
                                       ->orderBy("order","asc")
                                       ->get();
+
+                    $importerRoles = Role::select('role_id','name','slug','display_name')->whereNotIn('slug',['super_admin','admin','Italian_F_and_B_Producers','voice_of_expert','travel_agencies','restaurents','voyagers'])->get();                  
+
                     if($roleFields){
                         foreach ($roleFields as $key => $value) {
                             $data = [];
@@ -244,22 +247,26 @@ class RegisterController extends CoreController
                                             $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
 
                                             //Check Option has any Field Id
-                                            $checkRow = DB::table('user_field_maps')->where('option_id','=',$oneDepth->user_field_option_id)->first();
+                                            $checkRow = DB::table('user_field_maps')->where('child_id','=',$value->user_field_id)->first();
 
                                             if($checkRow){
-                                                $field = $this->getUserField($checkRow->child_id);
+                                                $value->parentId = $checkRow->option_id;
+                                            }
 
-                                                if($field){
+                                            // if($checkRow){
+                                            //     $field = $this->getUserField($checkRow->child_id);
 
-                                                    $field->name = $this->translate('messages.'.$field->title,$field->title);
-                                                    $value->options[$k]->child = $field;
+                                            //     if($field){
 
-                                                    $data = $this->getUserFieldOptionParent($field->user_field_id);
+                                            //         $field->name = $this->translate('messages.'.$field->title,$field->title);
+                                            //         $value->options[$k]->child = $field;
 
-                                                    $value->options[$k]->child->options = $data;
+                                            //         $data = $this->getUserFieldOptionParent($field->user_field_id);
 
-                                                }
-                                            }else{
+                                            //         $value->options[$k]->child->options = $data;
+
+                                            //     }
+                                            // }else{
 
                                                 $data = $this->getUserFieldOptionsNoneParent($value->user_field_id,$oneDepth->user_field_option_id);
 
@@ -272,19 +279,33 @@ class RegisterController extends CoreController
 
                                                     $value->options[$k]->options[$optionKey]->options = $options;
                                                 }  
-                                            }
+                                            //}
 
                                     }
                                 }
                             }// End Check Fields has option
 
-
                             $steps[$value->step][] = $value;
                         }
                     }
 
+
+
+                    if($role_id == 6){
+
+                        foreach ($importerRoles as $key => $role) {
+                            $importerRoles[$key]->name = $this->translate('messages.'.$importerRoles[$key]->name,$importerRoles[$key]->name);
+                            $importerRoles[$key]->image = env("APP_URL")."/images/roles/".$role->slug.".png";
+                        }
+
+                        $newArray =  [['type' => 'select','name' => 'role_id','title' => 'Select Role','option' => $importerRoles]];
+
+                        array_splice( $steps['step_2'], -1, 0, $newArray );
+                    }
+
                     Cache::forever('registration_form', $steps);
-                    
+                 
+
                 }
 
                 return response()->json(['success'=>$this->successStatus,'data' =>$steps,'response_time'=>$response_time], $this->successStatus); 

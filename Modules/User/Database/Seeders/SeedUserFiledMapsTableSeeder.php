@@ -17,11 +17,11 @@ class SeedUserFiledMapsTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("user_field_id"=>"20",'option_id'=>'686','child_id'=>'8'),
-                        array("user_field_id"=>"20",'option_id'=>'687','child_id'=>'24'),
-                        array("user_field_id"=>"9",'option_id'=>'650','child_id'=>'21'),
-                        array("user_field_id"=>"9",'option_id'=>'651','child_id'=>'22'),
-                        array("user_field_id"=>"8",'option_id'=>'649','child_id'=>'15'),
+                        array("user_field_id"=>"26",'option_id'=>'667','child_id'=>'26'),
+                        array("user_field_id"=>"24",'option_id'=>'602','child_id'=>'24'),
+                        array("user_field_id"=>"21",'option_id'=>'630','child_id'=>'21'),
+                        array("user_field_id"=>"22",'option_id'=>'631','child_id'=>'22'),
+                        //array("user_field_id"=>"8",'option_id'=>'649','child_id'=>'15'),
                     );
 
         foreach ($data as $key => $value) {
