@@ -80,7 +80,7 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
                         array("user_field_id"=>17,'role_id'=>8,'step'=>'step_1','order'=>2),
                         array("user_field_id"=>1,'role_id'=>8,'step'=>'step_1','order'=>3),
                         array("user_field_id"=>14,'role_id'=>8,'step'=>'step_1','order'=>4),
-                        array("user_field_id"=>13,'role_id'=>8,'step'=>'step_1','order'=>5),
+                        array("user_field_id"=>13,'role_id'=>8,'step'=>'step_2','order'=>5),
                         array("user_field_id"=>24,'role_id'=>8,'step'=>'step_2','order'=>6),
                         array("user_field_id"=>25,'role_id'=>8,'step'=>'step_2','order'=>7),
                         //Voyagers
