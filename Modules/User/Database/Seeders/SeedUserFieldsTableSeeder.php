@@ -37,7 +37,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Password",'type'=>'password','name'=>'password','required'=>'yes','hint'=>'Password must be at least 8 characters and contain at least one numeric digit and a special character.'),
                         array("title"=>"First Name",'type'=>'text','name'=>'first_name','required'=>'yes'),
                         array("title"=>"Last Name",'type'=>'text','name'=>'last_name','required'=>'yes'),
-                        array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes'),
+                        array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes','multiple_option' => 'true'),
                         array("title"=>"Pick Up Disocunt For Alysei Voyagers",'type'=>'select','name'=>'pick_up_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no'),
                         array("title"=>"Delivery Disocunt For Alysei Voyagers",'type'=>'select','name'=>'delivery_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no'),
                         array("title"=>"Neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','conditional'=>'yes'),
