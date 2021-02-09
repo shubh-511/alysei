@@ -806,6 +806,8 @@ class SeedUserFieldOptionsTableSeeder extends Seeder
                         array("user_field_id" => 26,"option"=>"Veneto"),
 
 
+                        array("user_field_id" => 27,"option"=>"Intrest 1","parent"=>0,"head"=>0),
+                        array("user_field_id" => 27,"option"=>"Intrest 2","parent"=>0,"head"=>0),
 
 
                 );
