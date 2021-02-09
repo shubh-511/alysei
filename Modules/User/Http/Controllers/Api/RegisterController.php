@@ -161,16 +161,24 @@ class RegisterController extends CoreController
                             if(count($checkMultipleOptions) == 1)
                             {
                                 $data = [];
-                                $data['user_field_id'] = $key;
-                                $data['user_id'] = $user->user_id;
-                                $data['value'] = $value;
+                                if(!empty($key))
+                                {
+                                    $data['user_field_id'] = $key;
+                                    $data['user_id'] = $user->user_id;
+                                    $data['value'] = $value;
+                                }
+                                
                             }else{
 
                                 foreach($checkMultipleOptions as $option){
                                     $data = [];
-                                    $data['user_field_id'] = $key;
-                                    $data['user_id'] = $user->user_id;
-                                    $data['value'] = $option;
+                                    if(!empty($key))
+                                    {
+                                        $data['user_field_id'] = $key;
+                                        $data['user_id'] = $user->user_id;
+                                        $data['value'] = $option;
+                                    }
+                                    
                                 }
                             }
                             
