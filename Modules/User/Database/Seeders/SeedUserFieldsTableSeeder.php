@@ -26,7 +26,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Alysei Brand Label",'type'=>'radio','name'=>'alysei_brand_label','required'=>'no'),
                         array("title"=>"Restaurent name",'type'=>'text','name'=>'restaurent_name','required'=>'no'),
                         array("title"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes'),
-                        array("title"=>"Provide Pick Up And/Or Delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option','true'),
+                        array("title"=>"Provide Pick Up And/Or Delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option'=>'true'),
                         array("title"=>"Restaurent Type",'type'=>'select','name'=>'restaurent_type','required'=>'yes'),
                         array("title"=>"Expertise",'type'=>'multiselect','name'=>'expertise','required'=>'yes'),
                         array("title"=>"Title",'type'=>'select','name'=>'title','required'=>'yes'),
