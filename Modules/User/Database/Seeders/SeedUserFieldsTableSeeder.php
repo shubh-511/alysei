@@ -45,7 +45,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"I AGREE TO THE DATA COLLECTION POLICIES STATED IN THE <a href='https://social.alysei.com/privacy-policy'>PRIVACY POLICY</a> AND <a href='https://social.alysei.com/terms'>TERMS OF SERVICE.</a>",'type'=>'checkbox','name'=>'terms_and_condition','required'=>'yes','conditional'=>'no'),
 
                         array("title"=>"Italian Regions",'type'=>'select','name'=>'italian_regions','required'=>'no','conditional'=>'no'),
-                        array("title"=>"Interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no','multiple_option' => 'true')
+                        array("title"=>"Interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no')
 
                     );
 
