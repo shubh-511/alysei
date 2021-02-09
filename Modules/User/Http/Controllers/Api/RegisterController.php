@@ -299,7 +299,7 @@ class RegisterController extends CoreController
                             $importerRoles[$key]->image = env("APP_URL")."/images/roles/".$role->slug.".png";
                         }
 
-                        $newArray =  [['type' => 'select','name' => 'role_id','title' => 'Select Role','option' => $importerRoles]];
+                        $newArray =  [['type' => 'select','name' => 'role_id','title' => 'Select Role','options' => $importerRoles]];
 
                         array_splice( $steps['step_2'], -1, 0, $newArray );
                     }
