@@ -256,7 +256,7 @@ class RegisterController extends CoreController
                                             $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
 
                                             //Check Option has any Field Id
-                                            $checkRow = DB::table('user_field_maps')->where('child_id','=',$value->user_field_id)->first();
+                                            $checkRow = DB::table('user_field_maps')->where('user_field_id','=',$value->user_field_id)->where('child_id','=',$role_id)->first();
 
                                             if($checkRow){
                                                 $value->parentId = $checkRow->option_id;

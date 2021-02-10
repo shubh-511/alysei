@@ -17,11 +17,19 @@ class SeedUserFiledMapsTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("user_field_id"=>"26",'option_id'=>'667','child_id'=>'26'),
+                        /*array("user_field_id"=>"26",'option_id'=>'667','child_id'=>'26'),
                         array("user_field_id"=>"24",'option_id'=>'602','child_id'=>'24'),
                         array("user_field_id"=>"21",'option_id'=>'630','child_id'=>'21'),
                         array("user_field_id"=>"22",'option_id'=>'631','child_id'=>'22'),
-                        array("user_field_id"=>"8",'option_id'=>'601','child_id'=>'8'),
+                        array("user_field_id"=>"8",'option_id'=>'601','child_id'=>'8'),*/
+
+
+                        array("user_field_id"=>"26",'option_id'=>'602','child_id'=>'10'),
+                        array("user_field_id"=>"24",'option_id'=>'602','child_id'=>'7'),
+                        array("user_field_id"=>"24",'option_id'=>'602','child_id'=>'8'),
+                        array("user_field_id"=>"21",'option_id'=>'630','child_id'=>'9'),
+                        array("user_field_id"=>"22",'option_id'=>'631','child_id'=>'9'),
+                        array("user_field_id"=>"8",'option_id'=>'601','child_id'=>'10'),
                     );
 
         foreach ($data as $key => $value) {
