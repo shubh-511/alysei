@@ -17,6 +17,7 @@ class LoginController extends CoreController
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
+    public $unauthorisedStatus = 401;
     
     public $userFieldsArray = ['user_id', 'name', 'email','first_name','last_name','middle_name','phone','postal_code','last_login_date','roles'];
     /** 
@@ -46,24 +47,33 @@ class LoginController extends CoreController
 
             //Check Auth 
             if (Auth::attempt(array('email' => $request->getUser(), 'password' => $request->getPassword()), true)){
-                
-                $user = Auth::user(); 
-                
-                if($user->account_enabled == 'active' || $user->account_enabled == 'incomplete')
+                if(Auth::user()->role_id == 1)
                 {
-                    Auth::user()->roles;
-                    $token =  $user->createToken('yss')->accessToken; 
-
-                    return response()->json(['success' => $this->successStatus,
-                                         'data' => $user->only($this->userFieldsArray),
-                                         'token'=> $token
-                                        ], $this->successStatus); 
-                }else{
-
-                    $message = $this->translate('messages.'.$user->account_enabled,$user->account_enabled);
-                    
+                    $mess = 'You are not allowed to login';
+                    $message = $this->translate('messages.'.$mess,$mess);
+                        
                     return response()->json(['error'=> $message], 401);  
                 }
+                else
+                {
+                    $user = Auth::user(); 
+                
+                    if($user->account_enabled == 'active' || $user->account_enabled == 'incomplete')
+                    {
+                        Auth::user()->roles;
+                        $token =  $user->createToken('yss')->accessToken; 
+
+                        return response()->json(['success' => $this->successStatus,
+                                             'data' => $user->only($this->userFieldsArray),
+                                             'token'=> $token
+                                            ], $this->successStatus); 
+                    }else{
+
+                        $message = $this->translate('messages.'.$user->account_enabled,$user->account_enabled);
+                        
+                        return response()->json(['error'=> $message], 401);  
+                    }
+                    }
             } 
             else{ 
 
@@ -83,22 +93,42 @@ class LoginController extends CoreController
     ***/
     public function logout(Request $request)
     {
-        if(true)
+        $mes = 'Logout successfully';
+        $message = $this->translate('messages.'.$mes,$mes);
+
+        $token = $request->user()->token();
+        $token->revoke();
+        return response()->json(['success' => $this->successStatus,
+                                 'data' => $message,
+                                ], $this->successStatus); 
+    }
+
+    /***
+    Alysei Progress 
+    ***/
+    public function alyseiProgress(Request $request)
+    {
+        try
         {
-            $mes = 'Logout successfully';
-            $message = $this->translate('messages.'.$mes,$mes);
-            return response()->json(['success' => $this->successStatus,
-                                     'data' => $message,
-                                    ], $this->successStatus); 
-        } 
-        else
-        {
-            $mes = 'Somethig went wrong';
-            $message = $this->translate('messages.'.$mes,$mes);
-            return response()->json(['success' => $this->exceptionStatus,
-                                     'data' => $message,
-                                    ], $this->exceptionStatus); 
+            $user = Auth::user();
+            
+            $userData = User::select('user_id','email','role_id','alysei_review','alysei_certification','alysei_recognition','alysei_qualitymark')->where('user_id', $user->user_id)->first();
+            
+            if(!empty($userData))
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $userData,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => 'Unauthorised']], $this->unauthorisedStatus);
+            }
         }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->unauthorisedStatus); 
+        } 
         
     }
 }
