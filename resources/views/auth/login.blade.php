@@ -13,13 +13,13 @@
 </head>
 <body>
   <main class="d-flex align-items-center min-vh-100 py-3 py-md-0">
-    <div class="container">
+    <div class="container" style="max-width: 800px!important;">
       <div class="card login-card">
-        <div class="row no-gutters">
-          <div class="col-md-5">
+        <div class="row no-gutters" style="margin-left: 150px;">
+          <!-- <div class="col-md-5">
             <img src="https://www.bootstrapdash.com/demo/login-template-free-2/assets/images/login.jpg" alt="login" class="login-card-img">
-          </div>
-          <div class="col-md-7">
+          </div> -->
+          <div class="col-md-12">
             <div class="card-body">
               <div class="brand-wrapper">
                 <img src="https://www.bootstrapdash.com/demo/login-template-free-2/assets/images/logo.svg" alt="logo" class="logo">
