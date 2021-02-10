@@ -49,7 +49,13 @@
                             <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending" style="width: 0px;">Name</th>
                             <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Email: activate to sort column descending" style="width: 0px;">Email</th>
                             <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Role: activate to sort column descending" style="width: 0px;">Role</th>
-                            <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Status: activate to sort column descending" style="width: 0px;">Status</th>
+                            <!-- <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Status: activate to sort column descending" style="width: 0px;">Status</th> -->
+
+                            <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Status: activate to sort column descending" style="width: 0px;">Alysei Review</th>
+                            <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Status: activate to sort column descending" style="width: 0px;">Alysei Certification</th>
+                            <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Status: activate to sort column descending" style="width: 0px;">Alysei Recognition</th>
+                            <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Status: activate to sort column descending" style="width: 0px;">Alysei Quality Mark</th>
+
                             <th tabindex="0" aria-controls="zero_config" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Action: activate to sort column descending" style="width: 0px;">Action</th>
                         </tr>
 
@@ -61,14 +67,47 @@
                                 <td>{{($user->name) ? ($user->name) : ($user->first_name.' '.$user->last_name)}}</td>
                                 <td>{{$user->email}}</td>
                                 <td>@if($user->role_id == 3) Italian F&B Producers @elseif($user->role_id == 7) Voice Of Expert @elseif($user->role_id == 8) Travel Agencies @elseif($user->role_id == 9) Restaurants @elseif($user->role_id == 10) Voyagers @elseif($user->role_id == 6) Importer & Distributer @endif</td>
-                                <td>
+                                <!--<td>
                                     <select style="width:65%;" class="userstatus form-control"  data-status_id="{{$user->user_id}}">
                                       <option value="active" @if($user->account_enabled == 'active' )selected @endif">Active</option>
                                       <option value="inactive" @if($user->account_enabled == 'inactive' )selected @endif">Inactive</option>
                                       <option value="expired" @if($user->account_enabled == 'expired' )selected @endif">Expired</option>
                                       <option value="incomplete" @if($user->account_enabled == 'incomplete' )selected @endif">Incomplete</option>
                                     </select>
+                                </td>-->
+
+                                <td>
+                                  @if($user->alysei_review == '1')
+                                    <span class="badge bg-success" onclick="isReview({{$user->user_id}},'0')">Enabled</span>
+                                  @else
+                                    <span class="badge bg-danger" onclick="isReview({{$user->user_id}},'1')">Disabled</span>
+                                  @endif
                                 </td>
+
+                                <td>
+                                  @if($user->alysei_certification == '1')
+                                    <span class="badge bg-success" onclick="isCertified({{$user->user_id}},'0')">Enabled</span>
+                                  @else
+                                    <span class="badge bg-danger" onclick="isCertified({{$user->user_id}},'1')">Disabled</span>
+                                  @endif
+                                </td>
+
+                                <td>
+                                  @if($user->alysei_recognition == '1')
+                                    <span class="badge bg-success" onclick="isRecognised({{$user->user_id}},'0')">Enabled</span>
+                                  @else
+                                    <span class="badge bg-danger" onclick="isRecognised({{$user->user_id}},'1')">Disabled</span>
+                                  @endif
+                                </td>
+
+                                <td>
+                                  @if($user->alysei_qualitymark == '1')
+                                    <span class="badge bg-success" onclick="isQM({{$user->user_id}},'0')">Enabled</span>
+                                  @else
+                                    <span class="badge bg-danger" onclick="isQM({{$user->user_id}},'1')">Disabled</span>
+                                  @endif
+                                </td>
+
                                 <td>
                                     <a href="{{url('login/users/edit', [$user->user_id])}}" class="pr-2" data-toggle="tooltip" title="" data-original-title="Edit"><i class="ti-marker-alt"></i></a>
 
@@ -96,6 +135,59 @@
 
 @push('footer_script')
 <script>
+
+function isReview(id,status){
+  if (confirm("Are you sure you want to change the status?") == true) {
+   $.ajax({
+          url:"{{url('/login/review-status')}}",
+          type:'post',
+          data:{'id':id,'status':status,'_token':'{{ csrf_token() }}'},
+          success: function(path){
+            location.reload();
+          }
+      });
+  }  
+ }
+
+function isCertified(id,status){
+  if (confirm("Are you sure you want to change the status?") == true) {
+   $.ajax({
+          url:"{{url('/login/certified-status')}}",
+          type:'post',
+          data:{'id':id,'status':status,'_token':'{{ csrf_token() }}'},
+          success: function(path){
+            location.reload();
+          }
+      });
+  }
+}
+
+function isRecognised(id,status){
+  if (confirm("Are you sure you want to change the status?") == true) {
+   $.ajax({
+          url:"{{url('/login/recognised-status')}}",
+          type:'post',
+          data:{'id':id,'status':status,'_token':'{{ csrf_token() }}'},
+          success: function(path){
+            location.reload();
+          }
+      });
+  }
+}
+
+function isQM(id,status){
+  if (confirm("Are you sure you want to change the status?") == true) {
+   $.ajax({
+          url:"{{url('/login/qm-status')}}",
+          type:'post',
+          data:{'id':id,'status':status,'_token':'{{ csrf_token() }}'},
+          success: function(path){
+            location.reload();
+          }
+      });
+  }
+}
+
 $(document).ready(function(){
    $('.userstatus').change(function(){
      let status =$(this).val();

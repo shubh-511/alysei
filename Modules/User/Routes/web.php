@@ -35,4 +35,9 @@ Route::group(['prefix'=>'login','middleware'=>['web','isAdminLogin']], function(
 
 	Route::post('/user-status', 'UserController@userStatus');
 
+	Route::post('/review-status', 'UserController@reviewStatus');
+	Route::post('/certified-status', 'UserController@certifiedStatus');
+	Route::post('/recognised-status', 'UserController@recognisedStatus');
+	Route::post('/qm-status', 'UserController@qmStatus');
+
 });

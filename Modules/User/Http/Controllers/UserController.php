@@ -69,4 +69,64 @@ class UserController extends Controller
         return view('admin.user.edit', compact('user'));
     }
 
+    /***
+    Alysei Review Status
+    ***/
+    public function reviewStatus(Request $request)
+    {
+        //echo $request->status; die;
+        if($request->isMethod('post')){
+            $user = User::where('user_id', $request->id)->update(['alysei_review' => $request->status]);
+            /*$user->alysei_review = $request->status;
+            $user->save();*/
+            return 1;
+        }
+    }
+
+    /***
+    Alysei Certification Status
+    ***/
+    public function certifiedStatus(Request $request)
+    {
+        
+        if($request->isMethod('post')){
+            $user = User::where('user_id', $request->id)->update(['alysei_certification' => $request->status]);
+            /*$user->alysei_review = $request->status;
+            $user->save();*/
+            return 1;
+        }
+    }
+
+    /***
+    Alysei Recognised Status
+    ***/
+    public function recognisedStatus(Request $request)
+    {
+        //echo $request->status; die;
+        if($request->isMethod('post')){
+            $user = User::where('user_id', $request->id)->update(['alysei_recognition' => $request->status]);
+            /*$user->alysei_review = $request->status;
+            $user->save();*/
+            return 1;
+        }
+    }
+
+    /***
+    Alysei Quality Marked Status
+    ***/
+    public function qmStatus(Request $request)
+    {
+        //echo $request->status; die;
+        if($request->isMethod('post')){
+            $user = User::where('user_id', $request->id)->update(['alysei_qualitymark' => $request->status]);
+            /*$user->alysei_review = $request->status;
+            $user->save();*/
+            return 1;
+        }
+    }
+
+   
+
+   
+
 }

@@ -25,6 +25,18 @@ ul.pagination
 	float: right;
 }
 
+.bg-success
+{
+	color: #fff;
+	cursor: pointer;
+}
+
+.bg-danger
+{
+	color: #fff;
+	cursor: pointer;
+}
+
 
 
 /*!
