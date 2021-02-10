@@ -16,7 +16,7 @@ class CreateUserFieldMapsTable extends Migration
         Schema::create('user_field_maps', function (Blueprint $table) {
             $table->integer('user_field_id');
             $table->integer('option_id');
-            $table->integer('child_id');
+            $table->integer('role_id');
         });
     }
 

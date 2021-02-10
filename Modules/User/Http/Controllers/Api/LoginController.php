@@ -76,4 +76,29 @@ class LoginController extends CoreController
             return response()->json(['success'=>$this->validationStatus,'errors' =>$e->getMessage()], $this->validationStatus);
         }
     }
+
+
+    /***
+    logout 
+    ***/
+    public function logout(Request $request)
+    {
+        if(true)
+        {
+            $mes = 'Logout successfully';
+            $message = $this->translate('messages.'.$mes,$mes);
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $message,
+                                    ], $this->successStatus); 
+        } 
+        else
+        {
+            $mes = 'Somethig went wrong';
+            $message = $this->translate('messages.'.$mes,$mes);
+            return response()->json(['success' => $this->exceptionStatus,
+                                     'data' => $message,
+                                    ], $this->exceptionStatus); 
+        }
+        
+    }
 }

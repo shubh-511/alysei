@@ -30,6 +30,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('user/settings', 'Api\UserController@userSettings');
 	Route::post('update/user/settings', 'Api\UserController@updateUserSettings');
 	Route::post('change/password', 'Api\ResetPasswordController@changePassword');
+	Route::post('logout', 'Api\LoginController@logout');
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
