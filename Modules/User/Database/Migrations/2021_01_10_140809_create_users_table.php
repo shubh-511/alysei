@@ -45,6 +45,12 @@ class CreateUsersTable extends Migration
             $table->integer('avatar_id')->nullable();
             $table->string('key')->comment("forgot key")->nullable();
             $table->integer('role_id')->unsigned();
+
+            $table->enum('alysei_review',['0','1'])->default('0')->comment("0=Not Reviewed, 1=Reviewed");
+            $table->enum('alysei_certification',['0','1'])->default('0')->comment("0=Not Certified, 1=Certified");
+            $table->enum('alysei_recognition',['0','1'])->default('0')->comment("0=Not Recognised, 1=Recognised");
+            $table->enum('alysei_qualitymark',['0','1'])->default('0')->comment("0=Not Marked, 1=Marked");
+
             $table->rememberToken();
             $table->string('timezone')->nullable();
             $table->string('locale')->default("en");
