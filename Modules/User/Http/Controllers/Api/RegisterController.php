@@ -190,7 +190,7 @@ class RegisterController extends CoreController
 
                         //Send Welcome Mail
                 
-                        event(new Welcome($user->user_id));
+                        //event(new Welcome($user->user_id));
 
                         return response()->json(['success' => $this->successStatus,
                                      'data' => $user->only($this->userFieldsArray),
