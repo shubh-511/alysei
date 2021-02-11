@@ -78,7 +78,7 @@
 
                                 <td>
                                   @if($user->alysei_review == '1')
-                                    <span class="badge bg-success" onclick="isReview({{$user->user_id}},'0')">Reviewed</span>
+                                    <span class="badge bg-success" <?php /* onclick="isReview({{$user->user_id}},'0')" */ ?>>Reviewed</span>
                                   @else
                                     <span class="badge bg-danger" onclick="isReview({{$user->user_id}},'1')">Not Reviwed</span>
                                   @endif
@@ -86,25 +86,25 @@
 
                                 <td>
                                   @if($user->alysei_certification == '1')
-                                    <span class="badge bg-success" onclick="isCertified({{$user->user_id}},'0')">Certified</span>
+                                    <span class="badge bg-success" <?php /*onclick="isCertified({{$user->user_id}},'0')" */ ?>>Certified</span>
                                   @else
-                                    <span class="badge bg-danger" onclick="isCertified({{$user->user_id}},'1')">Not Certified</span>
+                                    <span class="badge bg-danger" @if($user->alysei_review == '1') onclick="isCertified({{$user->user_id}},'1')" @endif>Not Certified</span>
                                   @endif
                                 </td>
 
                                 <td>
                                   @if($user->alysei_recognition == '1')
-                                    <span class="badge bg-success" onclick="isRecognised({{$user->user_id}},'0')">Recognised</span>
+                                    <span class="badge bg-success" <?php /* onclick="isRecognised({{$user->user_id}},'0')" */ ?>>Recognised</span>
                                   @else
-                                    <span class="badge bg-danger" onclick="isRecognised({{$user->user_id}},'1')">Not Recognised</span>
+                                    <span class="badge bg-danger" @if($user->alysei_review == '1' && $user->alysei_certification == '1') onclick="isRecognised({{$user->user_id}},'1')" @endif>Not Recognised</span>
                                   @endif
                                 </td>
 
                                 <td>
                                   @if($user->alysei_qualitymark == '1')
-                                    <span class="badge bg-success" onclick="isQM({{$user->user_id}},'0')">Quality Marked</span>
+                                    <span class="badge bg-success" <?php /*onclick="isQM({{$user->user_id}},'0')" */ ?>>Quality Marked</span>
                                   @else
-                                    <span class="badge bg-danger" onclick="isQM({{$user->user_id}},'1')">Not Marked</span>
+                                    <span class="badge bg-danger" @if($user->alysei_review == '1' && $user->alysei_certification == '1' && $user->alysei_recognition) onclick="isQM({{$user->user_id}},'1')" @endif>Not Marked</span>
                                   @endif
                                 </td>
 

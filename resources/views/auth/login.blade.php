@@ -22,7 +22,7 @@
           <div class="col-md-12">
             <div class="card-body">
               <div class="brand-wrapper">
-                <img src="https://www.bootstrapdash.com/demo/login-template-free-2/assets/images/logo.svg" alt="logo" class="logo">
+                <img src="{{asset('images/logo.png')}}" alt="logo" class="logo">
               </div>
               <p class="login-card-description">Sign into your account</p>
 
