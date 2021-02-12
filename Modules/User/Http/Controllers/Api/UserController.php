@@ -91,6 +91,34 @@ class UserController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
+
+    /* 
+     * Contact Details
+     * @params $request
+     */
+
+    public function updateContactDetails(Request $request){
+        try{
+                $input = $request->all();
+
+                /*$validator = Validator::make($input, [ 
+                    'email' => 'required|unique:users,email,'.$this->user->user_id.',user_id', 
+                ]);
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
+                }*/
+                
+                $user = User::where('user_id','=',$this->user->user_id)->update($input);
+
+                return response()->json(['success' => $this->successStatus,
+                                 'data' => $user,
+                                ], $this->successStatus);
+                                  
+        }catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
     
 
 }

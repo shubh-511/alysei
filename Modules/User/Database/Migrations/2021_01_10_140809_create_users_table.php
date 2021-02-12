@@ -51,6 +51,10 @@ class CreateUsersTable extends Migration
             $table->enum('alysei_recognition',['0','1'])->default('0')->comment("0=Not Recognised, 1=Recognised");
             $table->enum('alysei_qualitymark',['0','1'])->default('0')->comment("0=Not Marked, 1=Marked");
 
+            $table->text('address')->nullable();
+            $table->string('website')->nullable();
+            $table->string('fb_link')->nullable();
+
             $table->rememberToken();
             $table->string('timezone')->nullable();
             $table->string('locale')->default("en");

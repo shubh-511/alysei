@@ -32,6 +32,9 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('change/password', 'Api\ResetPasswordController@changePassword');
 	Route::post('logout', 'Api\LoginController@logout');
 	Route::get('get/alysei/progress', 'Api\LoginController@alyseiProgress');
+	
+	Route::post('update/contact/details', 'Api\LoginController@updateContactDetails');
+
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
