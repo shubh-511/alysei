@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\Role;
+use Modules\User\Entities\FeaturedProduct;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Validator;
@@ -69,7 +70,7 @@ class UserController extends CoreController
      * @params $request
      */
 
-    public function updateUserSettings(Request $request){
+    /*public function updateUserSettings(Request $request){
         try{
                 $input = $request->all();
 
@@ -90,6 +91,61 @@ class UserController extends CoreController
         }catch(\Exception $e){
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }*/
+
+    public function updateUserSettings(Request $request){
+        try{
+                $requestFields = $request->params;
+
+                $rules = $this->validateData($requestFields);
+                
+                $validator = Validator::make($requestFields, $rules);
+
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+                
+                $user = User::where('user_id','=',$this->user->user_id)->first();
+                $user->name = $requestFields['name'];
+                $user->display_name = $requestFields['display_name'];
+                $user->locale = $requestFields['locale'];
+                $user->save();
+
+                if(count($requestFields['featured_products']) > 0)
+                {
+                    foreach($requestFields['featured_products'] as $featuredProduct)
+                    {
+
+                    }
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                 'data' => $user,
+                                ], $this->successStatus);
+                                  
+        }catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Validate Data
+     * @Params $requestedfields
+     */
+
+    public function validateData($requestedFields){
+        $rules = [];
+        foreach ($requestedFields as $key => $field) {
+            //return $key;
+            if($key == 'name'){
+
+                $rules[$key] = 'required|min:3|unique:users,name,'.$this->user->user_id.',user_id',
+
+            }
+        }
+
+        return $rules;
     }
 
     /* 
