@@ -116,7 +116,11 @@ class UserController extends CoreController
                 {
                     foreach($requestFields['featured_products'] as $featuredProduct)
                     {
-
+                        $featProduct = new FeaturedProduct;
+                        $featProduct->product_title = $featuredProduct['title'];
+                        $featProduct->product_description = $featuredProduct['product_description'];
+                        $featProduct->product_tags = $featuredProduct['product_tags'];
+                        $featProduct->save();
                     }
                 }
 
@@ -140,7 +144,7 @@ class UserController extends CoreController
             //return $key;
             if($key == 'name'){
 
-                $rules[$key] = 'required|min:3|unique:users,name,'.$this->user->user_id.',user_id',
+                $rules[$key] = 'required|min:3|unique:users,name,'.$this->user->user_id.',user_id';
 
             }
         }
