@@ -47,7 +47,6 @@ class UserController extends CoreController
     public function userSettings(){
         try{
                 $loggedInUser = $this->user;
-                return $loggedInUser->role_id;
                 $userDetails = $loggedInUser->only(['name', 'email','display_name','locale']);
 
                 $userFieldInfo = [];
