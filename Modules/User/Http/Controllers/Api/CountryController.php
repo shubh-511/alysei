@@ -26,6 +26,14 @@ class CountryController extends Controller
     {
         try
         {
+            $validator = Validator::make($input, [ 
+                'country_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
             $stateData = State::where('country_id', $request->country_id)->get();
             
             if(count($stateData) > 0)
@@ -53,6 +61,14 @@ class CountryController extends Controller
     {
         try
         {
+            $validator = Validator::make($input, [ 
+                'state_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
             $cityData = City::where('state_id', $request->state_id)->get();
             
             if(count($cityData) > 0)
