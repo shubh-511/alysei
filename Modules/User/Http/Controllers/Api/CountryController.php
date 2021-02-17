@@ -19,6 +19,33 @@ class CountryController extends Controller
     public $exceptionStatus = 409;
     public $unauthorisedStatus = 401;
 
+
+    /***
+    get Countries
+    ***/
+    public function getCountries(Request $request)
+    {
+        try
+        {
+            $countryData = Country::orderBy('name','ASC')->get();
+            
+            if(count($countryData) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $countryData,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => 'No countries found']], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /***
     get States
     ***/

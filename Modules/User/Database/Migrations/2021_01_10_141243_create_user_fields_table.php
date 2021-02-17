@@ -25,6 +25,7 @@ class CreateUserFieldsTable extends Migration
             $table->text('css')->nullable();
             $table->string('class_name')->nullable();
             $table->enum('conditional',['yes','no'])->default('no');
+            $table->enum('api_call',['true','false'])->default('false');
             $table->timestamps();
         });
 

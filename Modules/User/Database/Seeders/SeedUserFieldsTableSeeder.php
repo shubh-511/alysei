@@ -30,7 +30,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Restaurent Type",'type'=>'select','name'=>'restaurent_type','required'=>'yes'),
                         array("title"=>"Expertise",'type'=>'multiselect','name'=>'expertise','required'=>'yes'),
                         array("title"=>"Title",'type'=>'multiselect','name'=>'title','required'=>'yes'),
-                        array("title"=>"Country",'type'=>'checkbox','name'=>'country','required'=>'yes','multiple_option' => 'true'),
+                        array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true'),
                         array("title"=>"Speciality",'type'=>'multiselect','name'=>'speciality','required'=>'yes','multiple_option'=>'true'),
                         array("title"=>"Zip/Postal Code",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
                         array("title"=>"Email",'type'=>'email','name'=>'email','required'=>'yes'),
@@ -45,7 +45,11 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"I AGREE TO THE DATA COLLECTION POLICIES STATED IN THE <a href='https://social.alysei.com/privacy-policy'>PRIVACY POLICY</a> AND <a href='https://social.alysei.com/terms'>TERMS OF SERVICE.</a>",'type'=>'terms','name'=>'terms_and_condition','required'=>'yes','conditional'=>'no'),
 
                         array("title"=>"Italian Regions",'type'=>'select','name'=>'italian_regions','required'=>'no','conditional'=>'no'),
-                        array("title"=>"Interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no')
+                        array("title"=>"Interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no'),
+
+                        
+                        array("title"=>"State",'type'=>'select','name'=>'state','required'=>'yes','conditional'=>'no','api_call'=>'true'),
+                        array("title"=>"City",'type'=>'select','name'=>'city','required'=>'yes','conditional'=>'no')
 
                     );
 
