@@ -26,7 +26,7 @@ class CountryController extends Controller
     {
         try
         {
-            $validator = Validator::make($input, [ 
+            $validator = Validator::make($request->all(), [ 
                 'country_id' => 'required', 
             ]);
 
@@ -61,7 +61,7 @@ class CountryController extends Controller
     {
         try
         {
-            $validator = Validator::make($input, [ 
+            $validator = Validator::make($request->all(), [ 
                 'state_id' => 'required', 
             ]);
 
