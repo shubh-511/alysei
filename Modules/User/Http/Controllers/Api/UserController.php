@@ -7,7 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\Role;
-use Modules\User\Entities\FeaturedProduct;
+use Modules\User\Entities\FeaturedListing;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Validator;
@@ -47,6 +47,7 @@ class UserController extends CoreController
     public function userSettings(){
         try{
                 $loggedInUser = $this->user;
+                $featuredinfo = [];
                 $userDetails = $loggedInUser->only(['name', 'email','display_name','locale']);
 
                 $userFieldInfo = [];
@@ -55,9 +56,87 @@ class UserController extends CoreController
 
                     $userFieldInfo[$key] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
                 }
-
+                if($loggedInUser->role_id == 3 || $loggedInUser->role_id == 6) //producers & importers
+                {
+                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '1')->orderBy('id','DESC')->get(); //products
+                    foreach ($featuredListing as $k => $value) 
+                    {
+                        $featuredListing[$k]->title
+                         = $this->translate('messages.'.$value->title
+                        ,$value->title
+                        );
+                        $featuredListing[$k]->description
+                         = $this->translate('messages.'.$value->description
+                        ,$value->description
+                        );
+                        $featuredListing[$k]->anonymous
+                         = $this->translate('messages.'.$value->anonymous
+                        ,$value->anonymous
+                        );
+                    }
+                }
+                elseif($loggedInUser->role_id == 9) //restaurant
+                {
+                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '2')->orderBy('id','DESC')->get(); //recipies
+                    foreach ($featuredListing as $k => $value) 
+                    {
+                        $featuredListing[$k]->title
+                         = $this->translate('messages.'.$value->title
+                        ,$value->title
+                        );
+                        $featuredListing[$k]->description
+                         = $this->translate('messages.'.$value->description
+                        ,$value->description
+                        );
+                        $featuredListing[$k]->anonymous
+                         = $this->translate('messages.'.$value->anonymous
+                        ,$value->anonymous
+                        );
+                    }
+                }
+                elseif($loggedInUser->role_id == 7) //voe
+                {
+                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '3')->orderBy('id','DESC')->get(); //blogs
+                    foreach ($featuredListing as $k => $value) 
+                    {
+                        $featuredListing[$k]->title
+                         = $this->translate('messages.'.$value->title
+                        ,$value->title
+                        );
+                        $featuredListing[$k]->description
+                         = $this->translate('messages.'.$value->description
+                        ,$value->description
+                        );
+                        $featuredListing[$k]->anonymous
+                         = $this->translate('messages.'.$value->anonymous
+                        ,$value->anonymous
+                        );
+                    }
+                }
+                elseif($loggedInUser->role_id == 8) //travel agencies
+                {
+                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '4')->orderBy('id','DESC')->get(); //blogs
+                    foreach ($featuredListing as $k => $value) 
+                    {
+                        $featuredListing[$k]->title
+                         = $this->translate('messages.'.$value->title
+                        ,$value->title
+                        );
+                        $featuredListing[$k]->description
+                         = $this->translate('messages.'.$value->description
+                        ,$value->description
+                        );
+                        $featuredListing[$k]->anonymous
+                         = $this->translate('messages.'.$value->anonymous
+                        ,$value->anonymous
+                        );
+                    }
+                }
+                
+                $userFieldInfo['featured_listing'] = $featuredListing;
+                    
                 return response()->json(['success' => $this->successStatus,
-                                 'data' => $userFieldInfo,
+                                 'data' => $userFieldInfo
                                 ], $this->successStatus);
 
         }catch(\Exception $e){
@@ -116,7 +195,7 @@ class UserController extends CoreController
                 {
                     foreach($requestFields['featured_products'] as $featuredProduct)
                     {
-                        $featProduct = new FeaturedProduct;
+                        $featProduct = new FeaturedListing;
                         $featProduct->product_title = $featuredProduct['title'];
                         $featProduct->product_description = $featuredProduct['product_description'];
                         $featProduct->product_tags = $featuredProduct['product_tags'];
