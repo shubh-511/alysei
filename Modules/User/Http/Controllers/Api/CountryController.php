@@ -34,7 +34,7 @@ class CountryController extends Controller
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $stateData = State::where('country_id', $request->country_id)->get();
+            $stateData = State::where('country_id', $request->country_id)->orderBy('name','ASC')->get();
             
             if(count($stateData) > 0)
             {
@@ -69,7 +69,7 @@ class CountryController extends Controller
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $cityData = City::where('state_id', $request->state_id)->get();
+            $cityData = City::where('state_id', $request->state_id)->orderBy('name','ASC')->get();
             
             if(count($cityData) > 0)
             {
