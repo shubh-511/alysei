@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Modules\User\Entities\Country;
 use Modules\User\Entities\State;
 use Modules\User\Entities\City;
+use Modules\User\Entities\MapCountryRole;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -27,7 +28,17 @@ class CountryController extends Controller
     {
         try
         {
-            $countryData = Country::orderBy('name','ASC')->get();
+            $getAssignedCountries = MapCountryRole::where('role_id', $request->role_id)->get();
+            $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
+
+            if(count($getCountries) > 0)
+            {
+                $countryData = Country::whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+            }
+            else
+            {
+                $countryData = Country::orderBy('name','ASC')->get();
+            }
             
             if(count($countryData) > 0)
             {

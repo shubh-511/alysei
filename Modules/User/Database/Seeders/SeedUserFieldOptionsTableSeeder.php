@@ -649,8 +649,8 @@ class SeedUserFieldOptionsTableSeeder extends Seeder
                                     array("user_field_id" => 2,"option"=>"Vegan","parent"=>587,"head"=>0),
                                     array("user_field_id" => 2,"option"=>"Others","parent"=>587,"head"=>0),
 
-                        array("user_field_id" => 13,"option"=>"USA"),
-                        array("user_field_id" => 13,"option"=>"Italy"),
+                        /*array("user_field_id" => 13,"option"=>"USA"),
+                        array("user_field_id" => 13,"option"=>"Italy"),*/
 
 
                         // array("user_field_id" => 13,"option"=>"Abruzzo","parent"=>602,"head"=>0),
