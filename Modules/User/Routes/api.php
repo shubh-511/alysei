@@ -34,6 +34,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/alysei/progress', 'Api\LoginController@alyseiProgress');
 
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');
+	Route::get('get/states', 'Api\CountryController@getStates');
+	Route::get('get/cities', 'Api\CountryController@getCities');
 
 });
 
