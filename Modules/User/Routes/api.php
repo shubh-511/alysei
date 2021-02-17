@@ -23,7 +23,8 @@ Route::post('verfiy/password/otp', 'Api\ResetPasswordController@verifyForgotPass
 Route::post('reset/password', 'Api\ResetPasswordController@resetPassword');
 
 Route::get('get/hubs/{role_id}', 'Api\HubController@getHubs');
-
+Route::get('get/states', 'Api\CountryController@getStates');
+Route::get('get/cities', 'Api\CountryController@getCities');
 
 Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('userinfo', 'Api\UserController@userinfo');
@@ -34,8 +35,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/alysei/progress', 'Api\LoginController@alyseiProgress');
 
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');
-	Route::get('get/states', 'Api\CountryController@getStates');
-	Route::get('get/cities', 'Api\CountryController@getCities');
+
 
 });
 
