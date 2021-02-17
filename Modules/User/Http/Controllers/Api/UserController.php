@@ -174,6 +174,7 @@ class UserController extends CoreController
 
     public function updateUserSettings(Request $request){
         try{
+                $loggedInUser = $this->user;
                 $requestFields = $request->params;
 
                 $rules = $this->validateData($requestFields);
@@ -191,15 +192,17 @@ class UserController extends CoreController
                 $user->locale = $requestFields['locale'];
                 $user->save();
 
-                if(count($requestFields['featured_products']) > 0)
+                if(count($requestFields['featured_listings']) > 0)
                 {
-                    foreach($requestFields['featured_products'] as $featuredProduct)
+                    foreach($requestFields['featured_listings'] as $featuredListing)
                     {
-                        $featProduct = new FeaturedListing;
-                        $featProduct->product_title = $featuredProduct['title'];
-                        $featProduct->product_description = $featuredProduct['product_description'];
-                        $featProduct->product_tags = $featuredProduct['product_tags'];
-                        $featProduct->save();
+                        $featList = new FeaturedListing;
+                        $featList->user_id = $loggedInUser->user_id;
+                        $featList->listing_type = $featuredListing['listing_type'];
+                        $featList->title = $featuredListing['title'];
+                        $featList->description = $featuredListing['description'];
+                        $featList->anonymous = $featuredListing['anonymous'];
+                        $featList->save();
                     }
                 }
 
