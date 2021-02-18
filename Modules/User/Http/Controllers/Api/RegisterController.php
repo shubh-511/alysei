@@ -252,6 +252,7 @@ class RegisterController extends CoreController
             if(!empty($userDetail))
             {
                 $userDetail->otp = null;
+                $userDetail->account_enabled = 'active';
                 $userDetail->save();
 
 
