@@ -12,6 +12,7 @@ use Validator;
 use DB;
 use Cache;
 use App\Events\Welcome;
+use App\Events\VerifyEmail;
 
 class RegisterController extends CoreController
 {
@@ -129,7 +130,10 @@ class RegisterController extends CoreController
                     $userData['role_id'] = $input['role_id'];
 
                     $userData['account_enabled'] = "incomplete";
-                    $userData['otp'] = $this->generateOTP();
+                    if($input['role_id'] == 10)
+                    {
+                        $userData['otp'] = $this->generateOTP();
+                    }
                     
                     if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
                       ){
@@ -184,6 +188,9 @@ class RegisterController extends CoreController
 
                         if($input['role_id'] == 10)
                         {
+                            //Send verify eMail OTP
+                    
+                            event(new VerifyEmail($user->user_id));
                             return response()->json(['success' => $this->successStatus,
                                         'message' => 'OTP has been sent on your email ID',
                                         'data' => $user->only($this->userFieldsArray)                  
