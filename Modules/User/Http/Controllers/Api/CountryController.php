@@ -117,7 +117,7 @@ class CountryController extends Controller
             }
             else
             {
-                return response()->json(['success'=>false,'errors' =>['exception' => 'No cities found']], $this->exceptionStatus);
+                return response()->json(['success'=>false,'errors' => 'No cities found in this region'], $this->exceptionStatus);
             }
         }
         catch(\Exception $e)
