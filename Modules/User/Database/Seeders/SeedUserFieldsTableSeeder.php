@@ -18,19 +18,19 @@ class SeedUserFieldsTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("title"=>"Company name",'type'=>'text','name'=>'comapny_name','required'=>'no'),
+                        array("title"=>"Company name",'type'=>'text','name'=>'comapny_name','required'=>'yes'),
                         array("title"=>"Product type",'type'=>'checkbox','name'=>'product_type','required'=>'yes'),
                         array("title"=>"Italian Regions",'type'=>'select','name'=>'italian_regions','required'=>'yes'),
                         array("title"=>"Horeca",'type'=>'radio','name'=>'horeca','required'=>'yes'),
                         array("title"=>"Private Label",'type'=>'radio','name'=>'private_label','required'=>'yes'),
                         array("title"=>"Alysei Brand Label",'type'=>'radio','name'=>'alysei_brand_label','required'=>'no'),
-                        array("title"=>"Restaurent name",'type'=>'text','name'=>'restaurent_name','required'=>'no'),
+                        array("title"=>"Restaurant name",'type'=>'text','name'=>'restaurant_name','required'=>'yes'),
                         array("title"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes'),
                         array("title"=>"Provide Pick Up And/Or Delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option'=>'true'),
-                        array("title"=>"Restaurent Type",'type'=>'select','name'=>'restaurent_type','required'=>'yes'),
-                        array("title"=>"Expertise",'type'=>'multiselect','name'=>'expertise','required'=>'yes'),
+                        array("title"=>"Restaurant Type",'type'=>'select','name'=>'restaurant_type','required'=>'yes'),
+                        array("title"=>"What is your specialization",'type'=>'multiselect','name'=>'expertise','required'=>'yes'),
                         array("title"=>"Title",'type'=>'multiselect','name'=>'title','required'=>'yes'),
-                        array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true'),
+                        array("title"=>"Country of Residence",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true'),
                         array("title"=>"Speciality",'type'=>'multiselect','name'=>'speciality','required'=>'yes','multiple_option'=>'true'),
                         array("title"=>"Zip/Postal Code",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
                         array("title"=>"Email",'type'=>'email','name'=>'email','required'=>'yes'),
@@ -48,8 +48,9 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no'),
 
                         
-                        array("title"=>"State",'type'=>'select','name'=>'state','required'=>'yes','conditional'=>'no','api_call'=>'true'),
-                        array("title"=>"City",'type'=>'select','name'=>'city','required'=>'yes','conditional'=>'no')
+                        array("title"=>"State/Region",'type'=>'select','name'=>'state','required'=>'yes','conditional'=>'no','api_call'=>'true'),
+                        array("title"=>"City",'type'=>'select','name'=>'city','required'=>'yes','conditional'=>'no'),
+                        array("title"=>"VAT No.",'type'=>'text','name'=>'vat_number','required'=>'yes','conditional'=>'no')
 
                     );
 

@@ -128,13 +128,9 @@ class RegisterController extends CoreController
                     $userData['password'] = bcrypt($inputData['password']);
                     $userData['role_id'] = $input['role_id'];
 
-                    if($input['role_id'] == 10){
-                        $userData['account_enabled'] = "active";    
-                    }else{
-                        $userData['account_enabled'] = "incomplete";
-                    }
+                    $userData['account_enabled'] = "incomplete";
+                    $userData['otp'] = $this->generateOTP();
                     
-
                     if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
                       ){
                         $userData['first_name'] = $inputData['first_name'];
@@ -186,16 +182,27 @@ class RegisterController extends CoreController
                             DB::table('user_field_values')->insert($data);
                         }
 
-                        $token =  $user->createToken('alysei')->accessToken; 
+                        if($input['role_id'] == 10)
+                        {
+                            return response()->json(['success' => $this->successStatus,
+                                        'message' => 'OTP has been sent on your email ID',
+                                        'data' => $user->only($this->userFieldsArray)                  
+                                    ], $this->successStatus);
+                        }
+                        else
+                        {
+                            $token =  $user->createToken('alysei')->accessToken; 
 
-                        //Send Welcome Mail
-                
-                        //event(new Welcome($user->user_id));
+                            //Send Welcome Mail
+                    
+                            //event(new Welcome($user->user_id));
 
-                        return response()->json(['success' => $this->successStatus,
-                                     'data' => $user->only($this->userFieldsArray),
-                                     'token' => $token
-                                    ], $this->successStatus); 
+                            return response()->json(['success' => $this->successStatus,
+                                         'data' => $user->only($this->userFieldsArray),
+                                         'token' => $token
+                                        ], $this->successStatus);
+                        }
+                         
 
                     }else{
                         return response()->json(['success' => $this->exceptionStatus,
@@ -213,6 +220,92 @@ class RegisterController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
         }
         
+    }
+
+
+    /** 
+     * Verify Otp api 
+     * 
+     * @return \Illuminate\Http\Response 
+     */ 
+    public function verifyOtp(Request $request) 
+    { 
+        try
+        {
+            $validator = Validator::make($request->all(), [  
+                'email' => 'required|max:190|email', 
+                'otp' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
+            }
+
+            $userDetail = User::where('email', $request->email)->where('otp', $request->otp)->first();
+            if(!empty($userDetail))
+            {
+                $userDetail->otp = null;
+                $userDetail->save();
+
+
+                return response()->json(['success' => true,
+                                         'message' => 'OTP verified!'
+                                        ], $this->successStatus); 
+            }
+            else
+            {
+                return response()->json(['success'=>false,
+                                        'message' => 'Invalid email or otp'
+                                    ], $this->validationStatus); 
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /** 
+     * Resend Otp api 
+     * 
+     * @return \Illuminate\Http\Response 
+     */ 
+    public function resendOtp(Request $request) 
+    { 
+        try
+        {
+            $validator = Validator::make($request->all(), [  
+                'email' => 'required|max:190|email', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
+            }
+
+            $userDetail = User::where('email', $request->email)->first();
+            if(!empty($userDetail))
+            {
+                $userDetail->otp = $this->generateOTP();
+                $userDetail->save();
+
+
+                return response()->json(['success' => true,
+                                         'message' => 'OTP has been sent!'
+                                        ], $this->successStatus); 
+            }
+            else
+            {
+                return response()->json(['success'=>false,
+                                        'message' => 'Invalid email ID'
+                                    ], $this->validationStatus); 
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
     }
 
     /*
@@ -453,5 +546,13 @@ class RegisterController extends CoreController
 
         return $inputData;
 
+    }
+
+    /*
+     * Generate OTP
+     */ 
+    public function generateOTP(){
+        $otp = mt_rand(1000,9999);
+        return $otp;
     }
 }
