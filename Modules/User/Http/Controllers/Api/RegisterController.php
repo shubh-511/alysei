@@ -245,7 +245,7 @@ class RegisterController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
+                return response()->json(['errors'=>$validator->errors()->first()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->where('otp', $request->otp)->first();
@@ -255,13 +255,13 @@ class RegisterController extends CoreController
                 $userDetail->save();
 
 
-                return response()->json(['success' => true,
+                return response()->json(['success' => $this->successStatus,
                                          'message' => 'OTP verified!'
                                         ], $this->successStatus); 
             }
             else
             {
-                return response()->json(['success'=>false,
+                return response()->json(['success'=>$this->validationStatus,
                                         'message' => 'Invalid email or otp'
                                     ], $this->validationStatus); 
             }
@@ -269,7 +269,7 @@ class RegisterController extends CoreController
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 
@@ -287,7 +287,7 @@ class RegisterController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
+                return response()->json(['errors'=>$validator->errors()->first()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->first();
@@ -297,13 +297,13 @@ class RegisterController extends CoreController
                 $userDetail->save();
 
 
-                return response()->json(['success' => true,
+                return response()->json(['success' => $this->successStatus,
                                          'message' => 'OTP has been sent!'
                                         ], $this->successStatus); 
             }
             else
             {
-                return response()->json(['success'=>false,
+                return response()->json(['success'=>$this->validationStatus,
                                         'message' => 'Invalid email ID'
                                     ], $this->validationStatus); 
             }
@@ -311,7 +311,7 @@ class RegisterController extends CoreController
         }
         catch(\Exception $e)
         {
-            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
 
