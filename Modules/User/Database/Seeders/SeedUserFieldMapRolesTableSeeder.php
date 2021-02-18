@@ -135,8 +135,9 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
 
                         array("user_field_id"=>13,'role_id'=>8,'step'=>'step_1','order'=>5),
                         array("user_field_id"=>28,'role_id'=>8,'step'=>'step_1','order'=>6),
-                        array("user_field_id"=>15,'role_id'=>8,'step'=>'step_1','order'=>7),
-                        array("user_field_id"=>29,'role_id'=>8,'step'=>'step_1','order'=>8),
+                        
+                        array("user_field_id"=>29,'role_id'=>8,'step'=>'step_1','order'=>7),
+                        array("user_field_id"=>15,'role_id'=>8,'step'=>'step_1','order'=>8),
 
                         array("user_field_id"=>24,'role_id'=>8,'step'=>'step_2','order'=>9),
                         array("user_field_id"=>25,'role_id'=>8,'step'=>'step_2','order'=>10),
