@@ -24,12 +24,14 @@ class SeedMapCountryRolesTableSeeder extends Seeder
                         array("country_id" => "231", "role_id" => "7"),
                         array("country_id" => "231", "role_id" => "8"),
                         array("country_id" => "231", "role_id" => "9"),
+                        array("country_id" => "107", "role_id" => "10")
                         //italy
                         array("country_id" => "107", "role_id" => "3"),
                         array("country_id" => "107", "role_id" => "6"),
                         array("country_id" => "107", "role_id" => "7"),
                         array("country_id" => "107", "role_id" => "8"),
-                        array("country_id" => "107", "role_id" => "9")
+                        array("country_id" => "107", "role_id" => "9"),
+                        array("country_id" => "107", "role_id" => "10")
                     );
 
         foreach ($data as $key => $value) {
