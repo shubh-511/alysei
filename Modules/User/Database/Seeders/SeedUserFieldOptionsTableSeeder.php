@@ -720,7 +720,7 @@ class SeedUserFieldOptionsTableSeeder extends Seeder
 
                         array("user_field_id" => 11,"option"=>"Wine"),
                         array("user_field_id" => 11,"option"=>"Food"),
-                        array("user_field_id" => 11,"option"=>"Both"),
+                        array("user_field_id" => 11,"option"=>"Wine and Food"),
                         
                         array("user_field_id" => 12,"option"=>"Blog Author"),
                         array("user_field_id" => 12,"option"=>"Book Author"),
