@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\sendVerifyEmailNotification;
+use App\Events\VerifyEmail;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Modules\User\Entities\User;
@@ -23,10 +23,10 @@ class sendVerifyEmailNotification
     /**
      * Handle the event.
      *
-     * @param  Welcome  $event
+     * @param  VerifyEmail  $event
      * @return void
      */
-    public function handle(sendVerifyEmailNotification $event)
+    public function handle(VerifyEmail $event)
     {
         $user = User::find($event->userId)->toArray();
         
