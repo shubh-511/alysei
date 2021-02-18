@@ -23,7 +23,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Italian Regions",'type'=>'select','name'=>'italian_regions','required'=>'yes'),
                         array("title"=>"Horeca",'type'=>'radio','name'=>'horeca','required'=>'yes','hint'=>'Select Horeca'),
                         array("title"=>"Private Label",'type'=>'radio','name'=>'private_label','required'=>'yes','hint'=>'Select Private Label'),
-                        array("title"=>"Alysei Brand Label",'type'=>'radio','name'=>'alysei_brand_label','required'=>'no',,'hint'=>'Select Alysei Brand Label'),
+                        array("title"=>"Alysei Brand Label",'type'=>'radio','name'=>'alysei_brand_label','required'=>'no','hint'=>'Select Alysei Brand Label'),
                         array("title"=>"Restaurant name",'type'=>'text','name'=>'restaurant_name','required'=>'yes'),
                         array("title"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes'),
                         array("title"=>"Provide Pick Up And/Or Delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option'=>'true'),
