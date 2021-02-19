@@ -30,7 +30,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Restaurant Type",'type'=>'select','name'=>'restaurant_type','required'=>'yes'),
                         array("title"=>"What is your specialization",'type'=>'multiselect','name'=>'expertise','required'=>'yes'),
                         array("title"=>"Title",'type'=>'multiselect','name'=>'title','required'=>'yes'),
-                        array("title"=>"Country of Residence",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true'),
+                        array("title"=>"Country",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true'),
                         array("title"=>"Speciality Trips",'type'=>'multiselect','name'=>'speciality','required'=>'yes','multiple_option'=>'true'),
                         array("title"=>"Zip/Postal Code",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
                         array("title"=>"Email",'type'=>'email','name'=>'email','required'=>'yes'),
