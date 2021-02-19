@@ -202,6 +202,7 @@ class UserController extends CoreController
                         $featList->title = $featuredListing['title'];
                         $featList->description = $featuredListing['description'];
                         $featList->anonymous = $featuredListing['anonymous'];
+                        $featList->img_id = $featuredListing['img_id'];
                         $featList->save();
                     }
                 }
