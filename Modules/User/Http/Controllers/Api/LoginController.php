@@ -58,7 +58,7 @@ class LoginController extends CoreController
                 {
                     $user = Auth::user(); 
                 
-                    if($user->account_enabled == 'active' || $user->account_enabled == 'incomplete')
+                    if($user->account_enabled == 'active')
                     {
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
