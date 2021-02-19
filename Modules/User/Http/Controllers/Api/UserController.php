@@ -202,6 +202,20 @@ class UserController extends CoreController
                         $featList->title = $featuredListing['title'];
                         $featList->description = $featuredListing['description'];
                         $featList->anonymous = $featuredListing['anonymous'];
+
+                        $target='siteimages/user/';
+                        $header_logo=$request->file('image');
+                        if(!empty($header_logo))
+                        {
+                            $headerImageName=$header_logo->getClientOriginalName();
+                            $ext1=$header_logo->getClientOriginalExtension();
+                            $temp1=explode(".",$headerImageName);
+                            $newHeaderLogo='user'.rand()."".round(microtime(true)).".".end($temp1);
+                            $headerTarget='siteimages/user/'.$newHeaderLogo;
+                            $header_logo->move($target,$newHeaderLogo);
+                            $user->user_image=$headerTarget;
+                        }
+                        
                         $featList->img_id = $featuredListing['img_id'];
                         $featList->save();
                     }
