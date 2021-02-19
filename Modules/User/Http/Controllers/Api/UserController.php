@@ -262,56 +262,7 @@ class UserController extends CoreController
         }
     }
 
-    /** 
-     * Change Password api 
-     * 
-     * @return \Illuminate\Http\Response 
-     */ 
-    public function changePassword(Request $request) 
-    {  
-        try 
-        {
-            $requestFields = $request->params;
-
-            $rules = $this->validatePassword($requestFields);
-            //return $rules;
-
-            $validator = Validator::make($requestFields, $rules);
-
-            /*$validator = Validator::make($request->all(), [  
-                'old_password' => 'required|max:190', 
-                'new_password' => 'required|max:190', 
-                'c_password' => 'required|same:new_password',
-            ]);*/
-
-            if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->successStatus);            
-            }
-            $user = Auth()->user()->user_id;
-            $email = Auth()->user()->email;
-
-            
-            if (Auth::guard('web')->attempt(['user_id' => $user, 'password' => $requestFields['old_password']]))
-            {
-                $userUpdate = User::where('id', $user)->first();
-                $userUpdate->password = bcrypt($requestFields['new_password']); 
-                $userUpdate->save();
-
-
-                return response()->json(['success' => $this->successStatus,
-                                         'message' => 'Your password has been reset',
-                                        ], $this->successStatus); 
-            }
-            else
-            {
-                return response()->json(['success'=>$this->validationStatus,'errors' =>['exception' => ['Old password incorrect']]], $this->validationStatus); 
-            }
-        }
-        catch(\Exception $e)
-        {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }
-    }
+    
     
 
     /*

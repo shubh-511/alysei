@@ -560,7 +560,7 @@ class RegisterController extends CoreController
      * Generate OTP
      */ 
     public function generateOTP(){
-        $otp = mt_rand(1000,9999);
+        $otp = mt_rand(100000,999999);
         return $otp;
     }
 }

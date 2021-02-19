@@ -85,7 +85,7 @@ class ResetPasswordController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
+                return response()->json(['errors'=>$validator->errors()->first()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->where('otp', $request->otp)->first();
@@ -129,7 +129,7 @@ class ResetPasswordController extends CoreController
             ]);
 
             if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()], $this->validationStatus);            
+                return response()->json(['errors'=>$validator->errors()->first()], $this->validationStatus);            
             }
 
             $userDetail = User::where('email', $request->email)->first();
