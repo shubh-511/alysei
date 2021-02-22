@@ -11,6 +11,7 @@ use Modules\User\Entities\FeaturedListing;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Validator;
+use App\Image;
 use DB;
 use Cache;
 use App\Events\Welcome;
@@ -60,7 +61,7 @@ class UserController extends CoreController
                 }
                 if($loggedInUser->role_id == 3 || $loggedInUser->role_id == 6) //producers & importers
                 {
-                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '1')->orderBy('id','DESC')->get(); //products
+                    $featuredListing = FeaturedListing::with('image')->where('user_id', $loggedInUser->user_id)->where('listing_type', '1')->orderBy('id','DESC')->get(); //products
                     foreach ($featuredListing as $k => $value) 
                     {
                         $featuredListing[$k]->title
@@ -79,7 +80,7 @@ class UserController extends CoreController
                 }
                 elseif($loggedInUser->role_id == 9) //restaurant
                 {
-                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '2')->orderBy('id','DESC')->get(); //recipies
+                    $featuredListing = FeaturedListing::with('image')->where('user_id', $loggedInUser->user_id)->where('listing_type', '2')->orderBy('id','DESC')->get(); //recipies
                     foreach ($featuredListing as $k => $value) 
                     {
                         $featuredListing[$k]->title
@@ -98,7 +99,7 @@ class UserController extends CoreController
                 }
                 elseif($loggedInUser->role_id == 7) //voe
                 {
-                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '3')->orderBy('id','DESC')->get(); //blogs
+                    $featuredListing = FeaturedListing::with('image')->where('user_id', $loggedInUser->user_id)->where('listing_type', '3')->orderBy('id','DESC')->get(); //blogs
                     foreach ($featuredListing as $k => $value) 
                     {
                         $featuredListing[$k]->title
@@ -117,7 +118,7 @@ class UserController extends CoreController
                 }
                 elseif($loggedInUser->role_id == 8) //travel agencies
                 {
-                    $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->where('listing_type', '4')->orderBy('id','DESC')->get(); //blogs
+                    $featuredListing = FeaturedListing::with('image')->where('user_id', $loggedInUser->user_id)->where('listing_type', '4')->orderBy('id','DESC')->get(); //blogs
                     foreach ($featuredListing as $k => $value) 
                     {
                         $featuredListing[$k]->title
@@ -204,22 +205,13 @@ class UserController extends CoreController
                         $featList->title = $featuredListing['title'];
                         $featList->description = $featuredListing['description'];
                         $featList->anonymous = $featuredListing['anonymous'];
-
-                        $img = $this->uploadImage($request->file('img_id'));
-
-                        $target='public/images/listing';
-                        $header_logo=$request->file('img_id');
-                        if(!empty($header_logo))
-                        {
-                            $headerImageName=$header_logo->getClientOriginalName();
-                            $ext1=$header_logo->getClientOriginalExtension();
-                            $temp1=explode(".",$headerImageName);
-                            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
-                            $headerTarget='public/images/listing/'.$newHeaderLogo;
-                            $header_logo->move($target,$newHeaderLogo);
-                            $featList->img_id=$headerTarget;
-                        }
                         
+                        //saving image
+                        $img = new Image;
+                        $img->imgage = $this->uploadImage($request->file('img_id'));
+                        $img->save();
+
+                        $featList->img_id = $img->id;
                         $featList->save();
                     }
                 }

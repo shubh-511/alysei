@@ -10,4 +10,9 @@ class FeaturedListing extends Model
     {
         return $this->belongsTo(User::class, 'user_id','id');
     }
+
+    public function image()
+    {
+        return $this->belongsTo(Image::class, 'img_id','id');
+    }
 }
