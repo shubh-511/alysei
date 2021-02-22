@@ -111,7 +111,7 @@ class CountryController extends Controller
             $newArray =  [['id' => '','name' => 'Other','state_id' => '','status' => '1']];
             //return $newArray;
             $newData = array_push($newArray, $cityData);
-            return $newData;
+            //return $newData;
             if(count($cityData) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
