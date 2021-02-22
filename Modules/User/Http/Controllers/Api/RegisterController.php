@@ -128,8 +128,15 @@ class RegisterController extends CoreController
                     //$userData['name'] = $inputData['email'];
                     $userData['password'] = bcrypt($inputData['password']);
                     $userData['role_id'] = $input['role_id'];
-
-                    $userData['account_enabled'] = "incomplete";
+                    if($input['role_id'] == 10)
+                    {
+                        $userData['account_enabled'] = "incomplete";
+                    }
+                    else
+                    {
+                        $userData['account_enabled'] = "active";
+                    }
+                    
                     if($input['role_id'] == 10)
                     {
                         $userData['otp'] = $this->generateOTP();
