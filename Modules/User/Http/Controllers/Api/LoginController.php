@@ -19,7 +19,7 @@ class LoginController extends CoreController
     public $exceptionStatus = 409;
     public $unauthorisedStatus = 401;
     
-    public $userFieldsArray = ['user_id', 'name', 'email','first_name','last_name','middle_name','phone','postal_code','last_login_date','roles'];
+    public $userFieldsArray = ['user_id', 'name', 'email','first_name','last_name','middle_name','account_enabled','phone','postal_code','last_login_date','roles'];
     /** 
      * Login
      * 
@@ -58,8 +58,8 @@ class LoginController extends CoreController
                 {
                     $user = Auth::user(); 
                 
-                    if($user->account_enabled == 'active')
-                    {
+                    /*if($user->account_enabled == 'active')
+                    {*/
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
 
@@ -67,13 +67,13 @@ class LoginController extends CoreController
                                              'data' => $user->only($this->userFieldsArray),
                                              'token'=> $token
                                             ], $this->successStatus); 
-                    }else{
+                    /*}else{
 
                         $message = $this->translate('messages.'.$user->account_enabled,$user->account_enabled);
                         
                         return response()->json(['error'=> $message], 401);  
-                    }
-                    }
+                    }*/
+                }
             } 
             else{ 
 
