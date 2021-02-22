@@ -14,9 +14,11 @@ use Validator;
 use DB;
 use Cache;
 use App\Events\Welcome;
+use App\Http\Traits\UploadImageTrait;
 
 class UserController extends CoreController
 {
+    use UploadImageTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -203,20 +205,21 @@ class UserController extends CoreController
                         $featList->description = $featuredListing['description'];
                         $featList->anonymous = $featuredListing['anonymous'];
 
-                        $target='siteimages/user/';
-                        $header_logo=$request->file('image');
+                        $img = $this->uploadImage($request->file('img_id'));
+
+                        $target='public/images/listing';
+                        $header_logo=$request->file('img_id');
                         if(!empty($header_logo))
                         {
                             $headerImageName=$header_logo->getClientOriginalName();
                             $ext1=$header_logo->getClientOriginalExtension();
                             $temp1=explode(".",$headerImageName);
-                            $newHeaderLogo='user'.rand()."".round(microtime(true)).".".end($temp1);
-                            $headerTarget='siteimages/user/'.$newHeaderLogo;
+                            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
+                            $headerTarget='public/images/listing/'.$newHeaderLogo;
                             $header_logo->move($target,$newHeaderLogo);
-                            $user->user_image=$headerTarget;
+                            $featList->img_id=$headerTarget;
                         }
                         
-                        $featList->img_id = $featuredListing['img_id'];
                         $featList->save();
                     }
                 }

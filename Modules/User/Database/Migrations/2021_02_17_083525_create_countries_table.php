@@ -18,6 +18,7 @@ class CreateCountriesTable extends Migration
             $table->string('sortname');
             $table->string('name');
             $table->integer('phonecode');
+            $table->enum('status',[0,1])->default(1)->comment("1=Active,0=Inactive");
             $table->timestamps();
         });
     }
