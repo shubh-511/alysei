@@ -108,8 +108,10 @@ class CountryController extends Controller
             }
 
             $cityData = City::where('state_id', $request->state_id)->orderBy('name','ASC')->get();
-            $newArray =  [['type' => 'select','name' => 'role_id','title' => 'Select Role','options' => '']];
-            return $newArray;
+            $newArray =  [['id' => '','name' => 'Other','state_id' => '','status' => '1']];
+            //return $newArray;
+            $newData = array_push($newArray, $cityData);
+            return $newData;
             if(count($cityData) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
