@@ -15,8 +15,9 @@ class CreateHubsTable extends Migration
     {
         Schema::create('hubs', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('country_id');
             $table->string('title');
-            $table->string('img_id');
+            $table->text('description');
             $table->enum('status',[0,1])->comment("0=disabled,1=enabled");
             $table->timestamps();
         });

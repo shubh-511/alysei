@@ -19,7 +19,7 @@ Route::get('get/registration/fields/{role_id}', 'Api\RegisterController@getRegis
 Route::post('user/register', 'Api\RegisterController@register');
 Route::post('user/login', 'Api\LoginController@login');
 Route::post('forgot/password', 'Api\ResetPasswordController@forgotPassword');
-Route::post('verfiy/password/otp', 'Api\ResetPasswordController@verifyForgotPasswordOtp');
+Route::post('verfiy/password/otp', 'Api\ResetPasswordController@verifyForgotPasswordOtp'); // not required
 Route::post('reset/password', 'Api\ResetPasswordController@resetPassword');
 Route::post('verify/otp', 'Api\RegisterController@verifyOtp');
 Route::post('resend/otp', 'Api\RegisterController@resendOtp');

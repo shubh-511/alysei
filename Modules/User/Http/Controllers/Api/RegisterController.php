@@ -263,9 +263,11 @@ class RegisterController extends CoreController
                 $userDetail->save();
 
 
+                $message = $this->translate("messages.OTP Verified","OTP Verified");
+
                 return response()->json(['success' => $this->successStatus,
-                                         'message' => 'OTP verified!'
-                                        ], $this->successStatus); 
+                                         'message' => $message,
+                                        ], $this->successStatus);  
             }
             else
             {
