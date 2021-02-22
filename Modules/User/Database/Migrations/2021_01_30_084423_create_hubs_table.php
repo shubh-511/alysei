@@ -18,7 +18,7 @@ class CreateHubsTable extends Migration
             $table->integer('country_id');
             $table->string('title');
             $table->text('description');
-            $table->enum('status',[0,1])->comment("0=disabled,1=enabled");
+            $table->enum('status',[0,1])->default(1)->comment("0=disabled,1=enabled");
             $table->timestamps();
         });
     }
