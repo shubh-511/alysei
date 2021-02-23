@@ -141,8 +141,8 @@ class ResetPasswordController extends CoreController
                 $message = $this->translate("passwords.reset");
 
                 return response()->json(['success' => $this->successStatus,
-                                         'message' => $message,
-                                         'data' => $userDetail,
+                                         'message' => $message
+                                         //'data' => $userDetail,
                                         ], $this->successStatus); 
             }
             else
