@@ -304,7 +304,8 @@ class RegisterController extends CoreController
             $userDetail = User::where('email', $request->email)->first();
             if(!empty($userDetail))
             {
-                $userDetail->otp = $this->generateOTP();
+                //$userDetail->otp = $this->generateOTP();
+                $userDetail->otp = "123456";
                 $userDetail->save();
 
 
