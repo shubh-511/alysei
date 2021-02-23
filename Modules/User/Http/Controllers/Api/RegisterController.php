@@ -265,10 +265,17 @@ class RegisterController extends CoreController
 
 
                 $message = $this->translate("messages.OTP Verified","OTP Verified");
+                Auth::loginUsingId($userDetail->id);
+                Auth::user()->roles;
+                $token =  $userDetail->createToken('yss')->accessToken; 
 
                 return response()->json(['success' => $this->successStatus,
+                                     'data' => $userDetail->only($this->userFieldsArray),
+                                     'token'=> $token
+                                    ], $this->successStatus); 
+                /*return response()->json(['success' => $this->successStatus,
                                          'message' => $message,
-                                        ], $this->successStatus);  
+                                        ], $this->successStatus);  */
             }
             else
             {
