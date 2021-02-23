@@ -139,7 +139,8 @@ class RegisterController extends CoreController
                     
                     if($input['role_id'] == 10)
                     {
-                        $userData['otp'] = $this->generateOTP();
+                        //$userData['otp'] = $this->generateOTP();
+                        $userData['otp'] = "123456";
                     }
                     
                     if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
