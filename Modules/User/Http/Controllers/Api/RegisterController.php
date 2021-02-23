@@ -131,19 +131,15 @@ class RegisterController extends CoreController
                     if($input['role_id'] == 10)
                     {
                         $userData['account_enabled'] = "incomplete";
+                        //$userData['otp'] = $this->generateOTP();
+                        $userData['otp'] = "123456";
                     }
                     else
                     {
                         $userData['account_enabled'] = "active";
                     }
-                    
-                    if($input['role_id'] == 10)
-                    {
-                        //$userData['otp'] = $this->generateOTP();
-                        $userData['otp'] = "123456";
-                    }
-                    
-                    if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
+                   
+                     if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
                       ){
                         $userData['first_name'] = $inputData['first_name'];
                         $userData['last_name'] = $inputData['last_name'];
