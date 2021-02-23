@@ -32,13 +32,6 @@ class SeedUserFiledMapsTableSeeder extends Seeder
                         array("user_field_id"=>"21",'option_id'=>'628','role_id'=>'9'),
                         array("user_field_id"=>"22",'option_id'=>'629','role_id'=>'9'),
                         array("user_field_id"=>"8",'option_id'=>'601','role_id'=>'10'),
-
-                        array("user_field_id"=>"32",'option_id'=>'48357','role_id'=>'10'),
-                        array("user_field_id"=>"32",'option_id'=>'48357','role_id'=>'3'),
-                        array("user_field_id"=>"32",'option_id'=>'48357','role_id'=>'6'),
-                        array("user_field_id"=>"32",'option_id'=>'48357','role_id'=>'7'),
-                        array("user_field_id"=>"32",'option_id'=>'48357','role_id'=>'8'),
-                        array("user_field_id"=>"32",'option_id'=>'48357','role_id'=>'9'),
                     );
 
         foreach ($data as $key => $value) {
