@@ -168,7 +168,7 @@ class RegisterController extends CoreController
                                 $data = [];
                                 if(!empty($key))
                                 {
-                                    if($key == 28)
+                                    /*if($key == 28)
                                     {
                                         $stateId = $value;
                                     }
@@ -180,11 +180,11 @@ class RegisterController extends CoreController
                                         $data['value'] = $createdCityId;
                                     }
                                     else
-                                    {
+                                    {*/
                                         $data['user_field_id'] = $key;
                                         $data['user_id'] = $user->user_id;
                                         $data['value'] = $value;
-                                    }
+                                    //}
                                     
                                 }
                                 
