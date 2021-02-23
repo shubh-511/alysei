@@ -107,7 +107,7 @@ class CountryController extends Controller
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $cityData = City::where('state_id', $request->state_id)->orWhere('state_id',0)->orderBy('id','DESC')->get();
+            $cityData = City::where('state_id', $request->state_id)->orWhere('state_id',0)->orderBy('name','ASC')->get();
             $newArray =  [['id' => '','name' => 'Other','state_id' => '','status' => '1']];
             //return $newArray;
             $newData = array_push($newArray, $cityData);
