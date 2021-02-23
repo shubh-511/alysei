@@ -138,8 +138,8 @@ class RegisterController extends CoreController
                     {
                         $userData['account_enabled'] = "active";
                     }
-                   
-                     if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
+                    
+                    if(array_key_exists('first_name',$inputData) && array_key_exists('last_name',$inputData)
                       ){
                         $userData['first_name'] = $inputData['first_name'];
                         $userData['last_name'] = $inputData['last_name'];
@@ -252,7 +252,7 @@ class RegisterController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first()], $this->validationStatus);            
             }
 
-            $userDetail = User::where('email', $request->email)->where('otp', $request->otp)->first();
+            $userDetail = User::with('roles')->where('email', $request->email)->where('otp', $request->otp)->first();
             if(!empty($userDetail))
             {
                 $userDetail->otp = null;
@@ -262,7 +262,7 @@ class RegisterController extends CoreController
 
                 $message = $this->translate("messages.OTP Verified","OTP Verified");
                 Auth::loginUsingId($userDetail->id);
-                Auth::user()->roles;
+                //Auth::user()->roles;
                 $token =  $userDetail->createToken('yss')->accessToken; 
 
                 return response()->json(['success' => $this->successStatus,
