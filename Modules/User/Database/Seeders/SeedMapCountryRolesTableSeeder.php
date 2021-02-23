@@ -19,7 +19,7 @@ class SeedMapCountryRolesTableSeeder extends Seeder
 
         $data = array(
                         //USA
-                        array("country_id" => "231", "role_id" => "3"),
+                        //array("country_id" => "231", "role_id" => "3"),
                         array("country_id" => "231", "role_id" => "6"),
                         array("country_id" => "231", "role_id" => "7"),
                         array("country_id" => "231", "role_id" => "8"),
