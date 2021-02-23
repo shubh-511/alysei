@@ -16,6 +16,7 @@ class CreateHubsTable extends Migration
         Schema::create('hubs', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('country_id');
+            $table->integer('state_id');
             $table->string('title');
             $table->text('description');
             $table->enum('status',[0,1])->default(1)->comment("0=disabled,1=enabled");
