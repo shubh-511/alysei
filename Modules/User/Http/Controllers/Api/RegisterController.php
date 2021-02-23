@@ -8,6 +8,7 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\Role;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use Modules\User\Entities\City;
 use Validator;
 use DB;
 use Cache;
@@ -91,7 +92,7 @@ class RegisterController extends CoreController
     public function register(Request $request){
 
         try{
-
+            $stateId='';
             $input = $request->all();
             $rules = [];
             $rules['role_id'] = 'required';
@@ -167,9 +168,24 @@ class RegisterController extends CoreController
                                 $data = [];
                                 if(!empty($key))
                                 {
-                                    $data['user_field_id'] = $key;
-                                    $data['user_id'] = $user->user_id;
-                                    $data['value'] = $value;
+                                    if($key == 28)
+                                    {
+                                        $stateId = $value;
+                                    }
+                                    if($key == 32)
+                                    {
+                                        $createdCityId = $this->createNewCityForApproval($key, $value, $stateId);
+                                        $data['user_field_id'] = $key;
+                                        $data['user_id'] = $user->user_id;
+                                        $data['value'] = $createdCityId;
+                                    }
+                                    else
+                                    {
+                                        $data['user_field_id'] = $key;
+                                        $data['user_id'] = $user->user_id;
+                                        $data['value'] = $value;
+                                    }
+                                    
                                 }
                                 
                             }else{
@@ -576,5 +592,18 @@ class RegisterController extends CoreController
     public function generateOTP(){
         $otp = mt_rand(100000,999999);
         return $otp;
+    }
+
+    /*
+     * Create new city for admin approval
+     */ 
+    public function createNewCityForApproval($key, $value, $stateId)
+    {
+        $newCity = new City;
+        $newCity->name = $value;
+        $newCity->state_id = $stateId;
+        $newCity->save();
+
+        return $newCity->id;
     }
 }

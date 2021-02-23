@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MapHubCity extends Model
 {
+    protected $table = 'map_hub_city';
     public function state()
     {
         return $this->belongsTo(State::class, 'state_id','id');

@@ -52,7 +52,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"City",'type'=>'select','name'=>'city','required'=>'no','conditional'=>'no'),
                         array("title"=>"VAT No.",'type'=>'text','name'=>'vat_number','required'=>'yes','conditional'=>'no','hint'=>'Enter VAT no.'),
                         array("title"=>"Address",'type'=>'text','name'=>'address','required'=>'yes','conditional'=>'no'),
-                        array("title"=>"Enter Your City",'type'=>'text','name'=>'your_city','required'=>'no','conditional'=>'no')
+                        array("title"=>"Enter Your City",'type'=>'text','name'=>'enter_your_city','required'=>'no','conditional'=>'no')
 
                     );
 

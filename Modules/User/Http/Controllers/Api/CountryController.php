@@ -64,26 +64,44 @@ class CountryController extends Controller
     {
         try
         {
-            $validator = Validator::make($request->all(), [ 
-                'country_id' => 'required', 
-            ]);
-
-            if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-            }
-
-            $stateData = State::where('country_id', $request->country_id)->orderBy('name','ASC')->get();
-            
-            if(count($stateData) > 0)
+            if(empty($request->countries))
             {
-                return response()->json(['success' => $this->successStatus,
-                                         'data' => $stateData,
-                                        ], $this->successStatus);
+                $validator = Validator::make($request->all(), [ 
+                'country_id' => 'required', 
+                ]);
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+
+                $stateData = State::where('country_id', $request->country_id)->orderBy('name','ASC')->get();
+                
+                if(count($stateData) > 0)
+                {
+                    return response()->json(['success' => $this->successStatus,
+                                             'data' => $stateData,
+                                            ], $this->successStatus);
+                }
+                else
+                {
+                    return response()->json(['success'=>false,'errors' =>['exception' => 'No states found']], $this->exceptionStatus);
+                }
             }
             else
             {
-                return response()->json(['success'=>false,'errors' =>['exception' => 'No states found']], $this->exceptionStatus);
+                $jsonArray = [];
+                foreach($request->countries as $country)
+                {
+                    $countryData = Country::where('id', $country)->first();
+                    $stateData = State::where('country_id', $country)->get();
+                    $jsonArray[$countryData->name] = $stateData;
+                }
+                return response()->json(['success' => $this->successStatus,
+                                            'data' => $jsonArray,
+                                        ], $this->successStatus);
+                
             }
+            
         }
         catch(\Exception $e)
         {

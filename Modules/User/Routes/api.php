@@ -24,7 +24,7 @@ Route::post('reset/password', 'Api\ResetPasswordController@resetPassword');
 Route::post('verify/otp', 'Api\RegisterController@verifyOtp');
 Route::post('resend/otp', 'Api\RegisterController@resendOtp');
 
-Route::get('get/hubs/{role_id}', 'Api\HubController@getHubs');
+Route::get('get/hubs', 'Api\HubController@getHubs');
 Route::get('get/states', 'Api\CountryController@getStates');
 Route::get('get/cities', 'Api\CountryController@getCities');
 Route::get('get/countries', 'Api\CountryController@getCountries');

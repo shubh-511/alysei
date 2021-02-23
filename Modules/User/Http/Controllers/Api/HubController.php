@@ -5,6 +5,9 @@ namespace Modules\User\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\User\Entities\Hub; 
+use Modules\User\Entities\State;
+use Modules\User\Entities\Country;
+use Modules\User\Entities\MapHubCity;
 use Illuminate\Routing\Controller;
 
 class HubController extends Controller
@@ -15,7 +18,7 @@ class HubController extends Controller
     /* 
         Get All Hubs
     */
-    public function getHubs($role){
+    /*public function getHubs($role){
 
         try
         {
@@ -41,65 +44,49 @@ class HubController extends Controller
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()]); 
         }
 
+    }*/
+
+    /***
+    get Hubs
+    ***/
+    public function getHubs(Request $request)
+    {
+        try
+        {
+            
+            //return response()->json(['success'=>false,'errors' =>['exception' => 'No states found']], $this->exceptionStatus);
+                
+            $jsonArray = [];
+            foreach($request->countries as $country => $states)
+            {
+                $hubs = Hub::where('country_id', $country)->first();
+                if(!empty($hubs))
+                {
+                    
+                    $hubData = MapHubCity::where('hub_id', $hubs->id)->whereIn('state_id', $states)->get();
+
+                    if(count($hubData) > 0)
+                    {
+                        $countryData = Country::where('id', $country)->first();
+                        $stateData = State::where('id', $states)->first();
+                        $jsonArray[$countryData->name.' / '.$stateData->name][] = $hubData;
+                    }
+                        
+                }
+            }
+
+        
+            return response()->json(['success' => $this->successStatus,
+                                        'data' => $jsonArray,
+                                    ], $this->successStatus);
+                
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Response
-     */
-    public function create()
-    {
-        return view('user::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function show($id)
-    {
-        return view('user::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Response
-     */
-    public function edit($id)
-    {
-        return view('user::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
+   
 }
