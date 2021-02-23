@@ -194,7 +194,7 @@ class RegisterController extends CoreController
                         {
                             //Send verify eMail OTP
                     
-                            event(new VerifyEmail($user->user_id));
+                            //event(new VerifyEmail($user->user_id));
                             return response()->json(['success' => $this->successStatus,
                                         'message' => 'OTP has been sent on your email ID',
                                         'data' => $user->only($this->userFieldsArray)                  
