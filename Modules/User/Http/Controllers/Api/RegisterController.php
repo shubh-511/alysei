@@ -319,7 +319,7 @@ class RegisterController extends CoreController
             else
             {
                 return response()->json(['success'=>$this->validationStatus,
-                                        'message' => 'Invalid email ID'
+                                        'errors' => 'Invalid email ID'
                                     ], $this->validationStatus); 
             }
 
