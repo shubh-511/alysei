@@ -57,9 +57,8 @@ class UserController extends CoreController
 
                 foreach($userDetails as $key => $user){
 
-                    $userFieldInfo[] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
+                    $userFieldInfo[$key] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
                 }
-
                 if($loggedInUser->role_id == 3 || $loggedInUser->role_id == 6) //producers & importers
                 {
                     $featuredListing = FeaturedListing::with('image')->where('user_id', $loggedInUser->user_id)->where('listing_type', '1')->orderBy('id','DESC')->get(); //products
@@ -306,7 +305,7 @@ class UserController extends CoreController
 
     public function getRoleFeaturedType(){
         
-
+        
     }
 
 }
