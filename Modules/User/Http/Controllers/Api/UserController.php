@@ -139,7 +139,7 @@ class UserController extends CoreController
                 $userFieldInfo['featured_listing'] = $featuredListing;
                     
                 return response()->json(['success' => $this->successStatus,
-                                 'data' => $userFieldInfo
+                                 'data' => $userDetails
                                 ], $this->successStatus);
 
         }catch(\Exception $e){
@@ -301,11 +301,6 @@ class UserController extends CoreController
 
         return $rules;
 
-    }
-
-    public function getRoleFeaturedType(){
-        
-        
     }
 
 }
