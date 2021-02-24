@@ -31,7 +31,7 @@ Route::get('get/countries', 'Api\CountryController@getCountries');
 
 Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('userinfo', 'Api\UserController@userinfo');
-	Route::get('user/settings', 'Api\UserController@userSettings');
+	Route::get('user/settings', 'Api\FeaturedListingsController@userSettings');
 	Route::post('update/user/settings', 'Api\UserController@updateUserSettings');
 	Route::post('change/password', 'Api\ResetPasswordController@changePassword');
 	Route::post('logout', 'Api\LoginController@logout');

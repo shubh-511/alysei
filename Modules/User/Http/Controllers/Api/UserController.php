@@ -54,6 +54,7 @@ class UserController extends CoreController
                 $userDetails = $loggedInUser->only(['name', 'email','display_name','locale']);
 
                 $userFieldInfo = [];
+                $featuredListing = [];
 
                 foreach($userDetails as $key => $user){
 

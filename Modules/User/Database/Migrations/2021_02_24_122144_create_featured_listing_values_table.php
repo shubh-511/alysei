@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFeaturedListingsTable extends Migration
+class CreateFeaturedListingValuesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class CreateFeaturedListingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('featured_listings', function (Blueprint $table) {
-            $table->bigIncrements('featured_listing_id');
+        Schema::create('featured_listing_values', function (Blueprint $table) {
+            $table->increments('featured_listing_value_id');
             $table->bigInteger('user_id');
-            $table->string('title')->nullable();
-            $table->longText('description')->nullable();
-            $table->string('image_id')->nullable();
-            $table->text('anonymous')->nullable();
+            $table->integer('featured_listing_field_id');
+            $table->string('value');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ class CreateFeaturedListingsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('featured_listings');
+        Schema::dropIfExists('featured_listing_values');
     }
 }
