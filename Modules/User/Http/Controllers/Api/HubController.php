@@ -55,20 +55,23 @@ class HubController extends Controller
         {
             
             //return response()->json(['success'=>false,'errors' =>['exception' => 'No states found']], $this->exceptionStatus);
-                
+                return $request->countries;
             $jsonArray = [];
-            foreach($request->countries as $country => $states)
+            foreach($request->countries as $country => $state)
             {
-                $hubs = Hub::where('country_id', $country)->first();
+                $hubs = Hub::where('country_id', $country)->where('state_id', $state)->first();
                 if(!empty($hubs))
                 {
+                    foreach ($$country['city'] as $value) {
+                        
+                    }
                     
-                    $hubData = MapHubCity::where('hub_id', $hubs->id)->whereIn('state_id', $states)->get();
+                    $hubData = MapHubCity::where('hub_id', $hubs->id)->whereIn('state_id', $state)->get();
 
                     if(count($hubData) > 0)
                     {
                         $countryData = Country::where('id', $country)->first();
-                        $stateData = State::where('id', $states)->first();
+                        $stateData = State::where('id', $state)->first();
                         $jsonArray[$countryData->name.' / '.$stateData->name][] = $hubData;
                     }
                         
