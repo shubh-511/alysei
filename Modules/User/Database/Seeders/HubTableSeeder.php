@@ -18,8 +18,8 @@ class HubTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("country_id" => "231", "title" => "US Hub"),
-                        array("country_id" => "107", "title" => "Italian Hub")
+                        array("country_id" => "231", "state_id" => "3931", "title" => "US Hub"),
+                        array("country_id" => "107", "state_id" => "1821", "title" => "Italian Hub")
                     );
 
         foreach ($data as $key => $value) {

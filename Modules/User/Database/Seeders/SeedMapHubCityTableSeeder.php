@@ -18,10 +18,10 @@ class SeedMapHubCityTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("hub_id" => "1", "state_id" => "3931", "city_id" => "43932"),
-                        array("hub_id" => "1", "state_id" => "3931", "city_id" => "43923"),
-                        array("hub_id" => "2", "state_id" => "1821", "city_id" => "22339"),
-                        array("hub_id" => "2", "state_id" => "1821", "city_id" => "22343")
+                    array("hub_id" => "1", "city_id" => "43932"),
+                    array("hub_id" => "1", "city_id" => "43923"),
+                    array("hub_id" => "2", "city_id" => "22339"),
+                    array("hub_id" => "2", "city_id" => "22343")
                     );
 
         foreach ($data as $key => $value) {
