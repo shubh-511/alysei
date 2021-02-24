@@ -136,7 +136,7 @@ class UserController extends CoreController
                     }
                 }
                 
-                $userFieldInfo['featured_listing'] = $featuredListing;
+                $userDetails['data']['featured_listing'] = $featuredListing;
                     
                 return response()->json(['success' => $this->successStatus,
                                  'data' => [$userDetails]
