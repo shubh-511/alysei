@@ -42,10 +42,10 @@ class FeaturedListingsController extends CoreController
 
                 $userFieldInfo = [];
 
-                foreach($userDetails as $key => $user){
+                // foreach($userDetails as $key => $user){
 
-                    $userFieldInfo[$key] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
-                }
+                //     $userFieldInfo[] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
+                // }
 
                 //Get Featured Listing Fields
 
@@ -69,7 +69,9 @@ class FeaturedListingsController extends CoreController
                     $fieldsData[$value->featured_listing_type_title][] = $value;
                 }
 
-                return response()->json(['featured_listing_type_title'=> $fieldsData]);
+                return response()->json(['success' => $this->successStatus,
+                                 "user_settings"=>$userDetails,'featured_listing_type_title'=> $fieldsData
+                                ], $this->successStatus);
                 //END
 
                 return response()->json(['success' => $this->successStatus,
