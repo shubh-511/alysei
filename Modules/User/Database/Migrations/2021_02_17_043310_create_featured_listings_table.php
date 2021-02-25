@@ -16,7 +16,8 @@ class CreateFeaturedListingsTable extends Migration
         Schema::create('featured_listings', function (Blueprint $table) {
             $table->bigIncrements('featured_listing_id');
             $table->bigInteger('user_id');
-            $table->string('title')->nullable();
+            $table->integer('featured_listing_type_id');
+            $table->string('title');
             $table->longText('description')->nullable();
             $table->string('image_id')->nullable();
             $table->text('anonymous')->nullable();

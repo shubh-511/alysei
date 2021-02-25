@@ -42,15 +42,21 @@ class FeaturedListingsController extends CoreController
 
                 $userFieldInfo = [];
 
-                // foreach($userDetails as $key => $user){
-
-                //     $userFieldInfo[] = ["title" => $this->translate("messages.".$key,$key),"value"=>$user];
-                // }
-
+                $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+                
+                foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+                    //dd($this->user->user_id);
+                    $featuredListing[$fieldsTypesValue->title] = FeaturedListing::with('image')
+                                        ->where('user_id', $this->user->user_id)
+                                        ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                        ->orderBy('featured_listing_id','DESC')->get(); 
+                    
+                }
+                
                 //Get Featured Listing Fields
 
                 //Get Featured Type
-                $featuredTypes = $this->getFeaturedTypeByRoleId($this->user->role_id);
+                $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
                 $fieldsData = [];
                 foreach ($featuredTypes as $key => $value) {
 
@@ -69,13 +75,12 @@ class FeaturedListingsController extends CoreController
                     $fieldsData[$value->featured_listing_type_title][] = $value;
                 }
 
-                return response()->json(['success' => $this->successStatus,
-                                 "user_settings"=>$userDetails,'featured_listing_type_title'=> $fieldsData
-                                ], $this->successStatus);
                 //END
 
                 return response()->json(['success' => $this->successStatus,
-                                 'data' => [$userDetails]
+                                         'user_settings'=>$userDetails,
+                                         'featured_listing_fields'=> $fieldsData,
+                                         'products' => $featuredListing
                                 ], $this->successStatus);
 
             }catch(\Exception $e){
@@ -85,10 +90,87 @@ class FeaturedListingsController extends CoreController
     }
 
     /*
-     * Get Featured Type Using Role Id
+     *
+     */
+    public function postFeaturedListing(Request $request){
+        try{
+                $stateId='';
+                $input = $request->all();
+                $rules = [];
+                $rules['featured_listing_type_id'] = 'required';
+                $validator = Validator::make($input, $rules);
+
+                if ($validator->fails()) { 
+                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
+                }
+
+                $featuredListingFields = $this->getFeaturedListingFields($this->user->role_id,$input['featured_listing_type_id']);
+
+                if(count($featuredListingFields) == 0){
+                    return response()->json(['success'=>$this->validationStatus,'errors' =>'Sorry,There are no fields for current role_id'], $this->validationStatus);
+                }else{
+
+                    $rules = $this->makeValidationRules($featuredListingFields);
+                    $inputData = $this->segregateInputData($input,$featuredListingFields);
+                }
+
+                
+                if(!empty($rules) && !empty($inputData)){
+                
+                    $validator = Validator::make($inputData, $rules);
+
+                    if ($validator->fails()) { 
+
+                        return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
+                    }
+
+                    if(array_key_exists('title',$inputData) && 
+                       array_key_exists('description',$inputData) && 
+                       array_key_exists('featured_listing_type_id',$input)
+                    ){
+
+                        $featuredListingData = [];
+                        $featuredListingData['title'] = strip_tags($inputData['title']);
+                        $featuredListingData['description'] = strip_tags($inputData['description']);
+                        $featuredListingData['user_id'] = $this->user->user_id;
+                        $featuredListingData['featured_listing_type_id'] = $input['featured_listing_type_id'];
+
+                        $featuredListing = FeaturedListing::create($featuredListingData);
+                            
+                        unset($input["featured_listing_type_id"]);
+
+                        foreach ($input as $key => $value) {
+                            $data = [];
+                            $data['featured_listing_field_id'] = $key;
+                            $data['user_id'] = $this->user->user_id;
+                            $data['value'] = $value;
+
+                            DB::table('featured_listing_values')->insert($data);
+                        }
+
+                        $mes = 'Successfully added';
+                        $message = $this->translate('messages.'.$mes,$mes);
+
+                        return response()->json(['success' => $this->successStatus,
+                                        'message' => $message,
+                                    ], $this->successStatus);
+
+                    }
+                }else{
+                    return response()->json(['success'=>$this->validationStatus,'errors'=>"parameters are missing"], $this->validationStatus);
+                }
+
+                //dd($fields);
+
+        }catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }    
+    }
+    /*
+     * Get Featured Listing Fields Using Role Id
      * @params $roleId
      */
-    public function getFeaturedTypeByRoleId($roleId){
+    public function getFeaturedListingFieldsByRoleId($roleId){
         
         $featuredTypes = DB::table("featured_listing_types as flt")
             ->select("flt.title as featured_listing_type_title","flfrm.*","fltrm.*","flf.*")
@@ -129,5 +211,90 @@ class FeaturedListingsController extends CoreController
         
         return $fieldOptionData;    
         
+    }
+
+    /*
+     * Get Featured Type Using Role Id
+     * @params $roleId
+     */
+    public function getFeaturedListingTypes($roleId){
+        $featuredTypes = DB::table("featured_listing_types as flt")
+            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+
+            ->where("fltrm.role_id","=",$roleId)
+            ->get();
+
+        return $featuredTypes;
+    }
+
+    /*
+     * Get Fields 
+     * @params $roleId and $featuredListingTypeId
+     */
+    public function getFeaturedListingFields($roleId,$featuredListingTypeId){
+        $featuredListingFields = DB::table("featured_listing_field_role_maps as flfrm")
+            ->join("featured_listing_fields as flf", 'flf.featured_listing_field_id', '=', 'flfrm.featured_listing_field_id')
+
+            ->where("flfrm.role_id","=",$roleId)
+            ->where("flfrm.featured_listing_type_id","=",$featuredListingTypeId)
+            ->get();
+
+        return $featuredListingFields;
+    }
+
+    /*
+     * Make Validation Rules
+     * @Params $featuredListingFields
+     */
+
+    public function makeValidationRules($featuredListingFields){
+        $rules = [];
+        foreach ($featuredListingFields as $key => $field) {
+            
+            if($field->name == 'email' && $field->required == 'yes'){
+
+                $rules[$field->name] = 'required|email|unique:users|max:50';
+
+            }else if($field->name == 'password' && $field->required == 'yes'){
+
+                $rules[$field->name] = 'required|min:8';
+
+            }else if($field->name == 'first_name' && $field->required == 'yes'){
+
+                $rules[$field->name] = 'required|min:3';
+
+            }else if($field->name == 'last_name' && $field->required == 'yes'){
+
+                $rules[$field->name] = 'required|min:3';
+
+            }else if($field->type == 'file'){
+
+            }else {
+
+                if($field->required == 'yes'){
+                    $rules[$field->name] = 'required|max:100';
+                }
+            }
+        }
+
+        return $rules;
+
+    }
+
+    /*
+     * Segregate user input data
+     * @Params $input and @featuredListingFields
+     */
+    public function segregateInputData($input,$featuredListingFields){
+        $inputData = [];
+
+        foreach($featuredListingFields as $key => $field){
+            if(array_key_exists($field->featured_listing_field_id, $input)){
+                $inputData[$field->name] = $input[$field->featured_listing_field_id];
+            }
+        }
+
+        return $inputData;
+
     }
 }
