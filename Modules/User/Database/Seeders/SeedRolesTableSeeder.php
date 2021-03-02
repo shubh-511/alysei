@@ -23,7 +23,7 @@ class SeedRolesTableSeeder extends Seeder
                         array("type" => "member","name"=>"Italian F&B Producers",'slug'=>'Italian_F_and_B_Producers','display_name'=>'Producer'),
                         array("type" => "member","name"=>"Importer",'slug'=>'importer','display_name'=>'Importer'),
                         array("type" => "member","name"=>"Distributer",'slug'=>'distributer','display_name'=>'Distributer'),
-                        array("type" => "member","name"=>"Importer & Distributer",'slug'=>'Importer_and_Distributer','display_name'=>'Importer & Distributer'),
+                        array("type" => "member","name"=>"US Importer & Distributer",'slug'=>'Importer_and_Distributer','display_name'=>'Importer & Distributer'),
                         array("type" => "member","name"=>"Voice Of Expert",'slug'=>'voice_of_expert','display_name'=>'Voice Of Expert'),
                         array("type" => "member","name"=>"Travel Agencies",'slug'=>'travel_agencies','display_name'=>'Travel Agencies'),
                         array("type" => "member","name"=>"Restaurents",'slug'=>'restaurents','display_name'=>'Restaurents'),

@@ -372,7 +372,15 @@ class RegisterController extends CoreController
                             $data = [];
                             
                             //Set Locale
-
+                            if($role_id == 3 && $value->user_field_id == 28)
+                            {
+                                $roleFields[$key]->title = $this->translate('messages.'.'Region','Region');
+                            }
+                            if($role_id == 6 && $value->user_field_id == 28)
+                            {
+                                $roleFields[$key]->title = $this->translate('messages.'.'State','State');
+                            }
+                            
                             $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
 
                             //Check Fields has option
