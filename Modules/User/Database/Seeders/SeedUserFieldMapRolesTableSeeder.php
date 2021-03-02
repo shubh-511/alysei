@@ -129,13 +129,14 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
 
                         array("user_field_id"=>15,'role_id'=>9,'step'=>'step_2','order'=>8),
                         array("user_field_id"=>31,'role_id'=>9,'step'=>'step_2','order'=>9),
-                        array("user_field_id"=>9,'role_id'=>9,'step'=>'step_2','order'=>10),
-                        array("user_field_id"=>21,'role_id'=>9,'step'=>'step_2','order'=>11),
-                        array("user_field_id"=>22,'role_id'=>9,'step'=>'step_2','order'=>12),
-                        array("user_field_id"=>10,'role_id'=>9,'step'=>'step_2','order'=>13),
-                        array("user_field_id"=>25,'role_id'=>9,'step'=>'step_2','order'=>14), 
-                        array("user_field_id"=>33,'role_id'=>9,'step'=>'step_2','order'=>15),
-                        array("user_field_id"=>34,'role_id'=>9,'step'=>'step_2','order'=>16),                       
+                        array("user_field_id"=>33,'role_id'=>9,'step'=>'step_2','order'=>10),
+                        array("user_field_id"=>34,'role_id'=>9,'step'=>'step_2','order'=>11),
+                        array("user_field_id"=>9,'role_id'=>9,'step'=>'step_2','order'=>12),
+                        array("user_field_id"=>21,'role_id'=>9,'step'=>'step_2','order'=>13),
+                        array("user_field_id"=>22,'role_id'=>9,'step'=>'step_2','order'=>14),
+                        array("user_field_id"=>10,'role_id'=>9,'step'=>'step_2','order'=>15),
+                        array("user_field_id"=>25,'role_id'=>9,'step'=>'step_2','order'=>16), 
+                                               
                         //Travel Agencies
                         array("user_field_id"=>16,'role_id'=>8,'step'=>'step_1','order'=>1),
                         array("user_field_id"=>17,'role_id'=>8,'step'=>'step_1','order'=>2),
