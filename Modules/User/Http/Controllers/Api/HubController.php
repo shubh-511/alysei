@@ -5,6 +5,7 @@ namespace Modules\User\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\User\Entities\Hub; 
+use Modules\User\Entities\City;
 use Modules\User\Entities\State;
 use Modules\User\Entities\Country;
 use Modules\User\Entities\MapHubCity;
@@ -53,37 +54,40 @@ class HubController extends Controller
     {
         try
         {
-            
-            //return response()->json(['success'=>false,'errors' =>['exception' => 'No states found']], $this->exceptionStatus);
-                return $request->countries;
             $jsonArray = [];
-            foreach($request->countries as $country => $state)
+            $hubData = [];
+            foreach($request->params as $country => $states)
             {
-                $hubs = Hub::where('country_id', $country)->where('state_id', $state)->first();
-                if(!empty($hubs))
+                $countryData = Country::where('id', $country)->first();
+                
+                foreach($states as $state)
                 {
-                    foreach ($$country['city'] as $value) {
-                        
-                    }
+                    $stateData = State::where('id', $state)->first();
                     
-                    $hubData = MapHubCity::where('hub_id', $hubs->id)->whereIn('state_id', $state)->get();
-
+                    $hubs = Hub::where('country_id', $country)->where('state_id', $state)->first();
+                    if(!empty($hubs))
+                    {
+                        $hubData = MapHubCity::with('hub:id,title')->where('hub_id', $hubs->id)
+                        ->where('status',1)
+                        ->groupBy('hub_id')
+                        ->get();
+                      
+                    }
                     if(count($hubData) > 0)
                     {
-                        $countryData = Country::where('id', $country)->first();
-                        $stateData = State::where('id', $state)->first();
-                        $jsonArray[$countryData->name.' / '.$stateData->name][] = $hubData;
+                        $jsonArray[$countryData->name.' / '.$stateData->name] = $hubs;
+                    }         
+                    else
+                    {
+                        $jsonArray[$countryData->name.' / '.$stateData->name] = [];
                     }
-                        
                 }
             }
 
-        
             return response()->json(['success' => $this->successStatus,
                                         'data' => $jsonArray,
                                     ], $this->successStatus);
                 
-            
         }
         catch(\Exception $e)
         {

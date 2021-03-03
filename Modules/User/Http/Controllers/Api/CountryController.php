@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 use Modules\User\Entities\Country;
 use Modules\User\Entities\State;
 use Modules\User\Entities\City;
+use Modules\User\Entities\Hub;
+use Modules\User\Entities\MapHubCity;
 use Modules\User\Entities\MapCountryRole;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth; 
