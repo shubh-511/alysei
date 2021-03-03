@@ -5,7 +5,6 @@ namespace App\Http\Traits;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User; 
-use App\
 use Carbon\Carbon;
 use App\Attachment;
 use Illuminate\Support\Facades\Auth; 
