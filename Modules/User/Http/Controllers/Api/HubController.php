@@ -9,7 +9,9 @@ use Modules\User\Entities\City;
 use Modules\User\Entities\State;
 use Modules\User\Entities\Country;
 use Modules\User\Entities\MapHubCity;
+use Modules\User\Entities\UserSelectedHub;
 use Illuminate\Routing\Controller;
+use Validator;
 
 class HubController extends Controller
 {
@@ -55,7 +57,7 @@ class HubController extends Controller
         try
         {
             $jsonArray = [];
-            $hubData = [];
+            $allHubs = [];
             foreach($request->params as $country => $states)
             {
                 $countryData = Country::where('id', $country)->first();
@@ -64,23 +66,29 @@ class HubController extends Controller
                 {
                     $stateData = State::where('id', $state)->first();
                     
-                    $hubs = Hub::where('country_id', $country)->where('state_id', $state)->first();
-                    if(!empty($hubs))
+                    $hubs = Hub::where('country_id', $country)->where('state_id', $state)->get();
+                    if(count($hubs) > 0)
                     {
-                        $hubData = MapHubCity::with('hub:id,title')->where('hub_id', $hubs->id)
-                        ->where('status',1)
-                        ->groupBy('hub_id')
-                        ->get();
+                        foreach($hubs as $hub)
+                        {
+                            $hubData = MapHubCity::with('hub:id,title')->where('hub_id', $hub->id)
+                            ->where('status',1)
+                            //->groupBy('hub_id')
+                            ->first();
+
+                            if(!empty($hubData))
+                            {
+                                $jsonArray[$countryData->name.' / '.$stateData->name] = $hubs;
+                            }         
+                            else
+                            {
+                                $jsonArray[$countryData->name.' / '.$stateData->name] = [];
+                            }
+                        }
+                        
                       
                     }
-                    if(count($hubData) > 0)
-                    {
-                        $jsonArray[$countryData->name.' / '.$stateData->name] = $hubs;
-                    }         
-                    else
-                    {
-                        $jsonArray[$countryData->name.' / '.$stateData->name] = [];
-                    }
+                    
                 }
             }
 
@@ -93,6 +101,65 @@ class HubController extends Controller
         {
             return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /***
+    Post User Hubs
+    ***/
+    public function postUserHubs(Request $request)
+    {
+        try
+        {
+            $rules = $this->makeValidationRules($request->params);
+            $validator = Validator::make($request->params, $rules);
+
+            if ($validator->fails()) { 
+
+                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
+            }
+
+            foreach($request->params as $hub)
+            {
+                $userHub = new UserSelectedHub;
+                $userHub->user_id = $user;
+                //$userHub->hub_id = 
+            }
+
+            return response()->json(['success' => $this->successStatus,
+                                        'data' => $jsonArray,
+                                    ], $this->successStatus);
+                
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Make Validation Rules
+     * @Params $params
+     */
+
+    public function makeValidationRules($params){
+        $rules = [];
+        
+        foreach ($params as $key => $field) {
+            //return $key;
+            if($key == 'hubs'){
+
+                $rules[$key] = 'required';
+
+            }else if($key == 'cities'){
+
+                //$rules[$key] = 'required|max:190';
+
+            }
+        }
+
+        return $rules;
+
     }
 
    

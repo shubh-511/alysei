@@ -40,6 +40,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');
 	Route::post('post/featured/listing', 'Api\FeaturedListingsController@postFeaturedListing');
 
+	Route::post('post/hubs', 'Api\HubController@postUserHubs');
+
 
 });
 
