@@ -11,13 +11,14 @@ use Modules\User\Entities\FeaturedListing;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Validator;
-use App\Image;
+use App\Attachment;
 use DB;
 use Cache;
 use App\Http\Traits\UploadImageTrait;
 
 class FeaturedListingsController extends CoreController
 {
+    use UploadImageTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -78,7 +79,7 @@ class FeaturedListingsController extends CoreController
                 //END
                 $data = ['user_settings'=>$userDetails,'featured_listing_fields'=> $fieldsData,'products' => $featuredListing];
                 return response()->json(['success' => $this->successStatus,
-                                       'data' => $data                                 
+                                       'data' => $data                      
                                 
                                 ], $this->successStatus);
 
@@ -133,6 +134,7 @@ class FeaturedListingsController extends CoreController
                         $featuredListingData['description'] = strip_tags($inputData['description']);
                         $featuredListingData['user_id'] = $this->user->user_id;
                         $featuredListingData['featured_listing_type_id'] = $input['featured_listing_type_id'];
+                        $featuredListingData['image_id'] = $this->uploadImage($inputData['image_id']);
 
                         $featuredListing = FeaturedListing::create($featuredListingData);
                             

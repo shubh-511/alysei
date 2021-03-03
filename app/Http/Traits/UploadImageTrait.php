@@ -5,7 +5,9 @@ namespace App\Http\Traits;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User; 
+use App\
 use Carbon\Carbon;
+use App\Attachment;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -32,7 +34,13 @@ trait UploadImageTrait
         {
         	$headerTarget = '';
         }
-        return $headerTarget;
+
+        $attachment = new Attachment;
+        $attachment->attachment_url = $headerTarget;
+        $attachment->attachment_type = $ext1;
+        $attachment->save();
+
+        return $attachment->id;
     }
 
 

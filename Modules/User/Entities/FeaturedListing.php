@@ -3,7 +3,7 @@
 namespace Modules\User\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Image;
+use App\Attachment;
 class FeaturedListing extends Model
 {
 	protected $fillable = ["title","description","image_id","featured_listing_type_id","created_at","updated_at","user_id"];
@@ -15,6 +15,6 @@ class FeaturedListing extends Model
 
     public function image()
     {
-        return $this->belongsTo(Image::class, 'image_id','id');
+        return $this->belongsTo(Attachment::class, 'image_id','id');
     }
 }

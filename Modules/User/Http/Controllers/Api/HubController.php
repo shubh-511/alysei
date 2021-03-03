@@ -69,24 +69,11 @@ class HubController extends Controller
                     $hubs = Hub::where('country_id', $country)->where('state_id', $state)->get();
                     if(count($hubs) > 0)
                     {
-                        foreach($hubs as $hub)
-                        {
-                            $hubData = MapHubCity::with('hub:id,title')->where('hub_id', $hub->id)
-                            ->where('status',1)
-                            //->groupBy('hub_id')
-                            ->first();
-
-                            if(!empty($hubData))
-                            {
-                                $jsonArray[$countryData->name.' / '.$stateData->name] = $hubs;
-                            }         
-                            else
-                            {
-                                $jsonArray[$countryData->name.' / '.$stateData->name] = [];
-                            }
-                        }
-                        
-                      
+                        $jsonArray[$countryData->name.' / '.$stateData->name] = $hubs;
+                    }
+                    else
+                    {
+                        $jsonArray[$countryData->name.' / '.$stateData->name] = [];
                     }
                     
                 }
