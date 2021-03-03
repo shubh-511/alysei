@@ -76,7 +76,7 @@ class FeaturedListingsController extends CoreController
                 }
 
                 //END
-                $data = ['user_settings'=>$userDetails,'featured_listing_fields'=> $fieldsData,'products' => $featuredListing]
+                $data = ['user_settings'=>$userDetails,'featured_listing_fields'=> $fieldsData,'products' => $featuredListing];
                 return response()->json(['success' => $this->successStatus,
                                        'data' => $data                                 
                                 
