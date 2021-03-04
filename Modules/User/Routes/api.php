@@ -40,6 +40,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');
 	Route::post('post/featured/listing', 'Api\FeaturedListingsController@postFeaturedListing');
 
+	Route::get('get/hub/countries', 'Api\HubController@getHubCountries');
 	Route::get('get/hubs', 'Api\HubController@getHubs');
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');
 

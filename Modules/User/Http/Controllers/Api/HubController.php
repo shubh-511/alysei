@@ -11,6 +11,7 @@ use Modules\User\Entities\Country;
 use Modules\User\Entities\UserTempHub;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\MapHubCity;
+use Modules\User\Entities\MapHubCountryRole;
 use Modules\User\Entities\UserSelectedHub;
 use Illuminate\Routing\Controller;
 use Validator;
@@ -63,6 +64,42 @@ class HubController extends Controller
         }
 
     }*/
+
+    /***
+    get Countries
+    ***/
+    public function getHubCountries(Request $request)
+    {
+        try
+        {
+            $getAssignedCountries = MapHubCountryRole::where('role_id', $request->role_id)->get();
+            $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
+
+            if(count($getCountries) > 0)
+            {
+                $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+            }
+            else
+            {
+                $countryData = Country::where('status', '1')->orderBy('name','ASC')->get();
+            }
+            
+            if(count($countryData) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $countryData,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => 'No countries found']], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
 
     /***
     get Hubs

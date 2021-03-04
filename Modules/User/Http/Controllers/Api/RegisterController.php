@@ -442,11 +442,19 @@ class RegisterController extends CoreController
                     if($role_id == 6){
 
                         foreach ($importerRoles as $key => $role) {
-                            $importerRoles[$key]->name = $this->translate('messages.'.$importerRoles[$key]->name,$importerRoles[$key]->name);
+                            if($importerRoles[$key]->name == "US Importer & Distributor")
+                            {
+                                $importerRoles[$key]->name = $this->translate('messages.'.'Importer & Distributor','Importer & Distributor');
+                            }
+                            else
+                            {
+                                $importerRoles[$key]->name = $this->translate('messages.'.$importerRoles[$key]->name,$importerRoles[$key]->name);
+                            }
+                            
                             $importerRoles[$key]->image = env("APP_URL")."/images/roles/".$role->slug.".png";
                         }
 
-                        $newArray =  [['type' => 'select','name' => 'role_id','title' => 'Select Role','options' => $importerRoles]];
+                        $newArray =  [['type' => 'select','name' => 'role_id','title' => 'Signup as','Placeholder'=>'Signup as','options' => $importerRoles]];
 
                         array_splice( $steps['step_2'], -1, 0, $newArray );
                     }
