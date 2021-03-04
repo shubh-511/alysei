@@ -19,7 +19,7 @@ trait UploadImageTrait
     ***/
     public function uploadImage($img)
     {
-    	$target='public/images/listing';
+    	$target='images/listing';
     	if(!empty($img))
         {
             $headerImageName=$img->getClientOriginalName();

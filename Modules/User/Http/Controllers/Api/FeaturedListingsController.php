@@ -144,7 +144,8 @@ class FeaturedListingsController extends CoreController
                             $data = [];
                             if($key == 1)
                             {
-                                $value = $this->uploadImage($key);
+                                $value = $this->uploadImage($value);
+                                FeaturedListing::where('featured_listing_id', $featuredListing->id)->update(['image_id' => $value]);
                             }
                             $data['featured_listing_field_id'] = $key;
                             $data['user_id'] = $this->user->user_id;
