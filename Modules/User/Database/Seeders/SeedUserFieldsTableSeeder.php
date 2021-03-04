@@ -51,7 +51,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"State/Region","placeholder"=>"Select",'type'=>'select','name'=>'state','required'=>'yes','conditional'=>'no','api_call'=>'true'),
                         array("title"=>"City","placeholder"=>"Select",'type'=>'select','name'=>'city','required'=>'no','conditional'=>'no'),
                         array("title"=>"VAT No.","placeholder"=>"Enter VAT no.",'type'=>'text','name'=>'vat_number','required'=>'yes','conditional'=>'no','hint'=>'Enter VAT no.'),
-                        array("title"=>"Address","placeholder"=>"Enter address",'type'=>'map','name'=>'address','required'=>'yes','conditional'=>'no'),
+                        array("title"=>"Restaurant Address","placeholder"=>"Enter address",'type'=>'map','name'=>'address','required'=>'yes','conditional'=>'no'),
                         array("title"=>"Enter Your City","placeholder"=>"Enter city",'type'=>'text','name'=>'enter_your_city','required'=>'no','conditional'=>'no'),
                         array("title"=>"Lattitude",'type'=>'hidden','name'=>'lattitude','required'=>'yes','conditional'=>'no'),
                         array("title"=>"Longitude",'type'=>'hidden','name'=>'longitude','required'=>'yes','conditional'=>'no')
