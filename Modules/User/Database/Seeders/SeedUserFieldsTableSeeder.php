@@ -34,7 +34,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Speciality Trips","placeholder"=>"Speciality trips",'type'=>'multiselect','name'=>'speciality','required'=>'yes','multiple_option'=>'true','hint'=>'Select your speciality trips'),
                         array("title"=>"Zip/Postal Code","placeholder"=>"Zip/Postal",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
                         array("title"=>"Email","placeholder"=>"Your email",'type'=>'email','name'=>'email','required'=>'yes'),
-                        array("title"=>"Password","placeholder"=>"Password",'type'=>'password','name'=>'password','required'=>'yes','hint'=>'Password must be at least 8 characters and contain at least one numeric digit and a special character.'),
+                        array("title"=>"Password","placeholder"=>"Enter password",'type'=>'password','name'=>'password','required'=>'yes','hint'=>'Password must be at least 8 characters and contain at least one numeric digit and a special character.'),
                         array("title"=>"First Name","placeholder"=>"Enter first name",'type'=>'text','name'=>'first_name','required'=>'yes'),
                         array("title"=>"Last Name","placeholder"=>"Enter last name",'type'=>'text','name'=>'last_name','required'=>'yes'),
                         array("title"=>"Country","placeholder"=>"Select",'type'=>'select','name'=>'country','required'=>'yes','multiple_option' => 'true'),
