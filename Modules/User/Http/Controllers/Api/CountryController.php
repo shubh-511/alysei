@@ -35,11 +35,11 @@ class CountryController extends Controller
 
             if(count($getCountries) > 0)
             {
-                $countryData = Country::whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
             }
             else
             {
-                $countryData = Country::orderBy('name','ASC')->get();
+                $countryData = Country::where('status', '1')->orderBy('name','ASC')->get();
             }
             
             if(count($countryData) > 0)
@@ -76,7 +76,7 @@ class CountryController extends Controller
                     return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                $stateData = State::where('country_id', $request->country_id)->orderBy('name','ASC')->get();
+                $stateData = State::where('status', '1')->where('country_id', $request->country_id)->orderBy('name','ASC')->get();
                 
                 if(count($stateData) > 0)
                 {
@@ -95,7 +95,7 @@ class CountryController extends Controller
                 foreach($request->countries as $country)
                 {
                     $countryData = Country::where('id', $country)->first();
-                    $stateData = State::where('country_id', $country)->get();
+                    $stateData = State::where('status', '1')->where('country_id', $country)->get();
                     $jsonArray[$countryData->name] = $stateData;
                 }
                 return response()->json(['success' => $this->successStatus,
@@ -127,7 +127,7 @@ class CountryController extends Controller
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $cityData = City::where('state_id', $request->state_id)->orderBy('name','ASC')->get()->toArray();
+            $cityData = City::where('status', '1')->where('state_id', $request->state_id)->orderBy('name','ASC')->get()->toArray();
             $newArray =  [['id' => '','name' => 'Other','state_id' => '','status' => '1']];
             
             array_splice( $cityData, 0, 0, $newArray );
