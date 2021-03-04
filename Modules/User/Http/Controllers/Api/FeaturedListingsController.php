@@ -134,7 +134,7 @@ class FeaturedListingsController extends CoreController
                         $featuredListingData['description'] = strip_tags($inputData['description']);
                         $featuredListingData['user_id'] = $this->user->user_id;
                         $featuredListingData['featured_listing_type_id'] = $input['featured_listing_type_id'];
-                        $featuredListingData['image_id'] = $this->uploadImage($inputData['image_id']);
+                        //$featuredListingData['image_id'] = $this->uploadImage($inputData['image_id']);
 
                         $featuredListing = FeaturedListing::create($featuredListingData);
                             
