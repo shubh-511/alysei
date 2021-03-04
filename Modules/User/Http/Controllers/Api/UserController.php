@@ -179,44 +179,32 @@ class UserController extends CoreController
     public function updateUserSettings(Request $request){
         try{
                 $loggedInUser = $this->user;
-                $requestFields = $request->params;
 
-                $rules = $this->validateData($requestFields);
-                
-                $validator = Validator::make($requestFields, $rules);
+                $validator = Validator::make($request->all(), [ 
+                    'name' => 'required|unique:users,name,'.$loggedInUser->user_id,
+                    'display_name' => 'required|max:190',
+                    'locale' => 'required',
+                    'website' => 'required|max:190',
+                    //'avatar_id' => 'required',
+                ]);
 
-
+            
                 if ($validator->fails()) { 
-                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
                 
                 $user = User::where('user_id','=',$this->user->user_id)->first();
-                $user->name = $requestFields['name'];
-                $user->display_name = $requestFields['display_name'];
-                $user->locale = $requestFields['locale'];
+                $user->website = $request->website;
+                $user->name = $request->name;
+                $user->display_name = $request->display_name;
+                $user->locale = $request->locale;
+                if(!empty($request->file('avatar_id')))
+                {
+                    $user->avatar_id = $this->uploadImage($request->file('avatar_id'));
+                }
                 $user->save();
 
-                if(count($requestFields['featured_listings']) > 0)
-                {
-                    foreach($requestFields['featured_listings'] as $featuredListing)
-                    {
-                        $featList = new FeaturedListing;
-                        $featList->user_id = $loggedInUser->user_id;
-                        $featList->listing_type = $featuredListing['listing_type'];
-                        $featList->title = $featuredListing['title'];
-                        $featList->description = $featuredListing['description'];
-                        $featList->anonymous = $featuredListing['anonymous'];
-                        
-                        //saving image
-                        $img = new Image;
-                        $img->imgage = $this->uploadImage($request->file('img_id'));
-                        $img->save();
-
-                        $featList->img_id = $img->id;
-                        $featList->save();
-                    }
-                }
-
+                
                 return response()->json(['success' => $this->successStatus,
                                  'data' => $user,
                                 ], $this->successStatus);
