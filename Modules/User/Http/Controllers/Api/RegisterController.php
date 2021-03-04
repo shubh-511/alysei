@@ -442,7 +442,7 @@ class RegisterController extends CoreController
                     if($role_id == 6){
 
                         foreach ($importerRoles as $key => $role) {
-                            if($importerRoles[$key]->name == "US Importer & Distributor")
+                            if($importerRoles[$key]->name == "US Importers & Distributers")
                             {
                                 $importerRoles[$key]->name = $this->translate('messages.'.'Importer & Distributor','Importer & Distributor');
                             }
