@@ -72,7 +72,8 @@ class HubController extends Controller
     {
         try
         {
-            $getAssignedCountries = MapHubCountryRole::where('role_id', $request->role_id)->get();
+            $user = $this->user;
+            $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->get();
             $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
 
             if(count($getCountries) > 0)
