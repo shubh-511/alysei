@@ -8,6 +8,8 @@ use Modules\User\Entities\Hub;
 use Modules\User\Entities\City;
 use Modules\User\Entities\State;
 use Modules\User\Entities\Country;
+use Modules\User\Entities\UserTempHub;
+use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\MapHubCity;
 use Modules\User\Entities\UserSelectedHub;
 use Illuminate\Routing\Controller;
@@ -18,6 +20,19 @@ class HubController extends Controller
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
+
+    public $user = '';
+
+    public function __construct(){
+
+        $this->middleware(function ($request, $next) {
+
+            $this->user = Auth::user();
+            return $next($request);
+        });
+    }
+
+
     /* 
         Get All Hubs
     */
@@ -56,8 +71,8 @@ class HubController extends Controller
     {
         try
         {
+            $user = $this->user;
             $jsonArray = [];
-            $allHubs = [];
             foreach($request->params as $country => $states)
             {
                 $countryData = Country::where('id', $country)->first();
@@ -97,23 +112,33 @@ class HubController extends Controller
     {
         try
         {
-            $rules = $this->makeValidationRules($request->params);
-            $validator = Validator::make($request->params, $rules);
+            $user = $this->user;
 
-            if ($validator->fails()) { 
-
-                return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
-            }
-
-            foreach($request->params as $hub)
+            if(!empty($request->params['selectedhubs']))
             {
-                $userHub = new UserSelectedHub;
-                $userHub->user_id = $user;
-                //$userHub->hub_id = 
+                foreach($request->params['selectedhubs'] as $hub)
+                {
+                    $userHub = new UserSelectedHub;
+                    $userHub->user_id = $user->user_id;
+                    $userHub->hub_id = $hub;
+                    $userHub->save();
+                }
             }
-
+            if(!empty($request->params['selectedcity']))
+            {
+                foreach($request->params['selectedcity'] as $city)
+                {
+                    $userHub = new UserTempHub;
+                    $userHub->user_id = $user->user_id;
+                    $userHub->country_id = $city['country_id'];
+                    $userHub->state_id = $city['state_id'];
+                    $userHub->city_id = $city['city_id'];
+                    $userHub->save();
+                }
+            }
+            
             return response()->json(['success' => $this->successStatus,
-                                        'data' => $jsonArray,
+                                    'message' => 'Successfully added',
                                     ], $this->successStatus);
                 
         }
