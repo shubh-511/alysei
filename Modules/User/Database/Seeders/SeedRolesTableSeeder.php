@@ -24,7 +24,7 @@ class SeedRolesTableSeeder extends Seeder
                         array("type" => "member","name"=>"Importer",'slug'=>'importer','display_name'=>'Importer'),
                         array("type" => "member","name"=>"Distributer",'slug'=>'distributer','display_name'=>'Distributer'),
                         array("type" => "member","name"=>"US Importer & Distributer",'slug'=>'Importer_and_Distributer','display_name'=>'Importer & Distributer'),
-                        array("type" => "member","name"=>"Voice Of Expert",'slug'=>'voice_of_expert','display_name'=>'Voice Of Expert'),
+                        array("type" => "member","name"=>"Voice Of Experts",'slug'=>'voice_of_expert','display_name'=>'Voice Of Experts'),
                         array("type" => "member","name"=>"Travel Agencies",'slug'=>'travel_agencies','display_name'=>'Travel Agencies'),
                         array("type" => "member","name"=>"Restaurents",'slug'=>'restaurents','display_name'=>'Restaurents'),
                         array("type" => "subscription","name"=>"Voyagers",'slug'=>'voyagers','display_name'=>'Voyagers')
