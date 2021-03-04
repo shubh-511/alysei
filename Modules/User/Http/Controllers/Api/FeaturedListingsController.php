@@ -142,6 +142,10 @@ class FeaturedListingsController extends CoreController
 
                         foreach ($input as $key => $value) {
                             $data = [];
+                            if($key == 1)
+                            {
+                                $value = $this->uploadImage($key);
+                            }
                             $data['featured_listing_field_id'] = $key;
                             $data['user_id'] = $this->user->user_id;
                             $data['value'] = $value;
