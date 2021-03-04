@@ -73,6 +73,7 @@ class HubController extends Controller
         {
             $user = $this->user;
             $jsonArray = [];
+            $hubs = [];
             foreach($request->params as $country => $states)
             {
                 $countryData = Country::where('id', $country)->first();
@@ -93,9 +94,9 @@ class HubController extends Controller
                     
                 }
             }
-
+            $hubs = ['hubs' => [$jsonArray]];
             return response()->json(['success' => $this->successStatus,
-                                        'data' => $jsonArray,
+                                        'data' => $hubs,
                                     ], $this->successStatus);
                 
         }
