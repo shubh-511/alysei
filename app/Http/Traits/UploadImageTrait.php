@@ -19,7 +19,7 @@ trait UploadImageTrait
     ***/
     public function uploadImage($img)
     {
-        $date = date("Y/m/");
+        $date = date("Y/m");
     	$target='uploads/'.$date;
     	if(!empty($img))
         {
