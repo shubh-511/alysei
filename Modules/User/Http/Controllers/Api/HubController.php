@@ -34,37 +34,6 @@ class HubController extends Controller
     }
 
 
-    /* 
-        Get All Hubs
-    */
-    /*public function getHubs($role){
-
-        try
-        {
-            $response_time = (microtime(true) - LARAVEL_START)*1000;
-
-            $hubs = Hub::where('status', '1')->where('role_id', $role)->get();
-            if(count($hubs) > 0)
-            {
-                return response()->json(['success'=>$this->successStatus,
-                'title' => 'What are hubs?',
-                'description' => 'Hubs allow you to connect with other located or working in specific loactions.',
-                'data' => $hubs]);
-            }
-            else
-            {
-                return response()->json(['success'=>$this->successStatus,
-                'title' => 'What are hubs?',
-                'description' => 'Hubs allow you to connect with other located or working in specific loactions.',
-                'message' => "currently no hubs found"]); 
-            }
-            
-        }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()]); 
-        }
-
-    }*/
-
     /***
     get Countries
     ***/
