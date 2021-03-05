@@ -28,7 +28,7 @@ Route::get('get/hubs', 'Api\HubController@getHubs');
 Route::get('get/states', 'Api\CountryController@getStates');
 Route::get('get/cities', 'Api\CountryController@getCities');
 Route::get('get/countries', 'Api\CountryController@getCountries');
-Route::get('edit/featured/listing/{featuredListingid}', 'Api\FeaturedListingsController@editFeaturedListing');
+
 Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('userinfo', 'Api\UserController@userinfo');
