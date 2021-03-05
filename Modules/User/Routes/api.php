@@ -45,6 +45,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/hubs', 'Api\HubController@getHubs');
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');
 
+	Route::get('get/user/submited/fields', 'Api\UserController@getUserSubmitedFields');
+
 
 });
 

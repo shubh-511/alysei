@@ -19,42 +19,82 @@ class SeedUserFieldsTableSeeder extends Seeder
 
         $data = array(
                         array("title"=>"Company name","placeholder"=>"Enter company name",'type'=>'text','name'=>'comapny_name','required'=>'yes'),
-                        array("title"=>"Product type","placeholder"=>"Select product type",'type'=>'checkbox','name'=>'product_type','required'=>'yes','hint'=>'Select Product Type'),
+
+                        array("title"=>"Product type","placeholder"=>"Select product type",'type'=>'checkbox','name'=>'product_type','required'=>'yes','hint'=>'Select Product Type','require_update'=>'true'),
+
                         array("title"=>"Italian Regions","placeholder"=>"Italian regions",'type'=>'select','name'=>'italian_regions','required'=>'yes'),
-                        array("title"=>"Horeca","placeholder"=>"Select horeca",'type'=>'radio','name'=>'horeca','required'=>'yes','hint'=>'Select Horeca'),
-                        array("title"=>"Private Label","placeholder"=>"Private label",'type'=>'radio','name'=>'private_label','required'=>'yes','hint'=>'Select Private Label'),
-                        array("title"=>"Alysei Brand Label","placeholder"=>"Alysei brand label",'type'=>'radio','name'=>'alysei_brand_label','required'=>'no','hint'=>'Select Alysei Brand Label'),
+
+                        array("title"=>"Horeca","placeholder"=>"Select horeca",'type'=>'radio','name'=>'horeca','required'=>'yes','hint'=>'Select Horeca','require_update'=>'true'),
+
+                        array("title"=>"Private Label","placeholder"=>"Private label",'type'=>'radio','name'=>'private_label','required'=>'yes','hint'=>'Select Private Label','require_update'=>'true'),
+
+                        array("title"=>"Alysei Brand Label","placeholder"=>"Alysei brand label",'type'=>'radio','name'=>'alysei_brand_label','required'=>'no','hint'=>'Select Alysei Brand Label','require_update'=>'true'),
+
                         array("title"=>"Restaurant name","placeholder"=>"Restaurant name",'type'=>'text','name'=>'restaurant_name','required'=>'yes'),
-                        array("title"=>"Hub","placeholder"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes'),
-                        array("title"=>"Provide Pick Up And/Or Delivery","placeholder"=>"Select pick up or delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option'=>'true','hint'=>'Select Pick up or Delivery'),
-                        array("title"=>"Restaurant Type","placeholder"=>"Restaurant type",'type'=>'select','name'=>'restaurant_type','required'=>'yes'),
-                        array("title"=>"What is your specialization","placeholder"=>"Your specialization",'type'=>'multiselect','name'=>'expertise','required'=>'yes','hint'=>'Choose your specialization'),
-                        array("title"=>"Title","placeholder"=>"Title",'type'=>'multiselect','name'=>'title','required'=>'yes'),
-                        array("title"=>"Country","placeholder"=>"Country",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true'),
-                        array("title"=>"Speciality Trips","placeholder"=>"Speciality trips",'type'=>'multiselect','name'=>'speciality','required'=>'yes','multiple_option'=>'true','hint'=>'Select your speciality trips'),
+
+                        array("title"=>"Hub","placeholder"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes','require_update'=>'true'),
+
+                        array("title"=>"Provide Pick Up And/Or Delivery","placeholder"=>"Select pick up or delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option'=>'true','hint'=>'Select Pick up or Delivery','require_update'=>'true'),
+
+                        array("title"=>"Restaurant Type","placeholder"=>"Restaurant type",'type'=>'select','name'=>'restaurant_type','required'=>'yes','require_update'=>'true'),
+
+                        array("title"=>"What is your specialization","placeholder"=>"Your specialization",'type'=>'multiselect','name'=>'expertise','required'=>'yes','hint'=>'Choose your specialization','require_update'=>'true'),
+
+                        array("title"=>"Title","placeholder"=>"Title",'type'=>'multiselect','name'=>'title','required'=>'yes','require_update'=>'true'),
+
+                        array("title"=>"Country","placeholder"=>"Country",'type'=>'select','name'=>'country','required'=>'yes','api_call'=>'true','require_update'=>'true'),
+
+                        array("title"=>"Speciality Trips","placeholder"=>"Speciality trips",'type'=>'multiselect','name'=>'speciality','required'=>'yes','multiple_option'=>'true','hint'=>'Select your speciality trips','require_update'=>'true'),
+
                         array("title"=>"Zip/Postal Code","placeholder"=>"Zip/Postal",'type'=>'text','name'=>'zip_postal_code','required'=>'yes'),
+
                         array("title"=>"Email","placeholder"=>"Your email",'type'=>'email','name'=>'email','required'=>'yes'),
+
                         array("title"=>"Password","placeholder"=>"Enter password",'type'=>'password','name'=>'password','required'=>'yes','hint'=>'Password must be at least 8 characters and contain at least one numeric digit and a special character.'),
+
                         array("title"=>"First Name","placeholder"=>"Enter first name",'type'=>'text','name'=>'first_name','required'=>'yes'),
+
                         array("title"=>"Last Name","placeholder"=>"Enter last name",'type'=>'text','name'=>'last_name','required'=>'yes'),
+
                         array("title"=>"Country","placeholder"=>"Select",'type'=>'select','name'=>'country','required'=>'yes','multiple_option' => 'true'),
-                        array("title"=>"Pick Up Disocunt For Alysei Voyagers","placeholder"=>"Pick up discount for alysei voygers",'type'=>'select','name'=>'pick_up_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no','hint'=>'Select One'),
-                        array("title"=>"Delivery Disocunt For Alysei Voyagers","placeholder"=>"Delivery discount for alysei voygers",'type'=>'select','name'=>'delivery_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no'),
-                        array("title"=>"Neighborhood","placeholder"=>"Enter neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','conditional'=>'yes'),
+
+                        array("title"=>"Pick Up Disocunt For Alysei Voyagers","placeholder"=>"Pick up discount for alysei voygers",'type'=>'select','name'=>'pick_up_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no','hint'=>'Select One','require_update'=>'true'),
+
+                        array("title"=>"Delivery Disocunt For Alysei Voyagers","placeholder"=>"Delivery discount for alysei voygers",'type'=>'select','name'=>'delivery_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no','require_update'=>'true'),
+
+                        array("title"=>"Neighborhood","placeholder"=>"Enter neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','conditional'=>'yes','require_update'=>'true'),
+
                         array("title"=>"Region","placeholder"=>"Select",'type'=>'select','name'=>'region','required'=>'no','conditional'=>'no'),
+
                         array("title"=>"I AGREE TO THE DATA COLLECTION POLICIES STATED IN THE <a href='https://social.alysei.com/privacy-policy'>PRIVACY POLICY</a> AND <a href='https://social.alysei.com/terms'>TERMS OF SERVICE.</a>",'type'=>'terms','name'=>'terms_and_condition','required'=>'yes','conditional'=>'no'),
 
                         array("title"=>"Italian Regions","placeholder"=>"Select",'type'=>'select','name'=>'italian_regions','required'=>'no','conditional'=>'no'),
+
                         array("title"=>"Interests","placeholder"=>"Select interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no'),
 
                         
                         array("title"=>"State/Region","placeholder"=>"Select",'type'=>'select','name'=>'state','required'=>'yes','conditional'=>'no','api_call'=>'true'),
+
                         array("title"=>"City","placeholder"=>"Select",'type'=>'select','name'=>'city','required'=>'no','conditional'=>'no'),
+
                         array("title"=>"VAT No.","placeholder"=>"Enter VAT no.",'type'=>'text','name'=>'vat_number','required'=>'yes','conditional'=>'no','hint'=>'Enter VAT no.'),
+
                         array("title"=>"Restaurant Address","placeholder"=>"Enter address",'type'=>'map','name'=>'address','required'=>'yes','conditional'=>'no'),
+
                         array("title"=>"Enter Your City","placeholder"=>"Enter city",'type'=>'text','name'=>'enter_your_city','required'=>'no','conditional'=>'no'),
+
                         array("title"=>"Lattitude",'type'=>'hidden','name'=>'lattitude','required'=>'yes','conditional'=>'no'),
-                        array("title"=>"Longitude",'type'=>'hidden','name'=>'longitude','required'=>'yes','conditional'=>'no')
+
+                        array("title"=>"Longitude",'type'=>'hidden','name'=>'longitude','required'=>'yes','conditional'=>'no'),
+
+
+                        array("title"=>"Our Products",'type'=>'text','name'=>'our_product','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
+
+                        array("title"=>"About",'type'=>'text','name'=>'about','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
+
+                        array("title"=>"Our Menu",'type'=>'text','name'=>'our_menu','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
+
+                        array("title"=>"Our Tours",'type'=>'text','name'=>'our_tour','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false')
 
                     );
 
