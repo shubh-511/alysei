@@ -96,7 +96,7 @@ class FeaturedListingsController extends CoreController
      * $request
      */
     public function postFeaturedListing(Request $request){
-        try{
+        //try{
                 $stateId='';
                 $input = $request->all();
                 $rules = [];
@@ -113,7 +113,7 @@ class FeaturedListingsController extends CoreController
                     return response()->json(['success'=>$this->validationStatus,'errors' =>'Sorry,There are no fields for current role_id'], $this->validationStatus);
                 }else{
 
-                    $rules = $this->makeValidationRules($featuredListingFields);
+                    $rules = $this->makeValidationRules($featuredListingFields,$input);
                     $inputData = $this->segregateInputData($input,$featuredListingFields);
                 }
 
@@ -139,50 +139,73 @@ class FeaturedListingsController extends CoreController
                         $featuredListingData['featured_listing_type_id'] = $input['featured_listing_type_id'];
                         //$featuredListingData['image_id'] = $this->uploadImage($inputData['image_id']);
 
-                        // if(array_key_exists("featured_listing_id",$input) && 
-                        //    $input['featured_listing_id'] !=''){
-                        //     $featuredListing = FeaturedListing::create($featuredListingData);
-                        // }else{
-                        //     $featuredListing = FeaturedListing::create($featuredListingData);    
-                        // }
+                        if(!array_key_exists("featured_listing_id",$input)){
+                            $update = false;
+                            $featuredListing = FeaturedListing::create($featuredListingData);
+                            $featuredListingId = $featuredListing->id;
+                        }else{
+                            $featuredListingId = $input["featured_listing_id"];
+                            $update = true;
+                            $featuredListing = FeaturedListing::where('featured_listing_id',$input['featured_listing_id'])->update($featuredListingData);    
+                        }
 
-                        $featuredListing = FeaturedListing::create($featuredListingData);
-                            
                         unset($input["featured_listing_type_id"]);
+                        unset($input["featured_listing_id"]);
 
                         foreach ($input as $key => $value) {
                             $data = [];
-                            if($key == 1)
+                            if($key == 1 && $update == false)
                             {
                                 $value = $this->uploadImage($value);
-                                FeaturedListing::where('featured_listing_id', $featuredListing->id)->update(['image_id' => $value]);
+                                FeaturedListing::where('featured_listing_id', $featuredListingId)->update(['image_id' => $value]);
                             }
 
-                            $data['featured_listing_id'] = $featuredListing->id;
+                            if($key == 1 && $update == true){
+                                // $featuredListing = FeaturedListing::where('featured_listing_id', $featuredListingId)->first();
+                                
+                                // $this->deleteAttachment($featuredListing->image_id);
+
+                                $value = $this->uploadImage($value);
+                                FeaturedListing::where('featured_listing_id', $featuredListingId)->update(['image_id' => $value]);
+
+                            }
+
+                            $data['featured_listing_id'] = $featuredListingId;
                             $data['featured_listing_field_id'] = $key;
                             $data['user_id'] = $this->user->user_id;
                             $data['value'] = $value;
 
-                            DB::table('featured_listing_values')->insert($data);
+                            if($update == false){
+
+                                DB::table('featured_listing_values')->insert($data);
+
+                            }else{
+
+                                $query = DB::table('featured_listing_values')->where(['featured_listing_id'=>$featuredListingId,'featured_listing_field_id'=>$key,'user_id'=>$this->user->user_id])->update(['value'=>$value]);    
+
+                            }
+                            
                         }
 
-                        $mes = 'Successfully added';
+
+                        $mes = ($update == false) ? 'Successfully added' : 'Successfully updated';
+
                         $message = $this->translate('messages.'.$mes,$mes);
 
                         return response()->json(['success' => $this->successStatus,
                                         'message' => $message,
                                     ], $this->successStatus);
-
                     }
+
                 }else{
                     return response()->json(['success'=>$this->validationStatus,'errors'=>"parameters are missing"], $this->validationStatus);
                 }
 
                 //dd($fields);
 
-        }catch(\Exception $e){
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
-        }    
+        // }catch(\Exception $e){
+        //     return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        // }    
     }
 
     /* 
@@ -360,7 +383,7 @@ class FeaturedListingsController extends CoreController
      * @Params $featuredListingFields
      */
 
-    public function makeValidationRules($featuredListingFields){
+    public function makeValidationRules($featuredListingFields,$input){
         $rules = [];
         foreach ($featuredListingFields as $key => $field) {
             
@@ -382,7 +405,9 @@ class FeaturedListingsController extends CoreController
 
             }else if($field->type == 'file'){
 
-                $rules[$field->name] = 'required';
+                if(!array_key_exists("featured_listing_id",$input)){
+                    $rules[$field->name] = 'required';
+                }
 
             }else {
 
