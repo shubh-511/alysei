@@ -40,7 +40,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');
 	Route::post('post/featured/listing', 'Api\FeaturedListingsController@postFeaturedListing');
-	Route::get('edit/featured/listing/{featuredListingid}', 'Api\FeaturedListingsController@editFeaturedListing');
+	Route::get('get/featured/listing/{featuredListingid}', 'Api\FeaturedListingsController@editFeaturedListing');
 
 	Route::get('get/hub/countries', 'Api\HubController@getHubCountries');
 	Route::get('get/hub/city', 'Api\HubController@getHubsCity');
