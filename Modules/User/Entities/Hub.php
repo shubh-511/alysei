@@ -3,7 +3,7 @@
 namespace Modules\User\Entities;
 
 use Illuminate\Database\Eloquent\Model;
-use Modules\User\Entities\Hub;
+use App\Attachment;
 class Hub extends Model
 {
     //protected $fillable = [];
