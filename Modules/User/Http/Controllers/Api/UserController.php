@@ -471,7 +471,7 @@ class UserController extends CoreController
 
                 if(in_array($option->user_field_option_id, $userFieldValues))
                 {
-                    echo $parentId;
+                    //echo $parentId;
                     $fieldOptionData[$key]->is_selected = true;    
                 }
                 else
