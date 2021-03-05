@@ -129,11 +129,10 @@ class HubController extends Controller
                     if(count($hubs) > 0)
                     {
                         $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'hubs_array'=>$hubs];
-                        //$jsonArray[$countryData->name.' / '.$stateData->name] = $hubs;
                     }
                     else
                     {
-                        $jsonArray[$countryData->name.' / '.$stateData->name] = [];
+                        $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'hubs_array'=>$hubs];
                     }
                     
                 }
