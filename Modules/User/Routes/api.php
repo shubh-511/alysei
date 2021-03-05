@@ -41,6 +41,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('post/featured/listing', 'Api\FeaturedListingsController@postFeaturedListing');
 
 	Route::get('get/hub/countries', 'Api\HubController@getHubCountries');
+	Route::get('get/hub/city', 'Api\HubController@getHubsCity');
 	Route::get('get/hubs', 'Api\HubController@getHubs');
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');
 

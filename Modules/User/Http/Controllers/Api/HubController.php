@@ -103,6 +103,42 @@ class HubController extends Controller
     }
 
     /***
+    get Cities for Hubs
+    ***/
+    public function getHubsCity(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $jsonArray = [];
+            foreach($request->params as $state)
+            {
+                $stateData = State::where('id', $state)->first();
+                
+                $cities = City::where('state_id', $state)->where('status', '1')->get();
+                if(count($cities) > 0)
+                {
+                    $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'city_array'=>$cities];
+                }
+                else
+                {
+                    $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'city_array'=>$cities];
+                }
+                    
+            }
+            $hubs = ['cities' => $harray];
+            return response()->json(['success' => $this->successStatus,
+                                        'data' => $hubs,
+                                    ], $this->successStatus);
+                
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /***
     get Hubs
     ***/
     public function getHubs(Request $request)
