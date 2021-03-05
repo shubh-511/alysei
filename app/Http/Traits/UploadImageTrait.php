@@ -19,14 +19,15 @@ trait UploadImageTrait
     ***/
     public function uploadImage($img)
     {
-    	$target='images/listing';
+        $date = date("Y/m/");
+    	$target='uploads/'.$date;
     	if(!empty($img))
         {
             $headerImageName=$img->getClientOriginalName();
             $ext1=$img->getClientOriginalExtension();
             $temp1=explode(".",$headerImageName);
             $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
-            $headerTarget='public/images/listing/'.$newHeaderLogo;
+            $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
             $img->move($target,$newHeaderLogo);
         }
         else
