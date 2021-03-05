@@ -17,6 +17,7 @@ class CreateFeaturedListingValuesTable extends Migration
             $table->increments('featured_listing_value_id');
             $table->bigInteger('user_id');
             $table->integer('featured_listing_field_id');
+            $table->bigInteger('featured_listing_id');
             $table->string('value');
             $table->timestamps();
         });

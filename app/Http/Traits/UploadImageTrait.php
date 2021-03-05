@@ -43,5 +43,8 @@ trait UploadImageTrait
         return $attachment->id;
     }
 
+    public function getAttachment($attachmentId){
+       return  Attachment::where('id',$attachmentId)->first();
+    }
 
 }
