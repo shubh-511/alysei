@@ -19,6 +19,7 @@ class CreateHubsTable extends Migration
             $table->integer('state_id');
             $table->string('title');
             $table->text('description');
+            $table->integer('image_id');
             $table->enum('status',[0,1])->default(1)->comment("0=disabled,1=enabled");
             $table->timestamps();
         });

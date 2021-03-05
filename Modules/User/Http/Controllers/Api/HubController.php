@@ -125,7 +125,7 @@ class HubController extends Controller
                 {
                     $stateData = State::where('id', $state)->first();
                     
-                    $hubs = Hub::where('country_id', $country)->where('state_id', $state)->get();
+                    $hubs = Hub::with('image')->where('country_id', $country)->where('state_id', $state)->get();
                     if(count($hubs) > 0)
                     {
                         $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'hubs_array'=>$hubs];
