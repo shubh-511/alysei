@@ -51,24 +51,21 @@ class FeaturedListingsController extends CoreController
                 
                 foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
                     
-                    $featuredListing[$fieldsTypesValue->title] = FeaturedListing::with('image')
+                    $featuredListing[] = FeaturedListing::with('image')
                                         ->where('user_id', $this->user->user_id)
                                         ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
                                         ->orderBy('featured_listing_id','DESC')->get(); 
+
+                    $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
                     
                 }
 
-                foreach ($featuredListing as $key => $value) {
-                    $products[] = ["title" => $key,"products"=>$value];
-                }
-                
                 //Get Featured Listing Fields
 
                 //Get Featured Type
                 $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
                 $fieldsData = [];
                 foreach ($featuredTypes as $key => $value) {
-
 
                     $value->title = $this->translate('messages.'.$value->title,$value->title);
 
@@ -81,11 +78,17 @@ class FeaturedListingsController extends CoreController
                             }
                     }
 
-                    $searchedKey = array_search(strtolower($value->featured_listing_type_title), array_column($products, 'title'));
-
-                    $products[$searchedKey]["fields"][] = $value;
+                    $fieldsData[$value->featured_listing_type_slug][] = $value;
                 }
 
+                foreach($fieldsData as $fieldsDataKey => $fieldsDataValue){
+                    
+
+                    $key = array_search($fieldsDataKey, array_column($products, 'slug'));
+
+                    $products[$key]['fields'] = $fieldsDataValue;
+                }
+                
                 //END
                 $data = ['user_settings'=>$userDetails,'products' => $products];
                 return response()->json(['success' => $this->successStatus,
@@ -317,7 +320,7 @@ class FeaturedListingsController extends CoreController
     public function getFeaturedListingFieldsByRoleId($roleId){
         
         $featuredTypes = DB::table("featured_listing_types as flt")
-            ->select("flt.title as featured_listing_type_title","flfrm.*","fltrm.*","flf.*")
+            ->select("flt.title as featured_listing_type_title","flt.slug as featured_listing_type_slug","flfrm.*","fltrm.*","flf.*")
             ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
 
             ->join("featured_listing_field_role_maps as flfrm",function ($join) {
