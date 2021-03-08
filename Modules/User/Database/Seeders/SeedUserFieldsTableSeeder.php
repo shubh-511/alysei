@@ -22,7 +22,7 @@ class SeedUserFieldsTableSeeder extends Seeder
 
                         array("title"=>"Product type","placeholder"=>"Select product type",'type'=>'checkbox','name'=>'product_type','required'=>'yes','hint'=>'Select Product Type','require_update'=>'true'),
 
-                        array("title"=>"Italian Regions","placeholder"=>"Italian regions",'type'=>'select','name'=>'italian_regions','required'=>'yes'),
+                        array("title"=>"Italian Regions","placeholder"=>"Italian regions",'type'=>'select','name'=>'italian_regions','required'=>'yes','display_on_registration'=>'false'),
 
                         array("title"=>"Horeca","placeholder"=>"Select horeca",'type'=>'radio','name'=>'horeca','required'=>'yes','hint'=>'Select Horeca','require_update'=>'true'),
 
@@ -62,13 +62,13 @@ class SeedUserFieldsTableSeeder extends Seeder
 
                         array("title"=>"Delivery Disocunt For Alysei Voyagers","placeholder"=>"Delivery discount for alysei voygers",'type'=>'select','name'=>'delivery_discount_for_alysei_voyagers','required'=>'no','conditional'=>'no','require_update'=>'true'),
 
-                        array("title"=>"Neighborhood","placeholder"=>"Enter neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','conditional'=>'yes','require_update'=>'true'),
+                        array("title"=>"Neighborhood","placeholder"=>"Enter neighborhood",'type'=>'select','name'=>'neighborhood','required'=>'no','conditional'=>'yes','require_update'=>'false','display_on_registration'=>'false'),
 
-                        array("title"=>"Region","placeholder"=>"Select",'type'=>'select','name'=>'region','required'=>'no','conditional'=>'no'),
+                        array("title"=>"Region","placeholder"=>"Select",'type'=>'select','name'=>'region','required'=>'no','conditional'=>'no','display_on_registration'=>'false'),
 
                         array("title"=>"I AGREE TO THE DATA COLLECTION POLICIES STATED IN THE <a href='https://social.alysei.com/privacy-policy'>PRIVACY POLICY</a> AND <a href='https://social.alysei.com/terms'>TERMS OF SERVICE.</a>",'type'=>'terms','name'=>'terms_and_condition','required'=>'yes','conditional'=>'no'),
 
-                        array("title"=>"Italian Regions","placeholder"=>"Select",'type'=>'select','name'=>'italian_regions','required'=>'no','conditional'=>'no'),
+                        array("title"=>"Italian Regions","placeholder"=>"Select",'type'=>'select','name'=>'italian_regions','required'=>'no','conditional'=>'no','display_on_registration'=>'false'),
 
                         array("title"=>"Interests","placeholder"=>"Select interests",'type'=>'multiselect','name'=>'interests','required'=>'yes','conditional'=>'no'),
 
