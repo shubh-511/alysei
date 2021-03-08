@@ -10,6 +10,7 @@ use Modules\User\Entities\Role;
 use Modules\User\Entities\FeaturedListing;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use Modules\User\Entities\Certificate;
 use Validator;
 use App\Image;
 use DB;
@@ -276,7 +277,7 @@ class UserController extends CoreController
             $user_id = $this->user->user_id;
 
             $response_time = (microtime(true) - LARAVEL_START)*1000;
-                $steps = Cache::get('registration_form');
+                $steps = Cache::get('profile_update_form');
 
                 if($role_id && (env("cache") == false) || $steps==null){
                     $steps = [];
@@ -285,7 +286,7 @@ class UserController extends CoreController
                                       ->where("role_id","=",$role_id)
                                       ->where("require_update","=",'true')
                                       ->where("conditional","=",'no')
-                                      ->orderBy("order","asc")
+                                      ->orderBy("edit_profile_field_order","asc")
                                       ->get();
 
 
@@ -323,7 +324,19 @@ class UserController extends CoreController
                                             if(!empty($fieldValue)){
                                                 $grandParent = $this->getUserFieldOptionGrandParent($fieldValue->value);
                                             }
-                                            
+
+                                            /*$userOptionValue = DB::table('user_field_values')
+                                            ->where('user_id', $user_id)
+                                            ->where('user_field_id', $value->user_field_id)
+                                            ->get();
+
+                                            $userOptionValue = $userOptionValue->pluck('value');
+
+                                            $userOptionValue = DB::table('user_field_values')
+                                            ->where('user_id', $user_id)
+                                            ->where('user_field_id', $value->user_field_id)
+                                            ->whereIn('value', $userOptionValue)
+                                            ->first();*/
                                             
                                             if($grandParent == $oneDepth->user_field_option_id)
                                             {
@@ -332,6 +345,15 @@ class UserController extends CoreController
                                             }else{
                                                 $value->options[$k]->is_selected = false;
                                             }
+
+                                            /*if(!empty($userOptionValue))
+                                            {
+                                                $value->options[$k]->is_selected = true;
+
+                                            }else{
+                                                $value->options[$k]->is_selected = false;
+                                            }*/
+                                            
 
                                             $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
 
@@ -375,11 +397,11 @@ class UserController extends CoreController
                                 }
                             }// End Check Fields has option
 
-                            $steps[$value->step][] = $value;
+                            $steps[] = $value;
                         }
                     }
 
-                    Cache::forever('registration_form', $steps);                      
+                    Cache::forever('profile_update_form', $steps);                      
             }
             return response()->json(['success'=>$this->successStatus,'data' =>$steps,'response_time'=>$response_time], $this->successStatus); 
         }      
@@ -387,6 +409,287 @@ class UserController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /*
+     * Update user profile 
+     * @params $request 
+     */
+    public function updateUserProfile(Request $request)
+    {
+        try
+        {
+            $role_id = $this->user->role_id;
+            $user_id = $this->user->user_id;
+            
+            $input = $request->all();
+            $rules = [];
+            
+
+            $roleFields = $this->checkFieldsByRoleId($role_id);
+
+            if(count($roleFields) == 0){
+                return response()->json(['success'=>$this->validationStatus,'errors' =>'Sorry,There are no fields for current role_id'], $this->validationStatus);
+            }else{
+
+                $rules = $this->makeValidationRules($roleFields);
+                $inputData = $this->segregateInputData($input,$roleFields);
+            }
+
+            if(!empty($rules)){
+                
+                $validator = Validator::make($inputData, $rules);
+
+                if ($validator->fails()) { 
+
+                    return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
+                }
+
+                /*if(array_key_exists('email',$inputData) && array_key_exists('password',$inputData)
+                  ){*/
+
+                    $userData = [];
+                    
+                    
+                        foreach ($input as $key => $value) {
+
+                            $this->deleteValueIfExist($user_id, $key);
+
+                            $checkMultipleOptions = explode(',', $value);
+
+                            if(count($checkMultipleOptions) == 1)
+                            {
+                                $data = [];
+                                if(!empty($key))
+                                {
+                                    $data['user_field_id'] = $key;
+                                    $data['user_id'] = $user_id;
+                                    $data['value'] = $value; 
+                                    DB::table('user_field_values')->insert($data);
+                                }
+                                
+                            }else{
+
+                                foreach($checkMultipleOptions as $option){
+                                    $data = [];
+                                    if(!empty($key))
+                                    {
+                                        $data['user_field_id'] = $key;
+                                        $data['user_id'] = $user_id;
+                                        $data['value'] = $option;
+                                        DB::table('user_field_values')->insert($data);
+                                    }
+                                    
+                                }
+                            }
+                           
+                        }
+
+                            return response()->json(['success' => $this->successStatus,
+                                 'message' => $this->translate('messages.'."Profile updated","Profile updated")
+                                ], $this->successStatus);
+                        
+                //}
+                
+            }
+        }catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+        
+    }
+
+    /*
+     * Get User Certificates
+     * @params $request 
+     */
+    public function getUserCertificates()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            $fieldOptions = DB::table('user_field_options')->where('parent','=',0)->where('head','=',0)->get();
+
+            $fieldOptions = $fieldOptions->pluck('user_field_option_id');
+
+            $userFieldValues = DB::table('user_field_values')->where('user_id', $loggedInUser->user_id)->where('user_field_id', 2)->whereIn('value', $fieldOptions)->get();
+
+            $userFieldValues = $userFieldValues->pluck('value');
+
+            $fieldOptions = DB::table('user_field_options')->whereIn('user_field_option_id',$userFieldValues)->get();
+
+
+
+            foreach($fieldOptions as $key => $fieldOption)
+            {
+                $userCertificates = Certificate::where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                $fieldOptions[$key]->certificates = $userCertificates;
+            } 
+
+            
+            return response()->json(['success' => $this->successStatus,
+                             'data' => $fieldOptions,
+                            ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+        
+    }
+
+
+    /*
+     * Upload User Certificates for Producers
+     * @params $request 
+     */
+    public function updateUserCertificates(Request $request)
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'user_field_option_id' => 'required'                
+            ]);
+
+        
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+            
+            $checkExistingCertificate = Certificate::where('user_field_option_id', $request->user_field_option_id)->where('user_id', $loggedInUser->user_id)->first();
+            
+            if(!empty($checkExistingCertificate))
+            {
+                
+            }
+            else
+            {
+                $userCertificate = new Certificate;
+                $userCertificate->user_id = $loggedInUser->user_id;
+                $userCertificate->user_field_option_id = $loggedInUser->user_field_option_id;
+               
+                if(!empty($request->file('photo_of_label')))
+                {
+                    $userCertificate->photo_of_label = $this->uploadImage($request->file('photo_of_label'));
+                }
+                if(!empty($request->file('fce_sid_certification')))
+                {
+                    $userCertificate->fce_sid_certification = $this->uploadImage($request->file('fce_sid_certification'));
+                }
+                if(!empty($request->file('phytosanitary_certificate')))
+                {
+                    $userCertificate->phytosanitary_certificate = $this->uploadImage($request->file('phytosanitary_certificate'));
+                }
+                if(!empty($request->file('packaging_for_usa')))
+                {
+                    $userCertificate->packaging_for_usa = $this->uploadImage($request->file('packaging_for_usa'));
+                }
+                if(!empty($request->file('food_safety_plan')))
+                {
+                    $userCertificate->food_safety_plan = $this->uploadImage($request->file('food_safety_plan'));
+                }
+                if(!empty($request->file('animal_helath_asl_certificate')))
+                {
+                    $userCertificate->animal_helath_asl_certificate = $this->uploadImage($request->file('animal_helath_asl_certificate'));
+                }
+                $userCertificate->save();
+            }
+            
+
+            
+            return response()->json(['success' => $this->successStatus,
+                             'data' => $user,
+                            ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+        
+    }
+
+    /*
+     * Check Exist Fields Values and delete
+     * @Params $roleId
+     */
+    public function deleteValueIfExist($user_id, $key)
+    {
+        $fieldValue = DB::table('user_field_values')
+            ->where('user_id', $user_id)
+            ->where('user_field_id', $key)
+            ->first();
+        if(!empty($fieldValue))
+        {
+            DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $key)
+                ->delete();
+        }
+    }
+    
+
+
+    /*
+     * Check Fields based on role id
+     * @Params $roleId
+     */
+
+    public function checkFieldsByRoleId($roleId){
+
+            $roleFields = DB::table('user_field_map_roles')
+                      ->join('user_fields', 'user_fields.user_field_id', '=', 'user_field_map_roles.user_field_id')
+                      ->where("role_id","=",$roleId)
+                      ->where("require_update","=",'true')
+                      ->where("conditional","=",'no')
+                      ->orderBy("order","asc")
+                      ->get();
+
+        return $roleFields;
+    }
+
+    /*
+     * Make Validation Rules
+     * @Params $userFields
+     */
+
+    public function makeValidationRules($userFields){
+        $rules = [];
+        foreach ($userFields as $key => $field) {
+            
+            if($field->name == 'email' && $field->required == 'yes'){
+
+                $rules[$field->name] = 'required|email|unique:users|max:50';
+
+            }else {
+
+                if($field->required == 'yes'){
+                    $rules[$field->name] = 'required|max:100';
+                }
+            }
+        }
+
+        return $rules;
+
+    }
+
+    /*
+     * Segregate user input data
+     * @Params $input and @userFields
+     */
+    public function segregateInputData($input,$userFields){
+
+        $inputData = [];
+
+        foreach($userFields as $key => $field){
+            if(array_key_exists($field->user_field_id, $input)){
+                $inputData[$field->name] = $input[$field->user_field_id];
+            }
+        }
+
+        return $inputData;
+
     }
 
     /*

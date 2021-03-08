@@ -29,6 +29,7 @@ Route::get('get/states', 'Api\CountryController@getStates');
 Route::get('get/cities', 'Api\CountryController@getCities');
 Route::get('get/countries', 'Api\CountryController@getCountries');
 
+
 Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('userinfo', 'Api\UserController@userinfo');
@@ -48,6 +49,10 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');
 
 	Route::get('get/user/submited/fields', 'Api\UserController@getUserSubmitedFields');
+	Route::post('update/user/profile', 'Api\UserController@updateUserProfile');
+
+	Route::get('get/user/certificates', 'Api\UserController@getUserCertificates');
+	Route::post('update/user/certificates', 'Api\UserController@updateUserCertificates');
 
 
 });

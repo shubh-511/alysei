@@ -46,9 +46,9 @@ class RegisterController extends CoreController
             }
 
 
-            $data = ['roles'=> $roles,'importer_roles' => $importerRoles, 'title' => 'Select your role',
-                'subtitle' => 'Join Alysei Today',
-                'description' => 'Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.' ];
+            $data = ['roles'=> $roles,'importer_roles' => $importerRoles, 'title' => $this->translate('messages.'.'Select your role','Select your role'),
+                'subtitle' => $this->translate('messages.'.'Join Alysei Today','Join Alysei Today'),
+                'description' => $this->translate('messages.'.'Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.','Become an Alysei Member by signing up for the Free Trial Beta Version, Your access request will be subject to approval.')];
 
             return response()->json(['success'=>$this->successStatus,'data' =>$data],$this->successStatus); 
 
@@ -185,7 +185,7 @@ class RegisterController extends CoreController
                                         $data['user_id'] = $user->user_id;
                                         $data['value'] = $value;
                                     //}
-                                    
+                                    DB::table('user_field_values')->insert($data);
                                 }
                                 
                             }else{
@@ -197,13 +197,14 @@ class RegisterController extends CoreController
                                         $data['user_field_id'] = $key;
                                         $data['user_id'] = $user->user_id;
                                         $data['value'] = $option;
+                                        DB::table('user_field_values')->insert($data);
                                     }
                                     
                                 }
                             }
                             
 
-                            DB::table('user_field_values')->insert($data);
+                            
                         }
 
                         if($input['role_id'] == 10)
