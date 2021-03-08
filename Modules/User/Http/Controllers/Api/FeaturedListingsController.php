@@ -47,13 +47,19 @@ class FeaturedListingsController extends CoreController
 
                 $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
                 
+                $products = [];
+                
                 foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
-                    //dd($this->user->user_id);
+                    
                     $featuredListing[$fieldsTypesValue->title] = FeaturedListing::with('image')
                                         ->where('user_id', $this->user->user_id)
                                         ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
                                         ->orderBy('featured_listing_id','DESC')->get(); 
                     
+                }
+
+                foreach ($featuredListing as $key => $value) {
+                    $products[] = ["title" => $key,"products"=>$value];
                 }
                 
                 //Get Featured Listing Fields
@@ -79,7 +85,7 @@ class FeaturedListingsController extends CoreController
                 }
 
                 //END
-                $data = ['user_settings'=>$userDetails,'featured_listing_fields'=> $fieldsData,'products' => $featuredListing];
+                $data = ['user_settings'=>$userDetails,'featured_listing_fields'=> $fieldsData,'products' => $products];
                 return response()->json(['success' => $this->successStatus,
                                        'data' => $data                      
                                 
