@@ -30,6 +30,7 @@ Route::get('get/cities', 'Api\CountryController@getCities');
 Route::get('get/countries', 'Api\CountryController@getCountries');
 
 Route::group(['middleware' => 'auth:api'], function(){
+
 	Route::get('userinfo', 'Api\UserController@userinfo');
 	Route::get('user/settings', 'Api\FeaturedListingsController@userSettings');
 	Route::post('update/user/settings', 'Api\UserController@updateUserSettings');
@@ -39,6 +40,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');
 	Route::post('post/featured/listing', 'Api\FeaturedListingsController@postFeaturedListing');
+	Route::get('get/featured/listing/{featuredListingid}', 'Api\FeaturedListingsController@editFeaturedListing');
 
 	Route::get('get/hub/countries', 'Api\HubController@getHubCountries');
 	Route::get('get/hub/city', 'Api\HubController@getHubsCity');

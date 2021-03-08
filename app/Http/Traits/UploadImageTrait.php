@@ -43,5 +43,18 @@ trait UploadImageTrait
         return $attachment->id;
     }
 
+    public function getAttachment($attachmentId){
+       return  Attachment::where('id',$attachmentId)->first();
+    }
+
+    public function deleteAttachment($attachmentId){
+        $attachment = Attachment::where('id',$attachmentId)->first();
+        
+        if($attachment){
+            unlink($attachment->attachment_url);
+            Attachment::where('id',$attachmentId)->delete();
+        }
+        
+    }
 
 }
