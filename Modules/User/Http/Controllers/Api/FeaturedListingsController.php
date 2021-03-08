@@ -81,11 +81,13 @@ class FeaturedListingsController extends CoreController
                             }
                     }
 
-                    $fieldsData[$value->featured_listing_type_title][] = $value;
+                    $searchedKey = array_search(strtolower($value->featured_listing_type_title), array_column($products, 'title'));
+
+                    $products[$searchedKey]["fields"][] = $value;
                 }
 
                 //END
-                $data = ['user_settings'=>$userDetails,'featured_listing_fields'=> $fieldsData,'products' => $products];
+                $data = ['user_settings'=>$userDetails,'products' => $products];
                 return response()->json(['success' => $this->successStatus,
                                        'data' => $data                      
                                 
