@@ -543,6 +543,7 @@ class RegisterController extends CoreController
         $roleFields = DB::table('user_field_map_roles')
                                   ->join('user_fields', 'user_fields.user_field_id', '=', 'user_field_map_roles.user_field_id')
                                   ->where("role_id","=",$roleId)
+                                  ->where("user_fields.display_on_registration","=",true)
                                   ->orderBy("order","asc")
                                   ->get();
 
