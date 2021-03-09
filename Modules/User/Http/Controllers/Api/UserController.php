@@ -272,7 +272,7 @@ class UserController extends CoreController
     public function getUserSubmitedFields()
     {
         try
-        {
+        { 
             $role_id = $this->user->role_id;
             $user_id = $this->user->user_id;
 
