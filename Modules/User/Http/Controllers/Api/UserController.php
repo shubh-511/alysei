@@ -182,7 +182,8 @@ class UserController extends CoreController
                 $loggedInUser = $this->user;
 
                 $validator = Validator::make($request->all(), [ 
-                    'name' => 'required|unique:users,name,'.$loggedInUser->user_id,
+                    //'name' => 'required|unique:users,name,'.$loggedInUser->user_id,
+                    'name' => 'required',
                     'display_name' => 'required|max:190',
                     'locale' => 'required',
                     'website' => 'required|max:190',
@@ -199,15 +200,13 @@ class UserController extends CoreController
                 $user->name = $request->name;
                 $user->display_name = $request->display_name;
                 $user->locale = $request->locale;
-                if(!empty($request->file('avatar_id')))
-                {
-                    $user->avatar_id = $this->uploadImage($request->file('avatar_id'));
-                }
                 $user->save();
+
+                $userData = User::with('profile_image','roles')->where('user_id','=',$this->user->user_id)->first();
 
                 
                 return response()->json(['success' => $this->successStatus,
-                                 'data' => $user,
+                                 'data' => $userData,
                                 ], $this->successStatus);
                                   
         }catch(\Exception $e){

@@ -19,4 +19,9 @@ class User extends Authenticatable
     public function roles(){
         return $this->belongsTo(Role::class, 'role_id','role_id')->select(array('role_id', 'name', 'slug', 'display_name'));
     }
+
+    public function profile_image()
+    {
+        return $this->belongsTo(Attachment::class, 'avatar_id','id');
+    }
 }
