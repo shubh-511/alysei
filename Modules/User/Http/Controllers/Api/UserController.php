@@ -728,7 +728,7 @@ class UserController extends CoreController
                     ->first();
 
             
-            if(!empty($fieldOptionData->parent))
+            /*if(!empty($fieldOptionData->parent))
             {
 
                 $fieldOptionDataParent = DB::table('user_field_options')
@@ -741,9 +741,11 @@ class UserController extends CoreController
                     ->first();
                 }
                     
-            }
+            }*/
             
         }
+
+        return $fieldOptionData->user_field_option_id; 
         
         if(!empty($fieldOptionDataSuperParent)){
             return $fieldOptionDataSuperParent->user_field_option_id;    
