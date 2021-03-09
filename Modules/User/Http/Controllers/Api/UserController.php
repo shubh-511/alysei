@@ -321,11 +321,6 @@ class UserController extends CoreController
 
                                             $grandParent = '';
 
-                                            $fieldOptionData = DB::table('user_field_options')
-                                            ->where('user_field_option_id','=',$fieldValue->value)
-                                            ->where('user_field_id','=',$value->user_field_id)
-                                            ->first();
-
                                             if(!empty($fieldValue)){
                                                 $grandParent = $this->getUserFieldOptionGrandParent($fieldValue->value);
                                             }
@@ -343,7 +338,7 @@ class UserController extends CoreController
                                             ->whereIn('value', $userOptionValue)
                                             ->first();*/
                                             
-                                            if(($grandParent == $oneDepth->user_field_option_id) || !empty($fieldOptionData))
+                                            if($grandParent == $oneDepth->user_field_option_id)
                                             {
                                                 $value->options[$k]->is_selected = true;
 
