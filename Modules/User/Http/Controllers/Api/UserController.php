@@ -203,10 +203,11 @@ class UserController extends CoreController
                 $user->save();
 
                 $userData = User::with('profile_image','roles')->where('user_id','=',$this->user->user_id)->first();
-
+                $token =  $userData->createToken('alysei')->accessToken; 
                 
                 return response()->json(['success' => $this->successStatus,
                                  'data' => $userData,
+                                 'token' => $token
                                 ], $this->successStatus);
                                   
         }catch(\Exception $e){
