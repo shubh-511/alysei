@@ -51,7 +51,7 @@ class FeaturedListingsController extends CoreController
                 
                 foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
                     
-                    $featuredListing = FeaturedListing::with('image')
+                    $featuredListing[] = FeaturedListing::with('image')
                                         ->where('user_id', $this->user->user_id)
                                         ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
                                         ->orderBy('featured_listing_id','DESC')->get(); 
