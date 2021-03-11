@@ -721,7 +721,8 @@ class UserController extends CoreController
     */
     public function getUserFieldOptionGrandParent($fieldId){
         $fieldOptionDataSuperParent = '';
-        
+        $fieldOptionData = [];
+
         if($fieldId > 0){
             $fieldOptionData = DB::table('user_field_options')
                     ->where('user_field_option_id','=',$fieldId)
@@ -745,7 +746,12 @@ class UserController extends CoreController
             
         }
 
-        return $fieldOptionData->user_field_option_id; 
+        if(!empty($fieldOptionData)){
+            return $fieldOptionData->user_field_option_id;     
+        }else{
+            return '';
+        }
+        
         
         if(!empty($fieldOptionDataSuperParent)){
             return $fieldOptionDataSuperParent->user_field_option_id;    
