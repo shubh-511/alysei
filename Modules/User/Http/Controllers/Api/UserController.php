@@ -202,7 +202,7 @@ class UserController extends CoreController
                 $user->locale = $request->locale;
                 $user->save();
 
-                $userData = User::select('*','name as username')->with('profile_image','roles')->where('user_id','=',$this->user->user_id)->first();
+                $userData = User::select('*','name as username')->with('avatar_id','roles')->where('user_id','=',$this->user->user_id)->first();
                 $token =  $userData->createToken('alysei')->accessToken; 
                 
                 return response()->json(['success' => $this->successStatus,
@@ -300,20 +300,28 @@ class UserController extends CoreController
                                     ->first();
                             
                             $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
-                            if(!empty($fieldValue) && $value->type == 'text')
-                            {
-                                $roleFields[$key]->is_selected = $fieldValue->value;
-                            }
-                            elseif(!empty($fieldValue) && $value->type == 'radio' && ($fieldValue->value == 'Yes' ||  $fieldValue->value == '1'))
+                            if(!empty($fieldValue) && $value->type == 'radio' && ($fieldValue->value == 'Yes' ||  $fieldValue->value == '1'))
                             {
                                 $roleFields[$key]->is_selected = true;
                             }
+                            elseif(!empty($fieldValue) && $value->type == 'text')
+                            {
+                                $roleFields[$key]->is_selected = $fieldValue->value;
+                            }
                             else
                             {
-                                $roleFields[$key]->is_selected = false;
+                                if($value->type == 'radio')
+                                {
+                                    $roleFields[$key]->is_selected = false;
+                                }
+                                else
+                                {
+                                    $roleFields[$key]->is_selected = '';
+                                }
+                                
                             }
                             
-
+                            
                             //Check Fields has option
                             if($value->type !='text' && $value->type !='email' && $value->type !='password'){
                                 
@@ -502,15 +510,26 @@ class UserController extends CoreController
                             }
                            
                         }
+
+                        
+
 			    $userProfile = User::where('user_id', $user_id)->first();
-                if(!empty($request->file('avatar_id')))
+                /*if(!empty($request->file('avatar_id')))
 		        {
 		            $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
 		        }
 		        if(!empty($request->file('cover_id')))
 		        {
 		            $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
-		        }
+		        }*/
+                if(!empty($requestFieldAvatar))
+                {
+                    $userProfile->avatar_id = $this->uploadImage($requestFieldAvatar);
+                }
+                if(!empty($requestFieldCover))
+                {
+                    $userProfile->cover_id = $this->uploadImage($requestFieldCover);
+                }
                 $userProfile->save();
                 $userData = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
 
