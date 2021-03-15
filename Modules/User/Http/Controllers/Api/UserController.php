@@ -304,7 +304,7 @@ class UserController extends CoreController
                             {
                                 $roleFields[$key]->is_selected = $fieldValue->value;
                             }
-                            elseif(!empty($fieldValue) && $value->type == 'radio' && ($fieldValue->value == 'yes' ||  $fieldValue->value == '1'))
+                            elseif(!empty($fieldValue) && $value->type == 'radio' && ($fieldValue->value == 'Yes' ||  $fieldValue->value == '1'))
                             {
                                 $roleFields[$key]->is_selected = true;
                             }
