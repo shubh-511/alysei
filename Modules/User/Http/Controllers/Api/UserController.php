@@ -738,7 +738,7 @@ class UserController extends CoreController
             }else {
 
                 if($field->required == 'yes'){
-                    $rules[$field->name] = 'required|max:100';
+                    $rules[$field->name] = 'required|max:200';
                 }
             }
         }
