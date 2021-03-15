@@ -43,6 +43,7 @@ class CreateUsersTable extends Migration
             $table->string('migrated_id')->nullable();
             $table->string('user_type')->default("Alysei");
             $table->integer('avatar_id')->nullable();
+            $table->integer('cover_id')->nullable();
             $table->string('key')->comment("forgot key")->nullable();
             $table->integer('role_id')->unsigned();
 

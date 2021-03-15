@@ -202,7 +202,7 @@ class UserController extends CoreController
                 $user->locale = $request->locale;
                 $user->save();
 
-                $userData = User::with('profile_image','roles')->where('user_id','=',$this->user->user_id)->first();
+                $userData = User::select('*','name as username')->with('profile_image','roles')->where('user_id','=',$this->user->user_id)->first();
                 $token =  $userData->createToken('alysei')->accessToken; 
                 
                 return response()->json(['success' => $this->successStatus,
@@ -304,9 +304,13 @@ class UserController extends CoreController
                             {
                                 $roleFields[$key]->is_selected = $fieldValue->value;
                             }
+                            elseif(!empty($fieldValue) && $value->type == 'radio' && ($fieldValue->value == 'yes' ||  $fieldValue->value == '1'))
+                            {
+                                $roleFields[$key]->is_selected = true;
+                            }
                             else
                             {
-                                $roleFields[$key]->is_selected = '';
+                                $roleFields[$key]->is_selected = false;
                             }
                             
 
@@ -403,7 +407,7 @@ class UserController extends CoreController
 
                     Cache::forever('profile_update_form', $steps);                      
             }
-            return response()->json(['success'=>$this->successStatus,'data' =>$steps,'response_time'=>$response_time], $this->successStatus); 
+            return response()->json(['success'=>$this->successStatus,'data' =>['step_1'=>$steps],'response_time'=>$response_time], $this->successStatus); 
         }      
         catch(\Exception $e)
         {
@@ -484,6 +488,15 @@ class UserController extends CoreController
                             }
                            
                         }
+			$userProfile = User::where('user_id', $user_id)->first();
+                        if(!empty($request->file('avatar_id')))
+		        {
+		            $userProfile->photo_of_label = $this->uploadImage($request->file('avatar_id'));
+		        }
+		        if(!empty($request->file('cover_id')))
+		        {
+		            $userProfile->photo_of_label = $this->uploadImage($request->file('cover_id'));
+		        }
 
                             return response()->json(['success' => $this->successStatus,
                                  'message' => $this->translate('messages.'."Profile updated","Profile updated")
@@ -522,7 +535,7 @@ class UserController extends CoreController
 
             foreach($fieldOptions as $key => $fieldOption)
             {
-                $userCertificates = Certificate::where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                $userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
                 $fieldOptions[$key]->certificates = $userCertificates;
             } 
 
@@ -562,13 +575,37 @@ class UserController extends CoreController
             
             if(!empty($checkExistingCertificate))
             {
-                
+                if(!empty($request->file('photo_of_label')))
+                {
+                    $checkExistingCertificate->photo_of_label = $this->uploadImage($request->file('photo_of_label'));
+                }
+                if(!empty($request->file('fce_sid_certification')))
+                {
+                    $checkExistingCertificate->fce_sid_certification = $this->uploadImage($request->file('fce_sid_certification'));
+                }
+                if(!empty($request->file('phytosanitary_certificate')))
+                {
+                    $checkExistingCertificate->phytosanitary_certificate = $this->uploadImage($request->file('phytosanitary_certificate'));
+                }
+                if(!empty($request->file('packaging_for_usa')))
+                {
+                    $checkExistingCertificate->packaging_for_usa = $this->uploadImage($request->file('packaging_for_usa'));
+                }
+                if(!empty($request->file('food_safety_plan')))
+                {
+                    $checkExistingCertificate->food_safety_plan = $this->uploadImage($request->file('food_safety_plan'));
+                }
+                if(!empty($request->file('animal_helath_asl_certificate')))
+                {
+                    $checkExistingCertificate->animal_helath_asl_certificate = $this->uploadImage($request->file('animal_helath_asl_certificate'));
+                }
+                $checkExistingCertificate->save();
             }
             else
             {
                 $userCertificate = new Certificate;
                 $userCertificate->user_id = $loggedInUser->user_id;
-                $userCertificate->user_field_option_id = $loggedInUser->user_field_option_id;
+                $userCertificate->user_field_option_id = $request->user_field_option_id;
                
                 if(!empty($request->file('photo_of_label')))
                 {
@@ -600,7 +637,7 @@ class UserController extends CoreController
 
             
             return response()->json(['success' => $this->successStatus,
-                             'data' => $user,
+                             'message' => $this->translate('messages.'.'Uploaded successfully','Uploaded successfully'),
                             ], $this->successStatus);
         }
         catch(\Exception $e)

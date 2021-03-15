@@ -19,7 +19,7 @@ class LoginController extends CoreController
     public $exceptionStatus = 409;
     public $unauthorisedStatus = 401;
     
-    public $userFieldsArray = ['user_id', 'name', 'email','first_name','last_name','middle_name','account_enabled','phone','postal_code','last_login_date','roles'];
+    public $userFieldsArray = ['user_id', 'name', 'email','website','locale','display_name','first_name','last_name','middle_name','account_enabled','phone','postal_code','last_login_date','roles'];
     /** 
      * Login
      * 
@@ -60,11 +60,13 @@ class LoginController extends CoreController
                 
                     /*if($user->account_enabled == 'active')
                     {*/
+                    $userData = User::select('*','name as username')->with('roles','profile_image','cover_image')->where('user_id', $user->user_id)->first();
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
 
                         return response()->json(['success' => $this->successStatus,
-                                             'data' => $user->only($this->userFieldsArray),
+                                             //'data' => $user->only($this->userFieldsArray),
+                                             'data' => $userData,
                                              'token'=> $token
                                             ], $this->successStatus); 
                     /*}else{

@@ -17,11 +17,15 @@ class SeedFeaturedListingFieldOptionsTableSeeder extends Seeder
     {
         Model::unguard();
         $data = array(
-                        array("featured_listing_field_id" => 7,"option"=>"Event Type 1"),
-                        array("featured_listing_field_id" => 7,"option"=>"Event Type 2"),
-                        array("featured_listing_field_id" => 7,"option"=>"Event Type 3"),
-                        array("featured_listing_field_id" => 7,"option"=>"Event Type 4"),
-                        array("featured_listing_field_id" => 7,"option"=>"Event Type 5"),
+                        array("featured_listing_field_id" => 7,"option"=>"Adventure"),
+                        array("featured_listing_field_id" => 7,"option"=>"Tech"),
+                        array("featured_listing_field_id" => 7,"option"=>"Family"),
+                        array("featured_listing_field_id" => 7,"option"=>"Wellness"),
+                        array("featured_listing_field_id" => 7,"option"=>"Fitness"),
+                        array("featured_listing_field_id" => 7,"option"=>"Photography"),
+                        array("featured_listing_field_id" => 7,"option"=>"Food & Drink"),
+                        array("featured_listing_field_id" => 7,"option"=>"Writing"),
+                        array("featured_listing_field_id" => 7,"option"=>"Culture"),
                         
                     );
 
