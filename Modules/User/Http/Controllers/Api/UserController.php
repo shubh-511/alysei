@@ -342,7 +342,21 @@ class UserController extends CoreController
                                             ->whereIn('value', $userOptionValue)
                                             ->first();*/
                                             
-                                            if($grandParent == $oneDepth->user_field_option_id)
+                                            /*if($grandParent == $oneDepth->user_field_option_id)
+                                            {
+                                                $value->options[$k]->is_selected = true;
+
+                                            }else{
+                                                $value->options[$k]->is_selected = false;
+                                            }*/
+
+                                            $fieldValuessParents = DB::table('user_field_values')
+                                                ->where('user_id', $user_id)
+                                                ->where('user_field_id', $oneDepth->user_field_id)
+                                                ->where('value', $oneDepth->user_field_option_id)
+                                                ->first();
+
+                                            if(!empty($fieldValuessParents) )
                                             {
                                                 $value->options[$k]->is_selected = true;
 
@@ -488,18 +502,21 @@ class UserController extends CoreController
                             }
                            
                         }
-			$userProfile = User::where('user_id', $user_id)->first();
-                        if(!empty($request->file('avatar_id')))
+			    $userProfile = User::where('user_id', $user_id)->first();
+                if(!empty($request->file('avatar_id')))
 		        {
-		            $userProfile->photo_of_label = $this->uploadImage($request->file('avatar_id'));
+		            $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
 		        }
 		        if(!empty($request->file('cover_id')))
 		        {
-		            $userProfile->photo_of_label = $this->uploadImage($request->file('cover_id'));
+		            $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
 		        }
+                $userProfile->save();
+                $userData = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
 
                             return response()->json(['success' => $this->successStatus,
-                                 'message' => $this->translate('messages.'."Profile updated","Profile updated")
+                                 'message' => $this->translate('messages.'."Profile updated","Profile updated"),
+                                 'data' => $userData
                                 ], $this->successStatus);
                         
                 //}

@@ -60,7 +60,7 @@ class LoginController extends CoreController
                 
                     /*if($user->account_enabled == 'active')
                     {*/
-                    $userData = User::select('*','name as username')->with('roles','profile_image','cover_image')->where('user_id', $user->user_id)->first();
+                    $userData = User::select('*','name as username')->with('roles','avatar_id','cover_id')->where('user_id', $user->user_id)->first();
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
 
