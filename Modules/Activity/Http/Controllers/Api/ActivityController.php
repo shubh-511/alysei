@@ -3,17 +3,20 @@
 namespace Modules\Activity\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\ActivityActionType;
 use Modules\Activity\Entities\ActivityAttachment;
+use Modules\Activity\Entities\ActivityAttachmentLink;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
 
-class ActivityController extends Controller
+class ActivityController extends CoreController
 {
     use UploadImageTrait;
     public $successStatus = 200;
@@ -32,9 +35,10 @@ class ActivityController extends Controller
         });
     }
 
-    /***
-    Add Post
-    ***/
+    /*
+     * Add Post
+     * @Params $request
+     */
     public function addPost(Request $request)
     {
         try
@@ -44,7 +48,7 @@ class ActivityController extends Controller
             //$requestedFields = json_decode($requestFields, true);
             $requestedFields = $requestFields;
             
-            $rules = $this->validateData($requestedFields);
+            $rules = $this->validateData($requestedFields, 1);
 
             $validator = Validator::make($requestedFields, $rules);
 
@@ -52,7 +56,7 @@ class ActivityController extends Controller
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $actionType = $this->checkActionType($requestedFields["action_type"]);
+            $actionType = $this->checkActionType($requestedFields["action_type"], 1);
             if($actionType[1] > 0)
             {
                 return response()->json(['success'=>false,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
@@ -94,27 +98,97 @@ class ActivityController extends Controller
         }
     }
 
+    /*
+     * Edit Post
+     * @Params $request
+     */
+    public function editPost(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $requestFields = $request->params;
+            //$requestedFields = json_decode($requestFields, true);
+            $requestedFields = $requestFields;
+            
+            $rules = $this->validateData($requestedFields, 2);
+
+            $validator = Validator::make($requestedFields, $rules);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $actionType = $this->checkActionType($requestedFields["action_type"], 2);
+            if($actionType[1] > 0)
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
+            }
+            else
+            {
+                $activityActionType = ActivityActionType::where("type", $requestedFields["action_type"])->first();
+                $activityAction = ActivityAction::where('activity_action_id', $requestedFields["post_id"])->where('subject_id', $user->user_id)->first();
+                if(!empty($activityAction))
+                {
+                    $activityAction->type = $activityActionType->activity_action_type_id;
+                    $activityAction->body = $requestedFields["body"];
+                    $activityAction->privacy = $requestedFields["privacy"];
+                    $activityAction->save();
+
+                    return response()->json(['success' => $this->successStatus,
+                                        'message' => $this->translate('messages.'."Post updated successfuly!","Post updated successfuly!"),
+                                        ], $this->successStatus);
+                }
+                else
+                {
+                    $message = $this->translate('messages.'."Invalid post id","Invalid post id");
+                    return response()->json(['success'=>false,'errors' =>['exception' => $message]], $this->exceptionStatus);
+                }
+                
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
 
     /*
      * Validate Data
      * @Params $requestedfields
      */
 
-    public function validateData($requestedFields)
+    public function validateData($requestedFields, $addOrUpdate)
     {
         $rules = [];
-        foreach ($requestedFields as $key => $field) {
-            
-            if($key == 'action_type'){
-                $rules[$key] = 'required|max:190';
-            }
-            elseif($key == 'privacy'){
-                $rules[$key] = 'required|max:190';
+        if($addOrUpdate == 1) // validation for adding activity post
+        {
+            foreach ($requestedFields as $key => $field) {
+                if($key == 'action_type'){
+                    $rules[$key] = 'required|max:190';
+                }
+                elseif($key == 'privacy'){
+                    $rules[$key] = 'required|max:190';
+                }
             }
         }
-
+        elseif($addOrUpdate == 2) // validation for updating activity post
+        {
+            foreach ($requestedFields as $key => $field) {
+                if($key == 'post_id'){
+                    $rules[$key] = 'required';
+                }
+                elseif($key == 'action_type'){
+                    $rules[$key] = 'required|max:190';
+                }
+                elseif($key == 'privacy'){
+                    $rules[$key] = 'required|max:190';
+                }
+            }
+        }
+        
         return $rules;
-
     }
 
     /*
@@ -122,24 +196,39 @@ class ActivityController extends Controller
      * @Params $type
      */
 
-    public function checkActionType($type)
+    public function checkActionType($type, $addOrUpdate)
     {
         $status = [];
         $activityActionType = ActivityActionType::where("type", $type)->first();
         if(!empty($activityActionType))
         {
-            if($activityActionType->enabled == '0')
+            if($addOrUpdate == 1) // adding a new activity post
             {
-                $status = [$this->translate('messages.'."Currently you are not authorised to post anything","Currently you are not authorised to post anything"), 1];
+                if($activityActionType->enabled == '0')
+                {
+                    $status = [$this->translate('messages.'."Currently you are not authorised to post anything","Currently you are not authorised to post anything"), 1];
+                }
+                elseif($activityActionType->attachable == '0')
+                {
+                    $status = [$this->translate('messages.'."You are not authorised to attach a media","You are not authorised to attach a media"), 2];
+                }
+                else
+                {
+                    $status = [$this->translate('messages.'."Success","Success"), 0];
+                }
             }
-            elseif($activityActionType->attachable == '0')
+            elseif($addOrUpdate == 2) // updating existing activity post
             {
-                $status = [$this->translate('messages.'."You are not authorised to attach a media","You are not authorised to attach a media"), 2];
+                if($activityActionType->editable == '0')
+                {
+                    $status = [$this->translate('messages.'."Currently you are not authorised to edit this post","Currently you are not authorised to edit this post"), 1];
+                }
+                else
+                {
+                    $status = [$this->translate('messages.'."Success","Success"), 0];
+                }
             }
-            else
-            {
-                $status = [$this->translate('messages.'."Success","Success"), 0];
-            }
+            
         }
         else
         {
@@ -158,13 +247,18 @@ class ActivityController extends Controller
     {
         foreach($attchments as $key => $attachment)
         {
-            $attachmentUrl = $this->postAttchment($attachment);
+            if($attchments[$key]->hasFile($attchments[$key]))
+            {
+                $attachmentLinkId = $this->postAttchment($attachment);
 
-            $activityAttchments = new ActivityAttachment;
-            $activityAttchments->action_id = $actionId;
-            $activityAttchments->type = "post_link";
-            $activityAttchments->attachment_url = $attachmentUrl;
-            $activityAttchments->save();
+                $activityAttchments = new ActivityAttachment;
+                $activityAttchments->action_id = $actionId;
+                $activityAttchments->type = "storage_file";
+                $activityAttchments->id = $attachmentLinkId;
+                $activityAttchments->save();
+
+            }
+            
         }
         
     }

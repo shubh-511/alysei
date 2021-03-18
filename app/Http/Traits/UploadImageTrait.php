@@ -8,6 +8,7 @@ use App\User;
 use Carbon\Carbon;
 use App\Attachment;
 use Modules\Activity\Entities\ActivityAttachment;
+use Modules\Activity\Entities\ActivityAttachmentLink;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -78,8 +79,13 @@ trait UploadImageTrait
         {
             $headerTarget = '';
         }
+
+        $activityAttachmentLink = new ActivityAttachmentLink;
+        $activityAttachmentLink->attachment_url = $headerTarget;
+        $activityAttachmentLink->attachment_url = $ext1;
+        $activityAttachmentLink->save();
         
-        return $headerTarget;
+        return $activityAttachmentLink->activity_attachment_link_id;
     }
 
 }
