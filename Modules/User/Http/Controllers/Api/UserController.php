@@ -514,22 +514,15 @@ class UserController extends CoreController
                         
 
 			    $userProfile = User::where('user_id', $user_id)->first();
-                /*if(!empty($request->file('avatar_id')))
+                if(!empty($request->file('avatar_id')))
 		        {
 		            $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
 		        }
 		        if(!empty($request->file('cover_id')))
 		        {
 		            $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
-		        }*/
-                if(!empty($requestFieldAvatar))
-                {
-                    $userProfile->avatar_id = $this->uploadImage($requestFieldAvatar);
-                }
-                if(!empty($requestFieldCover))
-                {
-                    $userProfile->cover_id = $this->uploadImage($requestFieldCover);
-                }
+		        }
+                
                 $userProfile->save();
                 $userData = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
 
