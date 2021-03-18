@@ -17,7 +17,7 @@ class CreateActivityAttachmentsTable extends Migration
             $table->increments('activity_attachment_id');
             $table->integer('action_id');
             $table->string('type');
-            $table->string('attachment_url');
+            $table->integer('id');
             $table->timestamps();
         });
     }
