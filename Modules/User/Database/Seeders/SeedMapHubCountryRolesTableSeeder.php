@@ -23,7 +23,8 @@ class SeedMapHubCountryRolesTableSeeder extends Seeder
                         array("country_id" => "233", "role_id" => "7"),
                         array("country_id" => "233", "role_id" => "8"),
                         array("country_id" => "233", "role_id" => "4"),
-                        array("country_id" => "233", "role_id" => "5")
+                        array("country_id" => "233", "role_id" => "5"),
+                        array("country_id" => "233", "role_id" => "9")
                     );
 
         foreach ($data as $key => $value) {
