@@ -337,27 +337,6 @@ class UserController extends CoreController
                                                 $grandParent = $this->getUserFieldOptionGrandParent($fieldValue->value);
                                             }
 
-                                            /*$userOptionValue = DB::table('user_field_values')
-                                            ->where('user_id', $user_id)
-                                            ->where('user_field_id', $value->user_field_id)
-                                            ->get();
-
-                                            $userOptionValue = $userOptionValue->pluck('value');
-
-                                            $userOptionValue = DB::table('user_field_values')
-                                            ->where('user_id', $user_id)
-                                            ->where('user_field_id', $value->user_field_id)
-                                            ->whereIn('value', $userOptionValue)
-                                            ->first();*/
-                                            
-                                            /*if($grandParent == $oneDepth->user_field_option_id)
-                                            {
-                                                $value->options[$k]->is_selected = true;
-
-                                            }else{
-                                                $value->options[$k]->is_selected = false;
-                                            }*/
-
                                             $fieldValuessParents = DB::table('user_field_values')
                                                 ->where('user_id', $user_id)
                                                 ->where('user_field_id', $oneDepth->user_field_id)
@@ -371,15 +350,6 @@ class UserController extends CoreController
                                             }else{
                                                 $value->options[$k]->is_selected = false;
                                             }
-
-                                            /*if(!empty($userOptionValue))
-                                            {
-                                                $value->options[$k]->is_selected = true;
-
-                                            }else{
-                                                $value->options[$k]->is_selected = false;
-                                            }*/
-                                            
 
                                             $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
 
@@ -429,12 +399,128 @@ class UserController extends CoreController
 
                     Cache::forever('profile_update_form', $steps);                      
             }
-            return response()->json(['success'=>$this->successStatus,'data' =>['step_1'=>$steps],'response_time'=>$response_time], $this->successStatus); 
+
+            /*****Featured Listings****/
+
+            $userFieldInfo = [];
+
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            
+            $products = [];
+            
+            foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+                
+                $featuredListing = FeaturedListing::with('image')
+                                    ->where('user_id', $this->user->user_id)
+                                    ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                    ->orderBy('featured_listing_id','DESC')->get(); 
+
+                $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
+                
+            }
+
+            //Get Featured Listing Fields
+
+            //Get Featured Type
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
+            $fieldsData = [];
+            foreach ($featuredTypes as $key => $value) {
+
+                $value->title = $this->translate('messages.'.$value->title,$value->title);
+
+                $value->options = $this->getFeaturedListingFieldOptionParent($value->featured_listing_field_id);
+
+                if(!empty($value->options)){
+                    foreach ($value->options as $k => $oneDepth) {
+
+                            $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
+                        }
+                }
+
+                $fieldsData[$value->featured_listing_type_slug][] = $value;
+            }
+
+            foreach($fieldsData as $fieldsDataKey => $fieldsDataValue){
+                
+
+                $key = array_search($fieldsDataKey, array_column($products, 'slug'));
+
+                $products[$key]['fields'] = $fieldsDataValue;
+            }
+            
+            //END
+            $data = ['step_1'=>$steps,'products' => $products];
+
+            /*************************/
+
+
+            return response()->json(['success'=>$this->successStatus,'data' => $data,'response_time'=>$response_time], $this->successStatus); 
         }      
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /*
+     * Get Featured Type Using Role Id
+     * @params $roleId
+     */
+    public function getFeaturedListingTypes($roleId){
+        $featuredTypes = DB::table("featured_listing_types as flt")
+            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+
+            ->where("fltrm.role_id","=",$roleId)
+            ->get();
+
+        return $featuredTypes;
+    }
+
+    /*
+     * Get Featured Listing Fields Using Role Id
+     * @params $roleId
+     */
+    public function getFeaturedListingFieldsByRoleId($roleId){
+        
+        $featuredTypes = DB::table("featured_listing_types as flt")
+            ->select("flt.title as featured_listing_type_title","flt.slug as featured_listing_type_slug","flfrm.*","fltrm.*","flf.*")
+            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+
+            ->join("featured_listing_field_role_maps as flfrm",function ($join) {
+                $join->on('flfrm.featured_listing_type_id', '=', 'fltrm.featured_listing_type_id');
+                $join->on('flfrm.featured_listing_type_id','=','flt.featured_listing_type_id');
+            }) 
+
+            ->join("featured_listing_fields as flf", 'flf.featured_listing_field_id', '=', 'flfrm.featured_listing_field_id')
+
+            ->where("fltrm.role_id","=",$roleId)
+            ->where("flfrm.role_id","=",$roleId)
+            ->get();
+
+        return $featuredTypes;
+    }
+
+    /*
+     * Get All Fields Option who are child
+     * @params $featured_listing_field_id 
+    */
+    public function getFeaturedListingFieldOptionParent($fieldId){
+
+        $fieldOptionData = [];
+        
+        if($fieldId > 0){
+            $fieldOptionData = DB::table('featured_listing_field_options')
+                    ->where('featured_listing_field_id','=',$fieldId)
+                    ->where('parent','=',0)
+                    ->get();
+
+            foreach ($fieldOptionData as $key => $option) {
+                $fieldOptionData[$key]->option = $this->translate('messages.'.$option->option,$option->option);
+            }
+        }
+        
+        return $fieldOptionData;    
+        
     }
 
     /*
