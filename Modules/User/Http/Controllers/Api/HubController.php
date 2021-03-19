@@ -87,12 +87,12 @@ class HubController extends Controller
 
             if(count($getCountries) > 0)
             {
-                $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
-                $countryUpcomingCountrieData = Country::where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
+                $countryData = Country::with('flag_id')->where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                $countryUpcomingCountrieData = Country::with('flag_id')->where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
             }
             else
             {
-                $countryData = Country::where('status', '1')->orderBy('name','ASC')->get();
+                $countryData = Country::with('flag_id')->where('status', '1')->orderBy('name','ASC')->get();
             }
             
             if(count($countryData) > 0)
