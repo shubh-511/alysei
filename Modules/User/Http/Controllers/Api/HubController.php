@@ -80,7 +80,7 @@ class HubController extends Controller
         {
             $user = $this->user;
             $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->where('is_active', '1')->get();
-            $getUpcomingCountries = MapHubCountryRole::where('is_active', '0')->get();
+            $getUpcomingCountries = Country::where('is_active', '0')->get();
 
             $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
 
