@@ -80,13 +80,15 @@ class HubController extends Controller
         {
             $user = $this->user;
             $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->where('is_active', '1')->get();
-            $getUpcomingCountries = Country::where('is_active', '0')->get();
+            $getUpcomingCountries = MapHubCountryRole::where('is_active', '0')->get();
 
             $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
+            $getComingCountries = $getUpcomingCountries->pluck('country_id')->toArray();
 
             if(count($getCountries) > 0)
             {
                 $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                $countryUpcomingCountrieData = Country::where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
             }
             else
             {
@@ -95,7 +97,7 @@ class HubController extends Controller
             
             if(count($countryData) > 0)
             {
-                $data = ['active_countries' => $countryData, 'upcoming_countries' => $getUpcomingCountries];
+                $data = ['active_countries' => $countryData, 'upcoming_countries' => $countryUpcomingCountrieData];
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $data,
                                         ], $this->successStatus);
