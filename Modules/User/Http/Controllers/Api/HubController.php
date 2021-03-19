@@ -72,6 +72,46 @@ class HubController extends Controller
     }
 
     /***
+    get Active and Upcoming Countries
+    ***/
+    public function getActiveAndUpcomingCountries(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->where('is_active', '1')->get();
+            $getUpcomingCountries = MapHubCountryRole::where('is_active', '0')->get();
+
+            $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
+
+            if(count($getCountries) > 0)
+            {
+                $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+            }
+            else
+            {
+                $countryData = Country::where('status', '1')->orderBy('name','ASC')->get();
+            }
+            
+            if(count($countryData) > 0)
+            {
+                $data = ['active_countries' => $countryData, 'upcoming_countries' => $getUpcomingCountries];
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $data,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => 'No countries found']], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /***
     get Cities for Hubs
     ***/
     public function getHubsCity(Request $request)

@@ -153,6 +153,23 @@ class ActivityController extends CoreController
         }
     }
 
+    /*
+     * Delete Post
+     * @Params $request
+     */
+    public function deletePost(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
 
     /*
      * Validate Data
