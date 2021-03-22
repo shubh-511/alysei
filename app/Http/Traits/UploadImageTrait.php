@@ -88,4 +88,17 @@ trait UploadImageTrait
         return $activityAttachmentLink->activity_attachment_link_id;
     }
 
+    /***
+    Delete Post Attchments
+    ***/
+    public function deletePostAttachment($attachmentId){
+        $attachment = ActivityAttachmentLink::where('activity_attachment_link_id',$attachmentId)->first();
+        
+        if($attachment){
+            unlink(env('BASE_URL').''.$attachment->attachment_url);
+            ActivityAttachmentLink::where('activity_attachment_link_id',$attachmentId)->delete();
+        }
+        
+    }
+
 }
