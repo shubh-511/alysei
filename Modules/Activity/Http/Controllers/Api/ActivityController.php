@@ -307,7 +307,7 @@ class ActivityController extends CoreController
                         }
                         else
                         {
-                            $message = "You liked this post";
+                            $message = "You have to first like this post";
                             return response()->json(['success' => $this->exceptionStatus,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->exceptionStatus);
