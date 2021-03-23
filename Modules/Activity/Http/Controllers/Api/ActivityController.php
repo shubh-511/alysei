@@ -245,7 +245,7 @@ class ActivityController extends CoreController
      * Like Post
      * @Params $request
      */
-    public function likePost(Request $request)
+    public function likeUnlikePost(Request $request)
     {
         try
         {
@@ -360,22 +360,79 @@ class ActivityController extends CoreController
             $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
             if(!empty($activityPost))
             {
+                $activityActionType = ActivityActionType::where('activity_action_type_id', $activityPost->type)->first();
+                $actionType = $this->checkActionType($activityActionType->type, 4);
+                if($actionType[1] > 0)
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
+                }
+                else
+                {
+                    $activityComment = new CoreComment;
+                    $activityComment->resource_type = "user";
+                    $activityComment->resource_id = $request->post_id;
+                    $activityComment->poster_type = "user";
+                    $activityComment->poster_id = $user->user_id;
+                    $activityComment->body = $request->comment;
+                    $activityComment->save();
+
+                    $activityPost->comment_count = $activityPost->comment_count + 1;
+                    $activityPost->save();
+
+                    $message = "Your comment has been posted successfully";
+                    return response()->json(['success' => $this->successStatus,
+                                             'message' => $this->translate('messages.'.$message,$message),
+                                            ], $this->successStatus);
+                }
+            }
+            else
+            {
+                $message = "Invalid post id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Comment Post
+     * @Params $request
+     */
+    public function replyPost(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'post_id' => 'required',
+                'comment_id' => 'required',
+                'reply' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
+            if(!empty($activityPost))
+            {
                 $activityComment = new CoreComment;
                 $activityComment->resource_type = "user";
                 $activityComment->resource_id = $request->post_id;
                 $activityComment->poster_type = "user";
                 $activityComment->poster_id = $user->user_id;
-                $activityComment->body = $user->user_id;
+                $activityComment->body = $request->reply;
+                $activityComment->parent_id = $request->comment_id;
                 $activityComment->save();
 
-                $activityPost->comment_count = $activityPost->comment_count + 1;
-                $activityPost->save();
-
-                $message = "Your comment has been posted successfully";
+                $message = "Your reply has been posted successfully";
                 return response()->json(['success' => $this->successStatus,
                                          'message' => $this->translate('messages.'.$message,$message),
                                         ], $this->successStatus);
-                
             }
             else
             {
@@ -408,10 +465,10 @@ class ActivityController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $activityPostComment = CoreComment::where('comment_id', $request->comment_id)->where('poster_id', $user->user_id)->first();
+            $activityPostComment = CoreComment::where('core_comment_id', $request->comment_id)->where('poster_id', $user->user_id)->first();
             if(!empty($activityPostComment))
             {
-                $activityPostCommentDelete = CoreComment::where('comment_id', $request->comment_id)->where('poster_id', $user->user_id)->delete();
+                $activityPostCommentDelete = CoreComment::where('core_comment_id', $request->comment_id)->where('poster_id', $user->user_id)->delete();
                 if($activityPostCommentDelete == 1)
                 {
                     $activityPost = ActivityAction::where('activity_action_id', $request->post_id)->first();
@@ -547,6 +604,17 @@ class ActivityController extends CoreController
                 if($activityActionType->displayable == '0')
                 {
                     $status = [$this->translate('messages.'."Currently you are not authorised to view this post","Currently you are not authorised to view this post"), 1];
+                }
+                else
+                {
+                    $status = [$this->translate('messages.'."Success","Success"), 0];
+                }
+            }
+            elseif($addOrUpdate == 4) // check is_commentable activity post
+            {
+                if($activityActionType->commentable == '0')
+                {
+                    $status = [$this->translate('messages.'."You are not authorised to comment on this post","You are not authorised to comment on this post"), 1];
                 }
                 else
                 {

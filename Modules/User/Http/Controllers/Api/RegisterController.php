@@ -37,7 +37,7 @@ class RegisterController extends CoreController
 
             foreach ($roles as $key => $role) {
                 $roles[$key]->name = $this->translate('messages.'.$roles[$key]->name,$roles[$key]->name);
-                $roles[$key]->image = env("APP_URL")."/images/roles/".$role->slug.".png";
+                $roles[$key]->image = env("APP_URL")."images/roles/".$role->slug.".png";
             }
 
             foreach ($importerRoles as $key => $role) {
