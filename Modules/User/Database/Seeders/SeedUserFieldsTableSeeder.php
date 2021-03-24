@@ -75,7 +75,7 @@ class SeedUserFieldsTableSeeder extends Seeder
                         
                         array("title"=>"State/Region","placeholder"=>"Select",'type'=>'select','name'=>'state','required'=>'yes','conditional'=>'no','api_call'=>'true'),
 
-                        array("title"=>"City","placeholder"=>"Select",'type'=>'select','name'=>'city','required'=>'no','conditional'=>'no'),
+                        array("title"=>"City","placeholder"=>"Select",'type'=>'select','name'=>'city','required'=>'yes','conditional'=>'no'),
 
                         array("title"=>"VAT No.","placeholder"=>"Enter VAT no.",'type'=>'text','name'=>'vat_number','required'=>'yes','conditional'=>'no','hint'=>'Enter VAT no.'),
 
