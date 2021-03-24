@@ -31,4 +31,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('follow/user', 'Api\FollowUserController@followUnfollowUser');
 	Route::get('get/followers', 'Api\FollowUserController@getFollowersList');
 
+	Route::post('send/connection/request', 'Api\ConnectUserController@sendConnectionRequest');
+	Route::get('get/pending/request', 'Api\ConnectUserController@getMyPendingRequest');
+
 });
