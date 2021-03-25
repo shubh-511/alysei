@@ -652,16 +652,24 @@ class UserController extends CoreController
 
             foreach($fieldOptions as $key => $fieldOption)
             {
-                //$userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
-                $userCertificates = Certificate::where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                $userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                //$userCertificates = Certificate::where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
 
-                $fieldOptions[$key]->certificates = $userCertificates;
-                $fieldOptions[$key]->certificates->photo_of_label = $this->getCertificatesById($userCertificates->photo_of_label);
-                $fieldOptions[$key]->certificates->fce_sid_certification = $this->getCertificatesById($userCertificates->fce_sid_certification);
-                $fieldOptions[$key]->certificates->phytosanitary_certificate = $this->getCertificatesById($userCertificates->phytosanitary_certificate);
-                $fieldOptions[$key]->certificates->packaging_for_usa = $this->getCertificatesById($userCertificates->packaging_for_usa);
-                $fieldOptions[$key]->certificates->food_safety_plan = $this->getCertificatesById($userCertificates->food_safety_plan);
-                $fieldOptions[$key]->certificates->animal_helath_asl_certificate = $this->getCertificatesById($userCertificates->animal_helath_asl_certificate);
+               
+                    //$fieldOptions[$key]->certificates = $userCertificates;
+                    
+                $fieldOptions[$key]->photo_of_label = (!empty($userCertificates->photo_of_label))?($this->getCertificatesById($userCertificates->photo_of_label)):"";
+
+                $fieldOptions[$key]->fce_sid_certification = (!empty($userCertificates->fce_sid_certification))?($this->getCertificatesById($userCertificates->fce_sid_certification)):"";
+
+                $fieldOptions[$key]->phytosanitary_certificate = (!empty($userCertificates->phytosanitary_certificate))?($this->getCertificatesById($userCertificates->phytosanitary_certificate)):"";
+
+                $fieldOptions[$key]->packaging_for_usa = (!empty($userCertificates->packaging_for_usa))?($this->getCertificatesById($userCertificates->packaging_for_usa)):"";
+
+                $fieldOptions[$key]->food_safety_plan = (!empty($userCertificates->food_safety_plan))?($this->getCertificatesById($userCertificates->food_safety_plan)):"";
+
+                $fieldOptions[$key]->animal_helath_asl_certificate = (!empty($userCertificates->animal_helath_asl_certificate))?($this->getCertificatesById($userCertificates->animal_helath_asl_certificate)):"";
+                
             } 
 
             $data = ['user_data' => $userData, 'data_certificates' => $fieldOptions];
