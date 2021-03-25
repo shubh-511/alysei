@@ -49,6 +49,18 @@ trait UploadImageTrait
        return Attachment::where('id',$attachmentId)->first();
     }
 
+    public function getCertificatesById($attachmentId){
+       $certificate = Attachment::where('id',$attachmentId)->first();
+       if(!empty($certificate))
+       {
+        return $certificate->attachment_url;
+       }
+       else
+       {
+        return "";
+       }
+    }
+
     public function deleteAttachment($attachmentId){
         $attachment = Attachment::where('id',$attachmentId)->first();
         

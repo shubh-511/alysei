@@ -652,8 +652,16 @@ class UserController extends CoreController
 
             foreach($fieldOptions as $key => $fieldOption)
             {
-                $userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                //$userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                $userCertificates = Certificate::where('user_id', $loggedInUser->user_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+
                 $fieldOptions[$key]->certificates = $userCertificates;
+                $fieldOptions[$key]->certificates->photo_of_label = $this->getCertificatesById($userCertificates->photo_of_label);
+                $fieldOptions[$key]->certificates->fce_sid_certification = $this->getCertificatesById($userCertificates->fce_sid_certification);
+                $fieldOptions[$key]->certificates->phytosanitary_certificate = $this->getCertificatesById($userCertificates->phytosanitary_certificate);
+                $fieldOptions[$key]->certificates->packaging_for_usa = $this->getCertificatesById($userCertificates->packaging_for_usa);
+                $fieldOptions[$key]->certificates->food_safety_plan = $this->getCertificatesById($userCertificates->food_safety_plan);
+                $fieldOptions[$key]->certificates->animal_helath_asl_certificate = $this->getCertificatesById($userCertificates->animal_helath_asl_certificate);
             } 
 
             $data = ['user_data' => $userData, 'data_certificates' => $fieldOptions];
@@ -699,28 +707,33 @@ class UserController extends CoreController
                 if(!empty($request->file('photo_of_label')))
                 {
                     $checkExistingCertificate->photo_of_label = $this->uploadImage($request->file('photo_of_label'));
+                    $checkExistingCertificate->save();
                 }
                 if(!empty($request->file('fce_sid_certification')))
                 {
                     $checkExistingCertificate->fce_sid_certification = $this->uploadImage($request->file('fce_sid_certification'));
+                    $checkExistingCertificate->save();
                 }
                 if(!empty($request->file('phytosanitary_certificate')))
                 {
                     $checkExistingCertificate->phytosanitary_certificate = $this->uploadImage($request->file('phytosanitary_certificate'));
+                    $checkExistingCertificate->save();
                 }
                 if(!empty($request->file('packaging_for_usa')))
                 {
                     $checkExistingCertificate->packaging_for_usa = $this->uploadImage($request->file('packaging_for_usa'));
+                    $checkExistingCertificate->save();
                 }
                 if(!empty($request->file('food_safety_plan')))
                 {
                     $checkExistingCertificate->food_safety_plan = $this->uploadImage($request->file('food_safety_plan'));
+                    $checkExistingCertificate->save();
                 }
                 if(!empty($request->file('animal_helath_asl_certificate')))
                 {
                     $checkExistingCertificate->animal_helath_asl_certificate = $this->uploadImage($request->file('animal_helath_asl_certificate'));
+                    $checkExistingCertificate->save();
                 }
-                $checkExistingCertificate->save();
             }
             else
             {
@@ -731,28 +744,33 @@ class UserController extends CoreController
                 if(!empty($request->file('photo_of_label')))
                 {
                     $userCertificate->photo_of_label = $this->uploadImage($request->file('photo_of_label'));
+                    $userCertificate->save();
                 }
                 if(!empty($request->file('fce_sid_certification')))
                 {
                     $userCertificate->fce_sid_certification = $this->uploadImage($request->file('fce_sid_certification'));
+                    $userCertificate->save();
                 }
                 if(!empty($request->file('phytosanitary_certificate')))
                 {
                     $userCertificate->phytosanitary_certificate = $this->uploadImage($request->file('phytosanitary_certificate'));
+                    $userCertificate->save();
                 }
                 if(!empty($request->file('packaging_for_usa')))
                 {
                     $userCertificate->packaging_for_usa = $this->uploadImage($request->file('packaging_for_usa'));
+                    $userCertificate->save();
                 }
                 if(!empty($request->file('food_safety_plan')))
                 {
                     $userCertificate->food_safety_plan = $this->uploadImage($request->file('food_safety_plan'));
+                    $userCertificate->save();
                 }
                 if(!empty($request->file('animal_helath_asl_certificate')))
                 {
                     $userCertificate->animal_helath_asl_certificate = $this->uploadImage($request->file('animal_helath_asl_certificate'));
+                    $userCertificate->save();
                 }
-                $userCertificate->save();
             }
             
 
