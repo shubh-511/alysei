@@ -33,5 +33,6 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::post('send/connection/request', 'Api\ConnectUserController@sendConnectionRequest');
 	Route::get('get/pending/request', 'Api\ConnectUserController@getMyPendingRequest');
+	Route::post('accept/reject/request', 'Api\ConnectUserController@acceptOrRejectConnection');
 
 });

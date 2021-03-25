@@ -141,18 +141,44 @@ class ConnectUserController extends CoreController
         try
         {
             $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'connection_id' => 'required', 
+                'accept_or_reject' => 'required', // 1=accept, 2=reject
+            ]);
 
-            $requests = Connection::with('user')->where('user_id', $user->user_id)->get();
-            if(count($requests) > 0)
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $checkConnectionId = Connection::with('user')->where('connection_id', $request->connection_id)->where('is_approved', '0')->where('user_id', $user->user_id)->first();
+            if(!empty($checkConnectionId))
             {
+                if($request->accept_or_reject == 1)
+                {
+                    $checkConnectionId->is_approved = '1';
+                    $checkConnectionId->save();
+
+                    $message = "Connection request accepted!";
+                }
+                elseif($request->accept_or_reject == 2)
+                {
+                    $rejectRequest = Connection::where('connection_id', $request->connection_id)->delete();
+
+                    $message = "Connection request rejected";
+                }
+                else
+                {
+                    $message = "accept/reject type is not valid";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+
                 return response()->json(['success' => $this->successStatus,
-                                    'count' => count($requests),
-                                    'data' => $requests,
+                                    'message' => $this->translate('messages.'.$message,$message),
                                     ], $this->successStatus);
             }
             else
             {
-                $message = "No pending requests found";
+                $message = "Connection id is not valid";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
         }
