@@ -656,7 +656,7 @@ class UserController extends CoreController
                 $fieldOptions[$key]->certificates = $userCertificates;
             } 
 
-            $data = ['user_data' => $userData, 'data' => $fieldOptions];
+            $data = ['user_data' => $userData, 'data_certificates' => $fieldOptions];
             return response()->json(['success' => $this->successStatus,
                             'data' => $data
                             ], $this->successStatus);
