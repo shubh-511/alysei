@@ -55,6 +55,8 @@ class CreateUsersTable extends Migration
             $table->text('address')->nullable();
             $table->string('website')->nullable();
             $table->string('fb_link')->nullable();
+            $table->string('vat_no')->nullable();
+            $table->string('fda_no')->nullable();
 
             $table->rememberToken();
             $table->string('timezone')->nullable();

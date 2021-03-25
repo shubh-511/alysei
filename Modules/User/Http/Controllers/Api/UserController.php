@@ -636,6 +636,8 @@ class UserController extends CoreController
         {
             $loggedInUser = $this->user;
 
+            $userData = User::select('user_id','fda_no','vat_no')->where('user_id', $loggedInUser->user_id)->first();
+
             $fieldOptions = DB::table('user_field_options')->where('parent','=',0)->where('head','=',0)->get();
 
             $fieldOptions = $fieldOptions->pluck('user_field_option_id');
@@ -654,9 +656,9 @@ class UserController extends CoreController
                 $fieldOptions[$key]->certificates = $userCertificates;
             } 
 
-            
+            $data = ['user_data' => $userData, 'data' => $fieldOptions];
             return response()->json(['success' => $this->successStatus,
-                             'data' => $fieldOptions,
+                            'data' => $data
                             ], $this->successStatus);
         }
         catch(\Exception $e)
@@ -678,6 +680,8 @@ class UserController extends CoreController
             $loggedInUser = $this->user;
 
             $validator = Validator::make($request->all(), [ 
+                'vat_no' => 'required',
+                'fda_no' => 'required'
                 'user_field_option_id' => 'required'                
             ]);
 
@@ -685,6 +689,8 @@ class UserController extends CoreController
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
+
+            $userData = User::where('user_id', $loggedInUser->user_id)->update(['vat_no' => $request->vat_no, 'fda_no' => $request->fda_no]);
             
             $checkExistingCertificate = Certificate::where('user_field_option_id', $request->user_field_option_id)->where('user_id', $loggedInUser->user_id)->first();
             
