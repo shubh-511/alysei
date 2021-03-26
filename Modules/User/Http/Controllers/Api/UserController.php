@@ -697,7 +697,7 @@ class UserController extends CoreController
 
             $validator = Validator::make($request->all(), [ 
                 'vat_no' => 'required',
-                'fda_no' => 'required',
+                //'fda_no' => 'required',
                 //'user_field_option_id' => 'required'                
             ]);
 
