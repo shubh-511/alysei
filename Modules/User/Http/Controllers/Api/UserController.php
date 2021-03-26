@@ -709,7 +709,17 @@ class UserController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $userData = User::where('user_id', $loggedInUser->user_id)->update(['vat_no' => $request->vat_no, 'fda_no' => $request->fda_no]);
+            $userDetail = User::where('user_id', $loggedInUser->user_id)->first();
+
+            $userDetail->vat_no = $request->vat_no;
+            if(!empty($request->fda_no))
+            {
+                $userDetail->fda_no = $request->fda_no;
+            }
+            $userDetail->save();
+
+            $userData = User::where('user_id', $loggedInUser->user_id)->first();
+
             if(!empty($request->user_field_option_id))
             {
                 $checkExistingCertificate = Certificate::where('user_field_option_id', $request->user_field_option_id)->where('user_id', $loggedInUser->user_id)->first();
