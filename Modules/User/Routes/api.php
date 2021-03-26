@@ -56,6 +56,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/user/certificates', 'Api\UserController@getUserCertificates');
 	Route::post('update/user/certificates', 'Api\UserController@updateUserCertificates');
 
+	Route::get('get/member/profile', 'Api\UserController@getMemberProfile');
+
 
 });
 

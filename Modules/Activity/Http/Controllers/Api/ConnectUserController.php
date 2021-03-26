@@ -40,6 +40,42 @@ class ConnectUserController extends CoreController
         });
     }
 
+
+    /*
+     * Get Permission For Sending Requests
+     * 
+     */
+    public function getPermissions()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $permissions = ConnectFollowPermission::select('connect_follow_permission_id','role_id','permission_type')->where('role_id', $user->role_id)->get();
+            if(count($permissions) > 0)
+            {
+                foreach($permissions as $key => $permission)
+                {
+                    $mapPermission = MapPermissionRole::select('map_permission_role_id','connect_follow_permission_id','role_id')->where('connect_follow_permission_id', $permission->connect_follow_permission_id)->get();
+                    $permissions[$key]->map_permissions = $mapPermission;
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'data' => $permissions,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No privillege granted for sending request or following someone";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /*
      * Send Connection Request
      * @Params $request
