@@ -57,6 +57,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('update/user/certificates', 'Api\UserController@updateUserCertificates');
 
 	Route::get('get/member/profile', 'Api\UserController@getMemberProfile');
+	Route::post('delete/featured/listing', 'Api\FeaturedListingsController@deleteFeaturedListing');
+	Route::post('remove/cover/profile/image', 'Api\UserController@removeProfileCoverImage');
 
 
 });

@@ -151,6 +151,10 @@ class RegisterController extends CoreController
                         $userData['timezone'] = $input['timezone'];
                         $userData['locale'] = $input['locale'];
                     }
+                    if(array_key_exists('vat_no',$inputData)){
+                        $userData['vat_no'] = $inputData['vat_no'];
+                        
+                    }
 
                     $user = User::create($userData); 
                     

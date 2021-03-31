@@ -220,6 +220,44 @@ class FeaturedListingsController extends CoreController
     }
 
     /* 
+     * delete featured listing
+     * @params $request
+     */
+    public function deleteFeaturedListing(Request $request){
+        try{
+                $input = $request->all();
+
+                $validator = Validator::make($input, [ 
+                    'featured_listing_id' => 'required', 
+                ]);
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+                
+                $isDeletedFeaturedListing = FeaturedListing::where('user_id','=',$this->user->user_id)->where('featured_listing_id', $request->featured_listing_id)->delete();
+                if($isDeletedFeaturedListing == 1)
+                {
+                    FeaturedListingValue::where('featured_listing_id', $request->featured_listing_id)->delete();
+                    $message = "Featured listing deleted successfully";
+                    return response()->json(['success' => $this->successStatus,
+                                 'message' => $this->translate('messages.'.$message,$message),
+                                ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "Something went wrong";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+                }
+
+                
+                                  
+        }catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /* 
      * Edit Featured Listing
      * params $featuredListingId
      */

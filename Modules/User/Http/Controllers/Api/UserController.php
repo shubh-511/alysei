@@ -602,15 +602,15 @@ class UserController extends CoreController
 
                         
 
-			    $userProfile = User::where('user_id', $user_id)->first();
+                $userProfile = User::where('user_id', $user_id)->first();
                 if(!empty($request->file('avatar_id')))
-		        {
-		            $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
-		        }
-		        if(!empty($request->file('cover_id')))
-		        {
-		            $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
-		        }
+                {
+                    $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
+                }
+                if(!empty($request->file('cover_id')))
+                {
+                    $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
+                }
                 
                 $userProfile->save();
                 $userData = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
@@ -627,6 +627,56 @@ class UserController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
         }
         
+    }
+
+    /* 
+     * Remove profile cover image
+     * @params $request
+     */
+    public function removeProfileCoverImage(Request $request)
+    {
+        try
+        {
+            $input = $request->all();
+
+            $validator = Validator::make($input, [ 
+                'image_type' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+            $userData = User::where('user_id','=',$this->user->user_id)->first();
+            if($request->image_type == 1) //removing profile image
+            {
+                $userData->avatar_id = null;
+                $userData->save();
+
+                $message = "Profile image removed successfully";
+                return response()->json(['success' => $this->successStatus,
+                             'message' => $this->translate('messages.'.$message,$message),
+                            ], $this->successStatus);
+            }
+            elseif($request->image_type == 2) //removing cover image
+            {
+                $userData->cover_id = null;
+                $userData->save();
+
+                $message = "Cover image removed successfully";
+                return response()->json(['success' => $this->successStatus,
+                             'message' => $this->translate('messages.'.$message,$message),
+                            ], $this->successStatus);
+            }
+            else
+            {
+                $message = "Image type is not valid";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+            }
+                         
+        }
+        catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
     }
 
     /*

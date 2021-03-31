@@ -15,7 +15,7 @@ class User extends Authenticatable
 	
 	protected $primaryKey = 'user_id';
 
-    protected $fillable = ['email','password','first_name','last_name','name','otp','role_id',"timezone","locale","account_enabled"];
+    protected $fillable = ['email','password','first_name','last_name','name','otp','role_id',"timezone","locale","account_enabled","vat_no"];
 
     public function roles(){
         return $this->belongsTo(Role::class, 'role_id','role_id')->select(array('role_id', 'name', 'slug', 'display_name'));
