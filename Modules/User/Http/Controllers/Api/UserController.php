@@ -185,8 +185,8 @@ class UserController extends CoreController
                 $loggedInUser = $this->user;
 
                 $validator = Validator::make($request->all(), [ 
-                    //'name' => 'required|unique:users,name,'.$loggedInUser->user_id,
-                    'name' => 'required',
+                    'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
+                    //'name' => 'required',
                     'display_name' => 'required|max:190',
                     'locale' => 'required',
                     'website' => 'required|max:190',
