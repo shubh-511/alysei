@@ -1009,6 +1009,14 @@ class UserController extends CoreController
 
         $userFieldSpecialityTrip = DB::table('user_fields')
             ->where('name', 'speciality')
+            ->first(); 
+
+        $userFieldRestaurantType = DB::table('user_fields')
+            ->where('name', 'restaurant_type')
+            ->first();        
+
+        $userFieldMenu = DB::table('user_fields')
+            ->where('name', 'our_menu')
             ->first();    
 
         if($role_id == 3 || $role_id == 4 || $role_id == 5 || $role_id == 6)
@@ -1174,7 +1182,45 @@ class UserController extends CoreController
         }
         elseif($role_id == 9)
         {
+            $restaurantTypeArray = [];
+            $aboutArray = [];
+            $menuArray = [];
 
+            if(!empty($userFieldAbout))
+            {
+                $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
+                $aboutArray[] = $fieldValueAbout->about;
+            }
+
+            if(!empty($userFieldRestaurantType))
+            {
+                $fieldValueRetaurantTypes = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldRestaurantType->user_field_id)
+                ->get();
+
+                if($fieldValueRetaurantTypes->count() > 0)
+                {
+                    foreach($fieldValueRetaurantTypes as $fieldValueRetaurantType)
+                    {
+                        $fieldValue = DB::table('user_field_options')
+                        ->where('user_field_id', $fieldValueRetaurantType->user_field_id)
+                        ->first();
+                        $restaurantTypeArray[] = $fieldValue->option;
+                    }
+                }
+            }
+
+            if(!empty($userFieldMenu))
+            {
+                $fieldValueMenu = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldMenu->user_field_id)
+                ->first();
+                $menuArray[] = $fieldValueMenu->value;
+            }
+
+            $values = ["restaurant_type" => $restaurantTypeArray, "about" => $aboutArray, "menu" => $menuArray];
         }
         elseif($role_id == 10)
         {
