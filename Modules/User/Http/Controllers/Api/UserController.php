@@ -14,6 +14,7 @@ use Modules\Activity\Entities\Follower;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Modules\User\Entities\Certificate;
+use Modules\User\Entities\Country;
 use Validator;
 use App\Image;
 use DB;
@@ -947,7 +948,246 @@ class UserController extends CoreController
         
     }
 
-   
+    /*
+     * Get About tab
+     *
+     */
+    public function getTabAbout()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            $data = $this->getFieldValueOnAboutTab($loggedInUser->role_id, $loggedInUser->user_id);
+
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $data
+                            ], $this->successStatus);
+
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+    *Get Tab content
+    */
+    public function getFieldValueOnAboutTab($role_id, $user_id)
+    {
+        $values = [];
+
+        $userFieldProductType = DB::table('user_fields')
+            ->where('name', 'product_type')
+            ->first();
+
+        $userFieldAbout = DB::table('user_fields')
+            ->where('name', 'about')
+            ->first();
+
+        $userFieldOurProduct = DB::table('user_fields')
+            ->where('name', 'our_product')
+            ->first();
+
+        $userFieldCountry = DB::table('user_fields')
+            ->where('name', 'country')
+            ->first();
+
+        $userFieldExpertise = DB::table('user_fields')
+            ->where('name', 'expertise')
+            ->first();    
+
+        $userFieldTitle = DB::table('user_fields')
+            ->where('name', 'title')
+            ->first(); 
+
+        $userFieldTour = DB::table('user_fields')
+            ->where('name', 'our_tour')
+            ->first();   
+
+        $userFieldSpecialityTrip = DB::table('user_fields')
+            ->where('name', 'speciality')
+            ->first();    
+
+        if($role_id == 3 || $role_id == 4 || $role_id == 5 || $role_id == 6)
+        {
+            $productTypeArray = [];
+            $ourProductsArray = [];
+            $aboutArray = [];
+
+            if(!empty($userFieldProductType))
+            {
+                $fieldValueProductTypes = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldProductType->user_field_id)
+                ->get();
+                if(count($fieldValueProductTypes > 0))
+                {
+                    foreach($fieldValueProductTypes as $fieldValueProductType)
+                    {
+                        $fieldValue = DB::table('user_field_options')
+                        ->where('user_field_id', $fieldValueProductType->user_field_id)
+                        ->first();
+                        $productTypeArray[] = $fieldValue->option;
+                    }
+                }
+            }
+            
+            if(!empty($userFieldAbout))
+            {
+                $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
+                $aboutArray[] = $fieldValueAbout->about;
+            }
+
+            if(!empty($userFieldOurProduct))
+            {
+
+                $fieldValueOurProduct = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldOurProduct->user_field_id)
+                ->first();
+                $ourProductsArray[] = $fieldValueOurProduct->value;
+            }
+
+            $values = ["product_type" => $productTypeArray, "about" => $aboutArray, "our_products" => $ourProductsArray];
+            
+        }
+        elseif($role_id == 7)
+        {
+            $countryArray = [];
+            $expertiseArray = [];
+            $titleArray = [];
+
+            if(!empty($userFieldCountry))
+            {
+                $fieldValueCountry = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldCountry->user_field_id)
+                ->first();
+
+                $country = Country::where('id', $fieldValueCountry->value)->first();
+                $countryArray[] = $country->name;
+            }
+
+            if(!empty($userFieldExpertise))
+            {
+                $fieldValueEpertise = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldExpertise->user_field_id)
+                ->get();
+
+                if(count($fieldValueEpertise > 0))
+                {
+                    foreach($fieldValueEpertise as $expertise)
+                    {
+                        $fieldValue = DB::table('user_field_options')
+                        ->where('user_field_id', $expertise->user_field_id)
+                        ->first();
+                        $expertiseArray[] = $fieldValue->option;
+                    }
+                }
+            }
+
+            if(!empty($userFieldTitle))
+            {
+                $fieldValueTitle = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldTitle->user_field_id)
+                ->get();
+
+                if(count($fieldValueTitle > 0))
+                {
+                    foreach($fieldValueTitle as $title)
+                    {
+                        $fieldValue = DB::table('user_field_options')
+                        ->where('user_field_id', $title->user_field_id)
+                        ->first();
+                        $titleArray[] = $fieldValue->option;
+                    }
+                }
+            }
+
+            if(!empty($userFieldAbout))
+            {
+                $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
+                $aboutArray[] = $fieldValueAbout->about;
+            }
+
+            $values = ["country" => $countryArray, "expertise" => $expertiseArray, "title" => $titleArray, "about" => $aboutArray];
+
+        }
+        elseif($role_id == 8)
+        {
+            $countryArray = [];
+            $ourTourArray = [];
+            $aboutArray = [];
+            $specialityTripArray = [];
+
+            if(!empty($userFieldCountry))
+            {
+                $fieldValueCountry = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldCountry->user_field_id)
+                ->first();
+
+                $country = Country::where('id', $fieldValueCountry->value)->first();
+                $countryArray[] = $country->name;
+            }
+
+            if(!empty($userFieldAbout))
+            {
+                $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
+                $aboutArray[] = $fieldValueAbout->about;
+            }
+
+            if(!empty($userFieldTour))
+            {
+                $fieldValueTour = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldTour->user_field_id)
+                ->first();
+                $ourTourArray[] = $fieldValueTour->value;
+            }
+
+            if(!empty($userFieldSpecialityTrip))
+            {
+                $fieldValueTrips = DB::table('user_field_values')
+                ->where('user_id', $user_id)
+                ->where('user_field_id', $userFieldSpecialityTrip->user_field_id)
+                ->get();
+
+                if(count($fieldValueTrips > 0))
+                {
+                    foreach($fieldValueTrips as $fieldValueTrip)
+                    {
+                        $fieldValue = DB::table('user_field_options')
+                        ->where('user_field_id', $fieldValueTrip->user_field_id)
+                        ->first();
+                        $specialityTripArray[] = $fieldValue->option;
+                    }
+                }
+            }
+
+            $values = ["country" => $countryArray, "speciality" => $specialityTripArray, "about" => $aboutArray, "our_tours" => $ourTourArray];
+        }
+        elseif($role_id == 9)
+        {
+
+        }
+        elseif($role_id == 10)
+        {
+
+        }
+        /*else
+        {
+            $values = [$this->translate('messages.'."Invalid Role Id","Invalid Role Id"), 1];
+        }*/
+        return $values;
+
+        
+    }   
 
     
 
