@@ -191,6 +191,9 @@ class UserController extends CoreController
                     'locale' => 'required',
                     'website' => 'required|max:190',
                     //'avatar_id' => 'required',
+                ],
+                [
+                    'name.unique' => 'The username has already been taken'
                 ]);
 
             
