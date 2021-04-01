@@ -1023,7 +1023,7 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldProductType->user_field_id)
                 ->get();
-                if(count($fieldValueProductTypes > 0))
+                if($fieldValueProductTypes->count() > 0)
                 {
                     foreach($fieldValueProductTypes as $fieldValueProductType)
                     {
@@ -1078,7 +1078,7 @@ class UserController extends CoreController
                 ->where('user_field_id', $userFieldExpertise->user_field_id)
                 ->get();
 
-                if(count($fieldValueEpertise > 0))
+                if($fieldValueEpertise->count() > 0)
                 {
                     foreach($fieldValueEpertise as $expertise)
                     {
@@ -1097,7 +1097,7 @@ class UserController extends CoreController
                 ->where('user_field_id', $userFieldTitle->user_field_id)
                 ->get();
 
-                if(count($fieldValueTitle > 0))
+                if($fieldValueTitle->count() > 0)
                 {
                     foreach($fieldValueTitle as $title)
                     {
@@ -1158,7 +1158,7 @@ class UserController extends CoreController
                 ->where('user_field_id', $userFieldSpecialityTrip->user_field_id)
                 ->get();
 
-                if(count($fieldValueTrips > 0))
+                if($fieldValueTrips->count() > 0)
                 {
                     foreach($fieldValueTrips as $fieldValueTrip)
                     {
