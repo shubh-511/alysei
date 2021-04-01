@@ -563,11 +563,16 @@ class UserController extends CoreController
                     return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
                 }
 
-                /*if(array_key_exists('email',$inputData) && array_key_exists('password',$inputData)
-                  ){*/
+                if(array_key_exists('about',$inputData))
+                {
+                    User::where('user_id', $user_id)->update(['about' => $inputData['about']]);
+                }
 
-                    $userData = [];
-                    
+                if(array_key_exists('company_name',$inputData))
+                {
+                    User::where('user_id', $user_id)->update(['company_name' => $inputData['company_name']]);
+                }
+
                     
                         foreach ($input as $key => $value) {
 
@@ -616,15 +621,13 @@ class UserController extends CoreController
                 }
                 
                 $userProfile->save();
-                $userData = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
+                $userDataImage = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
 
                             return response()->json(['success' => $this->successStatus,
                                  'message' => $this->translate('messages.'."Profile updated","Profile updated"),
-                                 'data' => $userData
+                                 'data' => $userDataImage
                                 ], $this->successStatus);
-                        
-                //}
-                
+                 
             }
         }catch(\Exception $e){
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
@@ -871,7 +874,9 @@ class UserController extends CoreController
         {
             $loggedInUser = $this->user;
 
-            $userData = User::select('user_id','name as username')->where('user_id', $loggedInUser->user_id)->first();
+            $userData = User::select('user_id','company_name','first_name','last_name','name as username')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
+
+            $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
 
             $postCount = ActivityAction::where('subject_id', $loggedInUser->user_id)->count();
             $connectionsCount = Connection::where('is_approved', '1')->where('resource_id', $loggedInUser->user_id)->orWhere('user_id', $loggedInUser->user_id)->count();
@@ -925,14 +930,12 @@ class UserController extends CoreController
 
                 $products[$key]['fields'] = $fieldsDataValue;
             }
-            
-            
 
             /*************************/
 
 
            
-            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'products' => $products];
+            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products];
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data
                             ], $this->successStatus);
@@ -943,6 +946,10 @@ class UserController extends CoreController
         }
         
     }
+
+   
+
+    
 
     /*
      * Check Exist Fields Values and delete
