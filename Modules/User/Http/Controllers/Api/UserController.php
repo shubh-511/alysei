@@ -874,7 +874,7 @@ class UserController extends CoreController
         {
             $loggedInUser = $this->user;
 
-            $userData = User::select('user_id','company_name','first_name','last_name','name as username')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
+            $userData = User::select('user_id','company_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
 
             $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
 
