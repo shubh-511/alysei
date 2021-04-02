@@ -58,7 +58,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/member/profile', 'Api\UserController@getMemberProfile');
 	Route::get('get/member/about/tab', 'Api\UserController@getMemberAboutTab');
-	Route::get('get/tab/contact', 'Api\UserController@getTabContact');
+	Route::get('get/member/contact/tab', 'Api\UserController@getMemberContactTab');
 
 
 	Route::post('delete/featured/listing', 'Api\FeaturedListingsController@deleteFeaturedListing');
