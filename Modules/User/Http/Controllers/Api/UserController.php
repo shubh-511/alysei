@@ -1059,7 +1059,7 @@ class UserController extends CoreController
                 $ourProductsArray[] = $fieldValueOurProduct->value;
             }
 
-            $values = ["product_type" => $productTypeArray, "about" => $aboutArray, "our_products" => $ourProductsArray];
+            $values = ["Product Type" => $productTypeArray, "About" => $aboutArray, "Our Products" => $ourProductsArray];
             
         }
         elseif($role_id == 7)
@@ -1123,7 +1123,7 @@ class UserController extends CoreController
                 $aboutArray[] = $fieldValueAbout->about;
             }
 
-            $values = ["country" => $countryArray, "expertise" => $expertiseArray, "title" => $titleArray, "about" => $aboutArray];
+            $values = ["Country" => $countryArray, "Expertise" => $expertiseArray, "Title" => $titleArray, "About" => $aboutArray];
 
         }
         elseif($role_id == 8)
@@ -1178,7 +1178,7 @@ class UserController extends CoreController
                 }
             }
 
-            $values = ["country" => $countryArray, "speciality" => $specialityTripArray, "about" => $aboutArray, "our_tours" => $ourTourArray];
+            $values = ["Country" => $countryArray, "Speciality" => $specialityTripArray, "About" => $aboutArray, "Our tours" => $ourTourArray];
         }
         elseif($role_id == 9)
         {
@@ -1220,7 +1220,7 @@ class UserController extends CoreController
                 $menuArray[] = $fieldValueMenu->value;
             }
 
-            $values = ["restaurant_type" => $restaurantTypeArray, "about" => $aboutArray, "menu" => $menuArray];
+            $values = ["Restaurant Type" => $restaurantTypeArray, "About" => $aboutArray, "Menu" => $menuArray];
         }
         elseif($role_id == 10)
         {
