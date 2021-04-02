@@ -63,6 +63,7 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->string('timezone')->nullable();
             $table->string('locale')->default("en");
+            $table->integer('profile_percentage')->default("25");
             $table->integer('created_by')->default(0);
             $table->integer('updated_by')->default(0);
             $table->timestamps();
