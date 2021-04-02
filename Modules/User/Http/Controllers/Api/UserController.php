@@ -1038,7 +1038,7 @@ class UserController extends CoreController
                         $fieldValue = DB::table('user_field_options')
                         ->where('user_field_id', $fieldValueProductType->user_field_id)
                         ->first();
-                        $productTypeArray[] = $fieldValue->option;
+                        $productTypeArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
                 }
             }
@@ -1046,7 +1046,7 @@ class UserController extends CoreController
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $fieldValueAbout->about;
+                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             if(!empty($userFieldOurProduct))
@@ -1056,10 +1056,10 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldOurProduct->user_field_id)
                 ->first();
-                $ourProductsArray[] = $fieldValueOurProduct->value;
+                $ourProductsArray[] = $this->translate('messages.'.$fieldValueOurProduct->value,$fieldValueOurProduct->value);
             }
 
-            $values = ["Product Type" => $this->translate('messages.'.$productTypeArray,$productTypeArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray), "Our Products" => $this->translate('messages.'.$ourProductsArray,$ourProductsArray)];
+            $values = ["Product Type" => $productTypeArray, "About" => $aboutArray, "Our Products" => $ourProductsArray];
             
         }
         elseif($role_id == 7)
@@ -1067,6 +1067,7 @@ class UserController extends CoreController
             $countryArray = [];
             $expertiseArray = [];
             $titleArray = [];
+            $aboutArray = [];
 
             if(!empty($userFieldCountry))
             {
@@ -1076,7 +1077,7 @@ class UserController extends CoreController
                 ->first();
 
                 $country = Country::where('id', $fieldValueCountry->value)->first();
-                $countryArray[] = $country->name;
+                $countryArray[] = $this->translate('messages.'.$country->name,$country->name);
             }
 
             if(!empty($userFieldExpertise))
@@ -1093,7 +1094,7 @@ class UserController extends CoreController
                         $fieldValue = DB::table('user_field_options')
                         ->where('user_field_id', $expertise->user_field_id)
                         ->first();
-                        $expertiseArray[] = $fieldValue->option;
+                        $expertiseArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
                 }
             }
@@ -1112,7 +1113,7 @@ class UserController extends CoreController
                         $fieldValue = DB::table('user_field_options')
                         ->where('user_field_id', $title->user_field_id)
                         ->first();
-                        $titleArray[] = $fieldValue->option;
+                        $titleArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
                 }
             }
@@ -1120,10 +1121,10 @@ class UserController extends CoreController
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $fieldValueAbout->about;
+                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
-            $values = ["Country" => $this->translate('messages.'.$countryArray,$countryArray), "Expertise" => $this->translate('messages.'.$expertiseArray,$expertiseArray), "Title" => $this->translate('messages.'.$titleArray,$titleArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray)];
+            $values = ["Country" => $countryArray, "Expertise" => $expertiseArray, "Title" => $titleArray, "About" => $aboutArray];
 
         }
         elseif($role_id == 8)
@@ -1141,13 +1142,13 @@ class UserController extends CoreController
                 ->first();
 
                 $country = Country::where('id', $fieldValueCountry->value)->first();
-                $countryArray[] = $country->name;
+                $countryArray[] = $this->translate('messages.'.$country->name,$country->name);
             }
 
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $fieldValueAbout->about;
+                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             if(!empty($userFieldTour))
@@ -1156,7 +1157,7 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldTour->user_field_id)
                 ->first();
-                $ourTourArray[] = $fieldValueTour->value;
+                $ourTourArray[] = $this->translate('messages.'.$fieldValueTour->value,$fieldValueTour->value);
             }
 
             if(!empty($userFieldSpecialityTrip))
@@ -1173,12 +1174,12 @@ class UserController extends CoreController
                         $fieldValue = DB::table('user_field_options')
                         ->where('user_field_id', $fieldValueTrip->user_field_id)
                         ->first();
-                        $specialityTripArray[] = $fieldValue->option;
+                        $specialityTripArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
                 }
             }
 
-            $values = ["Country" => $this->translate('messages.'.$countryArray,$countryArray), "Speciality" => $this->translate('messages.'.$specialityTripArray,$specialityTripArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray), "Our tours" => $this->translate('messages.'.$ourTourArray,$ourTourArray)];
+            $values = ["Country" => $countryArray, "Speciality" => $specialityTripArray, "About" => $aboutArray, "Our tours" => $ourTourArray];
         }
         elseif($role_id == 9)
         {
@@ -1189,7 +1190,7 @@ class UserController extends CoreController
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $fieldValueAbout->about;
+                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             if(!empty($userFieldRestaurantType))
@@ -1206,7 +1207,7 @@ class UserController extends CoreController
                         $fieldValue = DB::table('user_field_options')
                         ->where('user_field_id', $fieldValueRetaurantType->user_field_id)
                         ->first();
-                        $restaurantTypeArray[] = $fieldValue->option;
+                        $restaurantTypeArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
                 }
             }
@@ -1217,10 +1218,10 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldMenu->user_field_id)
                 ->first();
-                $menuArray[] = $fieldValueMenu->value;
+                $menuArray[] = $this->translate('messages.'.$fieldValueMenu->value,$fieldValueMenu->value);
             }
 
-            $values = ["Restaurant Type" => $this->translate('messages.'.$restaurantTypeArray,$restaurantTypeArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray), "Menu" => $this->translate('messages.'.$menuArray,$menuArray)];
+            $values = ["Restaurant Type" => $restaurantTypeArray, "About" => $aboutArray, "Menu" => $menuArray];
         }
         elseif($role_id == 10)
         {
