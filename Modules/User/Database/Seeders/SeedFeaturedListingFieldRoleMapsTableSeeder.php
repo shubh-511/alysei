@@ -64,7 +64,7 @@ class SeedFeaturedListingFieldRoleMapsTableSeeder extends Seeder
                         array("featured_listing_type_id"=>2,"featured_listing_field_id"=>1,'role_id'=>9,'order'=>1),
                         array("featured_listing_type_id"=>2,"featured_listing_field_id"=>2,'role_id'=>9,'order'=>2),
                         array("featured_listing_type_id"=>2,"featured_listing_field_id"=>3,'role_id'=>9,'order'=>3),
-                        array("featured_listing_type_id"=>2,"featured_listing_field_id"=>4,'role_id'=>9,'order'=>4),
+                        //array("featured_listing_type_id"=>2,"featured_listing_field_id"=>4,'role_id'=>9,'order'=>4),
 
                         //Restaurants
                         array("featured_listing_type_id"=>5,"featured_listing_field_id"=>1,'role_id'=>9,'order'=>1),

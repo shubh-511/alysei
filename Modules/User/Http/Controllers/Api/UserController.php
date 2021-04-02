@@ -949,10 +949,34 @@ class UserController extends CoreController
     }
 
     /*
-     * Get About tab
+     * Get Member About tab
      *
      */
     public function getMemberAboutTab()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            $data = $this->getFieldValueOnAboutTab($loggedInUser->role_id, $loggedInUser->user_id);
+
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $data
+                            ], $this->successStatus);
+
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+    *
+    *Get Member Contact Tab
+    */
+    public function getMemberContactTab()
     {
         try
         {
