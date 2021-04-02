@@ -952,7 +952,7 @@ class UserController extends CoreController
      * Get About tab
      *
      */
-    public function getTabAbout()
+    public function getMemberAboutTab()
     {
         try
         {
