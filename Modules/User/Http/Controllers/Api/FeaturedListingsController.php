@@ -139,13 +139,13 @@ class FeaturedListingsController extends CoreController
                     }
 
                     if(array_key_exists('title',$inputData) && 
-                       array_key_exists('description',$inputData) && 
+                       array_key_exists('listing_url',$inputData) && 
                        array_key_exists('featured_listing_type_id',$input)
                     ){
 
                         $featuredListingData = [];
                         $featuredListingData['title'] = strip_tags($inputData['title']);
-                        $featuredListingData['description'] = strip_tags($inputData['description']);
+                        $featuredListingData['listing_url'] = strip_tags($inputData['listing_url']);
                         $featuredListingData['user_id'] = $this->user->user_id;
                         $featuredListingData['featured_listing_type_id'] = $input['featured_listing_type_id'];
                         //$featuredListingData['image_id'] = $this->uploadImage($inputData['image_id']);
