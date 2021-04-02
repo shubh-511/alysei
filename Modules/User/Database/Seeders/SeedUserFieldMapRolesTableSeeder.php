@@ -90,7 +90,7 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
                         array("user_field_id"=>16,'role_id'=>4,'step'=>'step_1','order'=>1),
                         array("user_field_id"=>17,'role_id'=>4,'step'=>'step_1','order'=>2),
                         array("user_field_id"=>1,'role_id'=>4,'step'=>'step_1','order'=>3),
-                        array("user_field_id"=>2,'role_id'=>4,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>2,'role_id'=>4,'step'=>'step_1','order'=>4,'edit_profile_field_order'=>1),
 
                         array("user_field_id"=>13,'role_id'=>4,'step'=>'step_1','order'=>5),
                         array("user_field_id"=>28,'role_id'=>4,'step'=>'step_1','order'=>6),
@@ -99,9 +99,9 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
                         array("user_field_id"=>15,'role_id'=>4,'step'=>'step_1','order'=>9),
 
                         //array("user_field_id"=>3,'role_id'=>4,'step'=>'step_1','order'=>5),
-                        array("user_field_id"=>4,'role_id'=>4,'step'=>'step_2','order'=>10),
-                        array("user_field_id"=>5,'role_id'=>4,'step'=>'step_2','order'=>11),
-                        array("user_field_id"=>6,'role_id'=>4,'step'=>'step_2','order'=>12),
+                        array("user_field_id"=>4,'role_id'=>4,'step'=>'step_2','order'=>10,'edit_profile_field_order'=>4),
+                        array("user_field_id"=>5,'role_id'=>4,'step'=>'step_2','order'=>11,'edit_profile_field_order'=>5),
+                        array("user_field_id"=>6,'role_id'=>4,'step'=>'step_2','order'=>12,'edit_profile_field_order'=>6),
                         array("user_field_id"=>25,'role_id'=>4,'step'=>'step_2','order'=>13),
                         array("user_field_id"=>36,'role_id'=>4,'step'=>'step_2','order'=>14,'edit_profile_field_order'=>2),
                         array("user_field_id"=>35,'role_id'=>4,'step'=>'step_2','order'=>15,'edit_profile_field_order'=>3),
@@ -110,7 +110,7 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
                         array("user_field_id"=>16,'role_id'=>5,'step'=>'step_1','order'=>1),
                         array("user_field_id"=>17,'role_id'=>5,'step'=>'step_1','order'=>2),
                         array("user_field_id"=>1,'role_id'=>5,'step'=>'step_1','order'=>3),
-                        array("user_field_id"=>2,'role_id'=>5,'step'=>'step_1','order'=>4),
+                        array("user_field_id"=>2,'role_id'=>5,'step'=>'step_1','order'=>4,'edit_profile_field_order'=>1),
 
                         array("user_field_id"=>13,'role_id'=>5,'step'=>'step_1','order'=>5),
                         array("user_field_id"=>28,'role_id'=>5,'step'=>'step_1','order'=>6),
@@ -119,9 +119,9 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
                         array("user_field_id"=>15,'role_id'=>5,'step'=>'step_1','order'=>9),
 
                         //array("user_field_id"=>3,'role_id'=>5,'step'=>'step_1','order'=>5),
-                        array("user_field_id"=>4,'role_id'=>5,'step'=>'step_2','order'=>10),
-                        array("user_field_id"=>5,'role_id'=>5,'step'=>'step_2','order'=>11),
-                        array("user_field_id"=>6,'role_id'=>5,'step'=>'step_2','order'=>12),
+                        array("user_field_id"=>4,'role_id'=>5,'step'=>'step_2','order'=>10,'edit_profile_field_order'=>4),
+                        array("user_field_id"=>5,'role_id'=>5,'step'=>'step_2','order'=>11,'edit_profile_field_order'=>5),
+                        array("user_field_id"=>6,'role_id'=>5,'step'=>'step_2','order'=>12,'edit_profile_field_order'=>6),
                         array("user_field_id"=>25,'role_id'=>5,'step'=>'step_2','order'=>13),
                         array("user_field_id"=>36,'role_id'=>5,'step'=>'step_2','order'=>14,'edit_profile_field_order'=>2),
                         array("user_field_id"=>35,'role_id'=>5,'step'=>'step_2','order'=>15,'edit_profile_field_order'=>3),
