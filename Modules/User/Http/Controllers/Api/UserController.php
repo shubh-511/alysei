@@ -1059,7 +1059,7 @@ class UserController extends CoreController
                 $ourProductsArray[] = $fieldValueOurProduct->value;
             }
 
-            $values = ["Product Type" => $productTypeArray, "About" => $aboutArray, "Our Products" => $ourProductsArray];
+            $values = ["Product Type" => $this->translate('messages.'.$productTypeArray,$productTypeArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray), "Our Products" => $this->translate('messages.'.$ourProductsArray,$ourProductsArray)];
             
         }
         elseif($role_id == 7)
@@ -1123,7 +1123,7 @@ class UserController extends CoreController
                 $aboutArray[] = $fieldValueAbout->about;
             }
 
-            $values = ["Country" => $countryArray, "Expertise" => $expertiseArray, "Title" => $titleArray, "About" => $aboutArray];
+            $values = ["Country" => $this->translate('messages.'.$countryArray,$countryArray), "Expertise" => $this->translate('messages.'.$expertiseArray,$expertiseArray), "Title" => $this->translate('messages.'.$titleArray,$titleArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray)];
 
         }
         elseif($role_id == 8)
@@ -1178,7 +1178,7 @@ class UserController extends CoreController
                 }
             }
 
-            $values = ["Country" => $countryArray, "Speciality" => $specialityTripArray, "About" => $aboutArray, "Our tours" => $ourTourArray];
+            $values = ["Country" => $this->translate('messages.'.$countryArray,$countryArray), "Speciality" => $this->translate('messages.'.$specialityTripArray,$specialityTripArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray), "Our tours" => $this->translate('messages.'.$ourTourArray,$ourTourArray)];
         }
         elseif($role_id == 9)
         {
@@ -1220,7 +1220,7 @@ class UserController extends CoreController
                 $menuArray[] = $fieldValueMenu->value;
             }
 
-            $values = ["Restaurant Type" => $restaurantTypeArray, "About" => $aboutArray, "Menu" => $menuArray];
+            $values = ["Restaurant Type" => $this->translate('messages.'.$restaurantTypeArray,$restaurantTypeArray), "About" => $this->translate('messages.'.$aboutArray,$aboutArray), "Menu" => $this->translate('messages.'.$menuArray,$menuArray)];
         }
         elseif($role_id == 10)
         {
