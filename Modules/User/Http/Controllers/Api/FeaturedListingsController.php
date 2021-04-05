@@ -41,7 +41,7 @@ class FeaturedListingsController extends CoreController
      */
     public function userSettings(){
         try{
-                $userDetails = $this->user->only(['name', 'email','company_name','locale','first_name','last_name']);
+                $userDetails = $this->user->only(['name', 'email','company_name','restaurant_name','locale','first_name','last_name']);
 
                 $userFieldInfo = [];
 
