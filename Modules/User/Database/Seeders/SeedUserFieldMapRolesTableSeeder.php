@@ -204,6 +204,9 @@ class SeedUserFieldMapRolesTableSeeder extends Seeder
                         array("user_field_id"=>25,'role_id'=>7,'step'=>'step_2','order'=>12,'edit_profile_field_order'=>0),
                         array("user_field_id"=>36,'role_id'=>7,'step'=>'step_2','order'=>13,'edit_profile_field_order'=>4),
 
+                        //Voygers
+                        array("user_field_id"=>36,'role_id'=>10,'step'=>'step_1','order'=>0,'edit_profile_field_order'=>1),
+
                     );
 
         foreach ($data as $key => $value) {
