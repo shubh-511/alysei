@@ -18,7 +18,7 @@ class SeedUserFieldsTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("title"=>"Company name","placeholder"=>"Enter company name",'type'=>'text','name'=>'comapny_name','required'=>'yes'),
+                        array("title"=>"Company name","placeholder"=>"Enter company name",'type'=>'text','name'=>'company_name','required'=>'yes'),
 
                         array("title"=>"Product type","placeholder"=>"Select product type",'type'=>'checkbox','name'=>'product_type','required'=>'yes','hint'=>'Select Product Type','require_update'=>'true'),
 
