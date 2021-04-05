@@ -25,9 +25,9 @@ trait ProfileStatusTrait
         $profilePercentage = '';
 
         $user = User::where('user_id', $userId)->first();  // 10%
-        $FeaturedListing = FeaturedListing::where('user_id', $userId)->count();  // 25%
-        $userSelectedHub = UserSelectedHub::where('user_id', $userId)->count();  // 25%
-        $userTempHub = UserTempHub::where('user_id', $userId)->count();
+        $FeaturedListing = FeaturedListing::where('user_id', $userId)->get();  // 25%
+        $userSelectedHub = UserSelectedHub::where('user_id', $userId)->get();  // 25%
+        $userTempHub = UserTempHub::where('user_id', $userId)->get();
 
         if(empty($user->cover_id) && empty($user->avatar_id) && empty($user->about) && count($FeaturedListing) == 0 && (count($userSelectedHub) == 0 || count($userTempHub) == 0))
         {
