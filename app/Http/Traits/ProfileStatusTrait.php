@@ -4,7 +4,6 @@ namespace App\Http\Traits;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\User; 
 use Carbon\Carbon;
 use Modules\User\Entities\User;
 use Modules\User\Entities\FeaturedListing;
