@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\Certificate;
 use Modules\User\Entities\Country;
-use App\Traits\ProfileStatusTrait;
+use App\Http\Traits\ProfileStatusTrait;
 use Validator;
 use App\Image;
 use DB;
