@@ -188,7 +188,7 @@ class UserController extends CoreController
                 $validator = Validator::make($request->all(), [ 
                     'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
                     //'name' => 'required',
-                    'display_name' => 'required|max:190',
+                    //'display_name' => 'required|max:190',
                     'locale' => 'required',
                     'website' => 'required|max:190',
                     //'avatar_id' => 'required',
@@ -205,7 +205,7 @@ class UserController extends CoreController
                 $user = User::where('user_id','=',$this->user->user_id)->first();
                 $user->website = $request->website;
                 $user->name = $request->name;
-                $user->display_name = $request->display_name;
+                //$user->display_name = $request->display_name;
                 $user->locale = $request->locale;
                 $user->save();
 
