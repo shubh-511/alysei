@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\Certificate;
 use Modules\User\Entities\Country;
+use App\Traits\ProfileStatusTrait;
 use Validator;
 use App\Image;
 use DB;
@@ -25,6 +26,7 @@ use App\Http\Traits\UploadImageTrait;
 class UserController extends CoreController
 {
     use UploadImageTrait;
+    use ProfileStatusTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -882,6 +884,8 @@ class UserController extends CoreController
         try
         {
             $loggedInUser = $this->user;
+            $profilePercentage = $this->profileStatus($loggedInUser->user_id);
+            User::where('user_id', $loggedInUser->user_id)->update(['profile_percentage' => $profilePercentage]);
 
             $userData = User::select('user_id','profile_percentage','role_id','company_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
 
