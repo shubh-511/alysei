@@ -159,6 +159,10 @@ class RegisterController extends CoreController
                         $userData['company_name'] = $inputData['company_name'];
                         
                     }
+                    if(array_key_exists('restaurant_name',$inputData)){
+                        $userData['restaurant_name'] = $inputData['restaurant_name'];
+                        
+                    }
 
                     $user = User::create($userData); 
                     
