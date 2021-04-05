@@ -205,6 +205,14 @@ class UserController extends CoreController
                 $user = User::where('user_id','=',$this->user->user_id)->first();
                 $user->website = $request->website;
                 $user->name = $request->name;
+                if(!empty($request->first_name))
+                {
+                    $user->first_name = $request->first_name;
+                }
+                if(!empty($request->last_name))
+                {
+                    $user->last_name = $request->last_name;
+                }
                 //$user->display_name = $request->display_name;
                 $user->locale = $request->locale;
                 $user->save();
