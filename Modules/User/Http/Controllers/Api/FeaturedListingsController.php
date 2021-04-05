@@ -162,7 +162,7 @@ class FeaturedListingsController extends CoreController
 
                         unset($input["featured_listing_type_id"]);
                         unset($input["featured_listing_id"]);
-
+                        
                         foreach ($input as $key => $value) {
                             $data = [];
                             if($key == 1 && $update == false)
@@ -187,12 +187,16 @@ class FeaturedListingsController extends CoreController
                             $data['value'] = $value;
 
                             if($update == false){
-
-                                DB::table('featured_listing_values')->insert($data);
+                                if($data['value']){
+                                    DB::table('featured_listing_values')->insert($data);
+                                }
 
                             }else{
-
-                                $query = DB::table('featured_listing_values')->where(['featured_listing_id'=>$featuredListingId,'featured_listing_field_id'=>$key,'user_id'=>$this->user->user_id])->update(['value'=>$value]);    
+                                
+                                if($value){
+                                    $query = DB::table('featured_listing_values')->where(['featured_listing_id'=>$featuredListingId,'featured_listing_field_id'=>$key,'user_id'=>$this->user->user_id])->update(['value'=>$value]);        
+                                }
+                                
 
                             }
                             
