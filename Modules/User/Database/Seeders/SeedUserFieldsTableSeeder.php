@@ -34,7 +34,7 @@ class SeedUserFieldsTableSeeder extends Seeder
 
                         array("title"=>"Hub","placeholder"=>"Hub",'type'=>'select','name'=>'hub','required'=>'yes','require_update'=>'false','display_on_registration'=>'false'),
 
-                        array("title"=>"Provide Pick Up And/Or Delivery","placeholder"=>"Select pick up or delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'yes','multiple_option'=>'true','hint'=>'Select Pick up or Delivery','require_update'=>'true'),
+                        array("title"=>"Provide Pick Up And/Or Delivery","placeholder"=>"Select pick up or delivery",'type'=>'checkbox','name'=>'pick_and_delivery_option','required'=>'no','multiple_option'=>'true','hint'=>'Select Pick up or Delivery','require_update'=>'true'),
 
                         array("title"=>"Restaurant Type","placeholder"=>"Restaurant type",'type'=>'select','name'=>'restaurant_type','required'=>'yes','require_update'=>'true'),
 
