@@ -193,7 +193,6 @@ class UserController extends CoreController
                 $validator = Validator::make($request->all(), [ 
                 'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
                 'locale' => 'required',
-                'website' => 'required|max:190',
                 ],
                 [
                     'name.unique' => 'The username has already been taken'
@@ -203,6 +202,7 @@ class UserController extends CoreController
             {
                 $validator = Validator::make($request->all(), [ 
                 'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
+                'website' => 'required|max:190',
                 'locale' => 'required',
                 ],
                 [
