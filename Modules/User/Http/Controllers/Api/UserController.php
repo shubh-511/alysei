@@ -887,7 +887,7 @@ class UserController extends CoreController
             $profilePercentage = $this->profileStatus($loggedInUser->user_id);
             User::where('user_id', $loggedInUser->user_id)->update(['profile_percentage' => $profilePercentage]);
 
-            $userData = User::select('user_id','profile_percentage','role_id','company_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
+            $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
 
             $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
 
