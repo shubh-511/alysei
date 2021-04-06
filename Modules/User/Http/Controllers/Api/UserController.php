@@ -1082,7 +1082,7 @@ class UserController extends CoreController
                     foreach($fieldValueProductTypes as $fieldValueProductType)
                     {
                         $fieldValue = DB::table('user_field_options')
-                        ->where('user_field_id', $fieldValueProductType->user_field_id)
+                        ->where('user_field_option_id', $fieldValueProductType->value)
                         ->first();
                         $productTypeArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
