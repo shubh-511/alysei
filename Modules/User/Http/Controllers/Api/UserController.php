@@ -994,7 +994,7 @@ class UserController extends CoreController
         {
             $loggedInUser = $this->user;
 
-            $data = $this->getFieldValueOnAboutTab($loggedInUser->role_id, $loggedInUser->user_id);
+            $data = User::select('user_id','role_id','email','phone','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
 
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data

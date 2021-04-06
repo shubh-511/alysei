@@ -37,4 +37,6 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/pending/request', 'Api\ConnectUserController@getMyPendingRequest');
 	Route::post('accept/reject/request', 'Api\ConnectUserController@acceptOrRejectConnection');
 
+	Route::get('get/all/member/post', 'Api\ActivityController@getAllMemberPosts');
+
 });

@@ -502,6 +502,35 @@ class ActivityController extends CoreController
     }
 
     /*
+     * Get Member Post tab
+     *
+     */
+    public function getAllMemberPosts()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->orderBy('activity_action_id','DESC')->paginate(15);
+            if(!empty($activityPost))
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $activityPost,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No post found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Delete Post
      * @Params $postId, $userId
      */
