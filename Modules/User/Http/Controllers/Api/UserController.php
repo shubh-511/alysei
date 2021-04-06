@@ -183,49 +183,59 @@ class UserController extends CoreController
         }
     }*/
 
-    public function updateUserSettings(Request $request){
-        try{
-                $loggedInUser = $this->user;
-
+    public function updateUserSettings(Request $request)
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+            if($loggedInUser->role_id != 7 || $loggedInUser->role_id != 10)
+            {
                 $validator = Validator::make($request->all(), [ 
-                    'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
-                    //'name' => 'required',
-                    //'display_name' => 'required|max:190',
-                    'locale' => 'required',
-                    'website' => 'required|max:190',
-                    //'avatar_id' => 'required',
+                'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
+                'locale' => 'required',
+                'website' => 'required|max:190',
                 ],
                 [
                     'name.unique' => 'The username has already been taken'
                 ]);
-
+            }
+            else
+            {
+                $validator = Validator::make($request->all(), [ 
+                'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
+                'locale' => 'required',
+                ],
+                [
+                    'name.unique' => 'The username has already been taken'
+                ]);
+            }
             
-                if ($validator->fails()) { 
-                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-                }
-                
-                $user = User::where('user_id','=',$this->user->user_id)->first();
-                $user->website = $request->website;
-                $user->name = $request->name;
-                if(!empty($request->first_name))
-                {
-                    $user->first_name = $request->first_name;
-                }
-                if(!empty($request->last_name))
-                {
-                    $user->last_name = $request->last_name;
-                }
-                //$user->display_name = $request->display_name;
-                $user->locale = $request->locale;
-                $user->save();
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+            
+            $user = User::where('user_id','=',$this->user->user_id)->first();
+            $user->website = $request->website;
+            $user->name = $request->name;
+            if(!empty($request->first_name))
+            {
+                $user->first_name = $request->first_name;
+            }
+            if(!empty($request->last_name))
+            {
+                $user->last_name = $request->last_name;
+            }
+            //$user->display_name = $request->display_name;
+            $user->locale = $request->locale;
+            $user->save();
 
-                $userData = User::select('*','name as username')->with('avatar_id','roles')->where('user_id','=',$this->user->user_id)->first();
-                $token =  $userData->createToken('alysei')->accessToken; 
-                
-                return response()->json(['success' => $this->successStatus,
-                                 'data' => $userData,
-                                 'token' => $token
-                                ], $this->successStatus);
+            $userData = User::select('*','name as username')->with('avatar_id','roles')->where('user_id','=',$this->user->user_id)->first();
+            $token =  $userData->createToken('alysei')->accessToken; 
+            
+            return response()->json(['success' => $this->successStatus,
+                             'data' => $userData,
+                             'token' => $token
+                            ], $this->successStatus);
                                   
         }catch(\Exception $e){
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
