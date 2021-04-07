@@ -7,6 +7,8 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\CoreController;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use Modules\User\Entities\UserSelectedHub;
+use Modules\User\Entities\UserTempHub;
 use Validator;
 use DB;
 use Cache;
@@ -60,12 +62,23 @@ class LoginController extends CoreController
                 
                     /*if($user->account_enabled == 'active')
                     {*/
+                    $UserSelectedHub = UserSelectedHub::where('user_id', $user->user_id)->count();
+                    $UserTempHub = UserTempHub::where('user_id', $user->user_id)->count();
+                    if($UserSelectedHub > 0 || $UserTempHub > 0)
+                    {
+                        $isHubSelected = true;
+                    }
+                    else
+                    {
+                        $isHubSelected = false;
+                    }
                     $userData = User::select('*','name as username')->with('roles','avatar_id','cover_id')->where('user_id', $user->user_id)->first();
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
 
                         return response()->json(['success' => $this->successStatus,
                                              //'data' => $user->only($this->userFieldsArray),
+                                            'is_hub_selected' => $isHubSelected,
                                              'data' => $userData,
                                              'token'=> $token
                                             ], $this->successStatus); 
