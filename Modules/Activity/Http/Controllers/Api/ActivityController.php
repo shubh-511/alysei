@@ -90,7 +90,7 @@ class ActivityController extends CoreController
             }
             else
             {
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => 'Something went wrong']], $this->exceptionStatus);
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
            
         }

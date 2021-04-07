@@ -64,6 +64,10 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('delete/featured/listing', 'Api\FeaturedListingsController@deleteFeaturedListing');
 	Route::post('remove/cover/profile/image', 'Api\UserController@removeProfileCoverImage');
 
+	Route::get('get/block/user/list', 'Api\BlockUserController@getBlockedUserList');
+	Route::post('block/user', 'Api\BlockUserController@blockUser');
+	Route::post('unblock/user', 'Api\BlockUserController@unBlockUser');
+
 
 });
 
