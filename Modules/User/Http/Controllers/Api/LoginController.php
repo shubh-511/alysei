@@ -73,16 +73,13 @@ class LoginController extends CoreController
                         $isHubSelected = false;
                     }
                     $userData = User::select('*','name as username')->with('roles','avatar_id','cover_id')->where('user_id', $user->user_id)->first();
-                    foreach($userData as $key => $user)
-                    {
-                        $userData[$key]->is_hub_selected = $isHubSelected;
-                    }
+                    $userData->is_hub_selected = $isHubSelected;
+
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
 
                         return response()->json(['success' => $this->successStatus,
                                              //'data' => $user->only($this->userFieldsArray),
-                                            'is_hub_selected' => $isHubSelected,
                                              'data' => $userData,
                                              'token'=> $token
                                             ], $this->successStatus); 
