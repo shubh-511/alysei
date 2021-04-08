@@ -1092,7 +1092,7 @@ class UserController extends CoreController
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
+                $aboutArray = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             if(!empty($userFieldOurProduct))
@@ -1102,7 +1102,7 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldOurProduct->user_field_id)
                 ->first();
-                $ourProductsArray[] = $this->translate('messages.'.$fieldValueOurProduct->value,$fieldValueOurProduct->value);
+                $ourProductsArray = $this->translate('messages.'.$fieldValueOurProduct->value,$fieldValueOurProduct->value);
             }
 
             $values = ["Product Type" => $productTypeArray, "About" => $aboutArray, "Our Products" => $ourProductsArray];
@@ -1123,7 +1123,7 @@ class UserController extends CoreController
                 ->first();
 
                 $country = Country::where('id', $fieldValueCountry->value)->first();
-                $countryArray[] = $this->translate('messages.'.$country->name,$country->name);
+                $countryArray = $this->translate('messages.'.$country->name,$country->name);
             }
 
             if(!empty($userFieldExpertise))
@@ -1138,7 +1138,7 @@ class UserController extends CoreController
                     foreach($fieldValueEpertise as $expertise)
                     {
                         $fieldValue = DB::table('user_field_options')
-                        ->where('user_field_id', $expertise->user_field_id)
+                        ->where('user_field_option_id', $expertise->value)
                         ->first();
                         $expertiseArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
@@ -1157,7 +1157,7 @@ class UserController extends CoreController
                     foreach($fieldValueTitle as $title)
                     {
                         $fieldValue = DB::table('user_field_options')
-                        ->where('user_field_id', $title->user_field_id)
+                        ->where('user_field_option_id', $title->value)
                         ->first();
                         $titleArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
@@ -1167,7 +1167,7 @@ class UserController extends CoreController
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
+                $aboutArray = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             $values = ["Country" => $countryArray, "Expertise" => $expertiseArray, "Title" => $titleArray, "About" => $aboutArray];
@@ -1188,13 +1188,13 @@ class UserController extends CoreController
                 ->first();
 
                 $country = Country::where('id', $fieldValueCountry->value)->first();
-                $countryArray[] = $this->translate('messages.'.$country->name,$country->name);
+                $countryArray = $this->translate('messages.'.$country->name,$country->name);
             }
 
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
+                $aboutArray = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             if(!empty($userFieldTour))
@@ -1203,7 +1203,7 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldTour->user_field_id)
                 ->first();
-                $ourTourArray[] = $this->translate('messages.'.$fieldValueTour->value,$fieldValueTour->value);
+                $ourTourArray = $this->translate('messages.'.$fieldValueTour->value,$fieldValueTour->value);
             }
 
             if(!empty($userFieldSpecialityTrip))
@@ -1218,7 +1218,7 @@ class UserController extends CoreController
                     foreach($fieldValueTrips as $fieldValueTrip)
                     {
                         $fieldValue = DB::table('user_field_options')
-                        ->where('user_field_id', $fieldValueTrip->user_field_id)
+                        ->where('user_field_option_id', $fieldValueTrip->value)
                         ->first();
                         $specialityTripArray[] = $this->translate('messages.'.$fieldValue->option,$fieldValue->option);
                     }
