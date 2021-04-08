@@ -188,7 +188,7 @@ class UserController extends CoreController
         try
         {
             $loggedInUser = $this->user;
-            if($loggedInUser->role_id != 7 || $loggedInUser->role_id != 10)
+            if($loggedInUser->role_id == 7 || $loggedInUser->role_id == 10)
             {
                 $validator = Validator::make($request->all(), [ 
                 'name' => 'required|unique:users,name,'.$loggedInUser->user_id.',user_id',
