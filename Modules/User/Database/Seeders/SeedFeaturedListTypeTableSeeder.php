@@ -19,7 +19,7 @@ class SeedFeaturedListTypeTableSeeder extends Seeder
 
         $data = array(
                         array("title" => "Product","slug"=>"product"),
-                        array("title" => "Recipie","slug"=>"recipie"), 
+                        array("title" => "Recipe","slug"=>"recipie"), 
                         array("title" => "Blog","slug"=>"Blog"), 
                         array("title" => "Package","slug"=>"package"),
                         array("title" => "Event","slug"=>"events")
