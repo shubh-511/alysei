@@ -1236,7 +1236,7 @@ class UserController extends CoreController
             if(!empty($userFieldAbout))
             {
                 $fieldValueAbout = User::select('about')->where('user_id', $user_id)->first();
-                $aboutArray[] = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
+                $aboutArray = $this->translate('messages.'.$fieldValueAbout->about,$fieldValueAbout->about);
             }
 
             if(!empty($userFieldRestaurantType))
@@ -1264,7 +1264,7 @@ class UserController extends CoreController
                 ->where('user_id', $user_id)
                 ->where('user_field_id', $userFieldMenu->user_field_id)
                 ->first();
-                $menuArray[] = $this->translate('messages.'.$fieldValueMenu->value,$fieldValueMenu->value);
+                $menuArray = $this->translate('messages.'.$fieldValueMenu->value,$fieldValueMenu->value);
             }
 
             $values = ["Restaurant Type" => $restaurantTypeArray, "About" => $aboutArray, "Menu" => $menuArray];
