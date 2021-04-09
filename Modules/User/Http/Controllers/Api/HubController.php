@@ -319,11 +319,33 @@ class HubController extends Controller
         try
         {
             $validator = Validator::make($request->all(), [ 
-            'country_id' => 'required', 
+                'country_id' => 'required', 
             ]);
 
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $user = $this->user;
+
+            $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->where('country_id', $request->country_id)->get();
+            $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->where('country_id', $request->country_id)->get();
+
+            $selectedStates = array();
+            if(count($UserSelectedHubs) > 0 )
+            {
+                foreach($UserSelectedHubs as $UserSelectedHub)
+                {
+                    $selectedHub = Hub::where('id', $UserSelectedHub->hub_id)->first();
+                    $selectedStates[] = $selectedHub->state_id;
+                }
+            }
+            if(count($UserTempHubs) > 0)
+            {
+                foreach($UserTempHubs as $UserTempHub)
+                {
+                    $selectedStates[] = $UserTempHub->state_id;
+                }
             }
 
             $states = State::where('status', '1')->where('country_id', $request->country_id)->orderBy('name','ASC')->get();
@@ -332,9 +354,14 @@ class HubController extends Controller
             {
                 foreach($states as $key => $state)
                 {
-
-                    $states[$key]->is_selected = true;
-
+                    if(in_array($state->id, $selectedStates))
+                    {
+                        $states[$key]->is_selected = true;
+                    }
+                    else
+                    {   
+                        $states[$key]->is_selected = false;
+                    }   
                 }
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $states,
