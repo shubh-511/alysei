@@ -222,10 +222,19 @@ class HubController extends Controller
                     $userHub->save();
                 }
             }
-            
-            return response()->json(['success' => $this->successStatus,
+
+            if(!empty($request->params['selectedcity']) || !empty($request->params['selectedhubs']))
+            {
+                return response()->json(['success' => $this->successStatus,
                                     'message' => 'Successfully added',
                                     ], $this->successStatus);
+            }
+            else
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => ['Please select atleast a hub or a city']]], $this->exceptionStatus); 
+            }
+            
+            
                 
         }
         catch(\Exception $e)
@@ -264,7 +273,7 @@ class HubController extends Controller
                 }
             }
 
-            $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->get();
+            $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->where('is_active', '1')->get();
             $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
 
             if(count($getCountries) > 0)
