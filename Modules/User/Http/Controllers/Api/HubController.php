@@ -162,20 +162,26 @@ class HubController extends Controller
             foreach($request->params as $country => $states)
             {
                 $countryData = Country::where('id', $country)->first();
-                
                 foreach($states as $state)
                 {
                     $stateData = State::where('id', $state)->first();
                     
                     $hubs = Hub::with('image')->where('country_id', $country)->where('state_id', $state)->get();
-                    if(count($hubs) > 0)
+                    
+                    foreach($hubs as $key => $hub)
                     {
-                        $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'hubs_array'=>$hubs];
+                        $UserSelectedHub = UserSelectedHub::where('user_id', $user->user_id)->where('hub_id', $hub->id)->first();
+                        if(!empty($UserSelectedHub) && $hub->id == $UserSelectedHub->hub_id)
+                        {
+                            $hubs[$key]->is_selected = true;
+                        }
+                        else
+                        {
+                            $hubs[$key]->is_selected = false;
+                        }
                     }
-                    else
-                    {
-                        $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'hubs_array'=>$hubs];
-                    }
+                    $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'hubs_array'=>$hubs];
+                    
                     
                 }
             }
@@ -200,28 +206,33 @@ class HubController extends Controller
         {
             $user = $this->user;
 
-            if(!empty($request->params['selectedhubs']))
+            if(!empty($request->params['add_or_update']) && $request->params['add_or_update'] != 1) // 1=save, 2=update
             {
-                foreach($request->params['selectedhubs'] as $hub)
-                {
-                    $userHub = new UserSelectedHub;
-                    $userHub->user_id = $user->user_id;
-                    $userHub->hub_id = $hub;
-                    $userHub->save();
-                }
+                UserSelectedHub::where('user_id', $user->user_id)->delete();
+                UserTempHub::where('user_id', $user->user_id)->delete();
             }
-            if(!empty($request->params['selectedcity']))
-            {
-                foreach($request->params['selectedcity'] as $city)
+                if(!empty($request->params['selectedhubs']))
                 {
-                    $userHub = new UserTempHub;
-                    $userHub->user_id = $user->user_id;
-                    $userHub->country_id = $city['country_id'];
-                    $userHub->state_id = $city['state_id'];
-                    $userHub->city_id = $city['city_id'];
-                    $userHub->save();
+                    foreach($request->params['selectedhubs'] as $hub)
+                    {
+                        $userHub = new UserSelectedHub;
+                        $userHub->user_id = $user->user_id;
+                        $userHub->hub_id = $hub;
+                        $userHub->save();
+                    }
                 }
-            }
+                if(!empty($request->params['selectedcity']))
+                {
+                    foreach($request->params['selectedcity'] as $city)
+                    {
+                        $userHub = new UserTempHub;
+                        $userHub->user_id = $user->user_id;
+                        $userHub->country_id = $city['country_id'];
+                        $userHub->state_id = $city['state_id'];
+                        $userHub->city_id = $city['city_id'];
+                        $userHub->save();
+                    }
+                }
 
             if(!empty($request->params['selectedcity']) || !empty($request->params['selectedhubs']))
             {
@@ -382,7 +393,6 @@ class HubController extends Controller
         }          
             
     }
-
 
     /*
      * Make Validation Rules
