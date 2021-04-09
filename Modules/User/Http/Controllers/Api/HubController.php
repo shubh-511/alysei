@@ -343,7 +343,7 @@ class HubController extends Controller
 
             $user = $this->user;
 
-            $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->where('country_id', $request->country_id)->get();
+            $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
             $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->where('country_id', $request->country_id)->get();
 
             $selectedStates = array();
