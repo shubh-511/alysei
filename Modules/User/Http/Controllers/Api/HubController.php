@@ -272,6 +272,10 @@ class HubController extends Controller
                     $selectedCountries[] = $UserTempHub->country_id;
                 }
             }
+
+            $getUpcomingCountries = MapHubCountryRole::where('is_active', '0')->get();
+            $getComingCountries = $getUpcomingCountries->pluck('country_id')->toArray();
+
             $countryUpcomingCountrieData = Country::with('flag_id')->select('id','name','flag_id','status')->where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
 
             $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->where('is_active', '1')->get();
