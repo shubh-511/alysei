@@ -46,6 +46,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/hub/countries', 'Api\HubController@getHubCountries');
 	Route::get('get/active/upcoming/countries', 'Api\HubController@getActiveAndUpcomingCountries');
 
+	Route::get('get/selected/hub/countries', 'Api\HubController@getSelectedHubCountries');
+
 	Route::post('get/hub/city', 'Api\HubController@getHubsCity');
 	Route::post('get/hubs', 'Api\HubController@getHubs');
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');

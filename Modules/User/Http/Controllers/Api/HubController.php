@@ -234,6 +234,71 @@ class HubController extends Controller
         }
     }
 
+    /***
+    get User Selected Hubs
+    ***/
+    public function getSelectedHubCountries(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $jsonArray = [];
+            $hubsArray = [];
+            
+            $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
+            $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->get();
+            $selectedCountries = array();
+            if(count($UserSelectedHubs) > 0 )
+            {
+                foreach($UserSelectedHubs as $UserSelectedHub)
+                {
+                    $selectedHub = Hub::where('id', $UserSelectedHub)->hub_id)->first();
+                    $selectedCountries[] = $selectedHub->country_id;
+                }
+            }
+            if(count($UserTempHubs) > 0)
+            {
+                foreach($UserTempHubs as $UserTempHub)
+                {
+                    $selectedCountries[] = $UserTempHub->country_id;
+                }
+            }
+
+            $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->get();
+            $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
+
+            if(count($getCountries) > 0)
+            {
+                $countryData = Country::select('id','name','flag_id','status')->where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+            }
+            else
+            {
+                $countryData = Country::select('id','name','flag_id','status')->where('status', '1')->orderBy('name','ASC')->get();
+            }
+
+            foreach($countryData as $key => $country)
+            {
+                if(in_array($country->id, $selectedCountries))
+                {
+                    $countryData[$key]->is_selected = true;
+                }
+                else
+                {
+                    $countryData[$key]->is_selected = false;
+                }
+            }
+
+            return response()->json(['success' => $this->successStatus,
+                                        'data' => $countryData,
+                                    ], $this->successStatus);
+                
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
 
     /*
      * Make Validation Rules
