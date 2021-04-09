@@ -87,12 +87,12 @@ class HubController extends Controller
 
             if(count($getCountries) > 0)
             {
-                $countryData = Country::with('flag_id')->where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
-                $countryUpcomingCountrieData = Country::with('flag_id')->where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
+                $countryData = Country::select('id','name','flag_id','status')->with('flag_id')->where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                $countryUpcomingCountrieData = Country::select('id','name','flag_id','status')->with('flag_id')->where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
             }
             else
             {
-                $countryData = Country::with('flag_id')->where('status', '1')->orderBy('name','ASC')->get();
+                $countryData = Country::select('id','name','flag_id','status')->with('flag_id')->where('status', '1')->orderBy('name','ASC')->get();
             }
             
             if(count($countryData) > 0)
@@ -244,7 +244,7 @@ class HubController extends Controller
     }
 
     /***
-    get User Selected Hubs
+    get Selected Hub Countries
     ***/
     public function getSelectedHubCountries(Request $request)
     {
@@ -272,17 +272,18 @@ class HubController extends Controller
                     $selectedCountries[] = $UserTempHub->country_id;
                 }
             }
+            $countryUpcomingCountrieData = Country::with('flag_id')->select('id','name','flag_id','status')->where('status', '1')->whereIn('id', $getComingCountries)->orderBy('name','ASC')->get();
 
             $getAssignedCountries = MapHubCountryRole::where('role_id', $user->role_id)->where('is_active', '1')->get();
             $getCountries = $getAssignedCountries->pluck('country_id')->toArray();
 
             if(count($getCountries) > 0)
             {
-                $countryData = Country::select('id','name','flag_id','status')->where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                $countryData = Country::with('flag_id')->select('id','name','flag_id','status')->where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
             }
             else
             {
-                $countryData = Country::select('id','name','flag_id','status')->where('status', '1')->orderBy('name','ASC')->get();
+                $countryData = Country::with('flag_id')->select('id','name','flag_id','status')->where('status', '1')->orderBy('name','ASC')->get();
             }
 
             foreach($countryData as $key => $country)
@@ -297,8 +298,10 @@ class HubController extends Controller
                 }
             }
 
+            $data = ['active_countries' => $countryData, 'upcoming_countries' => $countryUpcomingCountrieData];
+
             return response()->json(['success' => $this->successStatus,
-                                        'data' => $countryData,
+                                        'data' => $data,
                                     ], $this->successStatus);
                 
         }
@@ -306,6 +309,47 @@ class HubController extends Controller
         {
             return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /***
+    get Selected Hub States
+    ***/
+    public function getSelectedHubStates(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [ 
+            'country_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $states = State::where('status', '1')->where('country_id', $request->country_id)->orderBy('name','ASC')->get();
+            
+            if(count($states) > 0)
+            {
+                foreach($states as $key => $state)
+                {
+
+                    $states[$key]->is_selected = true;
+
+                }
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $states,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                return response()->json(['success'=>false,'errors' =>['exception' => 'No states found']], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }          
+            
     }
 
 
