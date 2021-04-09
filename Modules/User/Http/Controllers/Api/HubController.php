@@ -252,7 +252,7 @@ class HubController extends Controller
             {
                 foreach($UserSelectedHubs as $UserSelectedHub)
                 {
-                    $selectedHub = Hub::where('id', $UserSelectedHub)->hub_id)->first();
+                    $selectedHub = Hub::where('id', $UserSelectedHub->hub_id)->first();
                     $selectedCountries[] = $selectedHub->country_id;
                 }
             }
