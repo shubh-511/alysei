@@ -127,14 +127,21 @@ class HubController extends Controller
                 $stateData = State::where('id', $state)->first();
                 
                 $cities = City::where('state_id', $state)->where('status', '1')->get();
-                if(count($cities) > 0)
+
+                foreach($cities as $key => $city)
                 {
-                    $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'city_array'=>$cities];
+                    if(in_array($stateData, $request->params))
+                    {
+                        $cities[$key]->is_selected = true;
+                    }
+                    else
+                    {
+                        $cities[$key]->is_selected = false;
+                    }
                 }
-                else
-                {
-                    $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'city_array'=>$cities];
-                }
+                
+                $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'city_array'=>$cities];
+               
                     
             }
             $hubs = ['cities' => $harray];
