@@ -131,17 +131,21 @@ class HubController extends Controller
                 $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->whereIn('state_id', $request->params)->get();
                 $allCity = $UserTempHubs->pluck('city_id')->toArray();
 
-                foreach($cities as $key => $city)
+                if(!empty($UserTempHubs))
                 {
-                    if(in_array($city->id, $allCity))
+                    foreach($cities as $key => $city)
                     {
-                        $cities[$key]->is_selected = true;
-                    }
-                    else
-                    {
-                        $cities[$key]->is_selected = false;
+                        if(in_array($city->id, $allCity))
+                        {
+                            $cities[$key]->is_selected = true;
+                        }
+                        else
+                        {
+                            $cities[$key]->is_selected = false;
+                        }
                     }
                 }
+                
                 
                 $harray[] = ['state_id'=>$stateData->id,'state_name'=>$stateData->name,'city_array'=>$cities];
                
