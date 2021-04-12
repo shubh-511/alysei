@@ -212,6 +212,59 @@ class HubController extends Controller
     }
 
     /***
+    Review Hubs Selection
+    ***/
+    public function hubsReviewSelection(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $jsonArray = [];
+            $harray = [];
+            
+            $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
+            $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->get();
+            $selectedCountries = array();
+            if(count($UserSelectedHubs) > 0 )
+            {
+                foreach($UserSelectedHubs as $UserSelectedHub)
+                {
+                    $selectedHub = Hub::where('id', $UserSelectedHub->hub_id)->first();
+                    $selectedCountries[] = $selectedHub->country_id;
+                }
+                $getHubs = Hub::whereIn('country_id', $selectedCountries)->get();
+                foreach($getHubs as $getHub)
+                {
+                    $countryData = Country::where('id', $getHub->country_id)->first();
+                    $harray[] = ['country'=>$countryData->id,'country_name'=>$countryData->name,'hubs_array'=>$getHubs];
+                }
+
+            }
+            /*if(count($UserTempHubs) > 0)
+            {
+                foreach($UserTempHubs as $UserTempHub)
+                {
+                    $selectedCountries[] = $UserTempHub->country_id;
+                }
+            }*/
+
+
+
+            
+              
+            $hubs = ['hubs' => $harray];
+            return response()->json(['success' => $this->successStatus,
+                                        'data' => $hubs,
+                                    ], $this->successStatus);
+                
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /***
     Post User Hubs
     ***/
     public function postUserHubs(Request $request)
