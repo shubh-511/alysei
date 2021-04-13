@@ -243,7 +243,7 @@ class HubController extends Controller
                 {
                     $getHubs = Hub::where('country_id', $getHub->country_id)->whereIn('id', $hubsSelectedByUser)->get();
                     $countryData = Country::where('id', $getHub->country_id)->first();
-                    $UserTempHubsCity = UserTempHub::where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
+                    $UserTempHubsCity = UserTempHub::with('city:id,name')->where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
                     $harray[] = ['country_id' => $getHub->country_id,'country_name' => $countryData->name,'selected_hubs' => $getHubs, 'selected_city' => $UserTempHubsCity];
                 }
             }
