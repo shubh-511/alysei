@@ -221,37 +221,33 @@ class HubController extends Controller
             $user = $this->user;
             $jsonArray = [];
             $harray = [];
+            $UserTempHubsCity = [];
             
             $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
+            $hubsSelectedByUser = $UserSelectedHubs->pluck('hub_id')->toArray();
+
             $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->get();
             $selectedCountries = array();
-            if(count($UserSelectedHubs) > 0 )
+            if(count($UserSelectedHubs) > 0 || count($UserTempHubs) > 0)
             {
                 foreach($UserSelectedHubs as $UserSelectedHub)
                 {
                     $selectedHub = Hub::where('id', $UserSelectedHub->hub_id)->first();
                     $selectedCountries[] = $selectedHub->country_id;
                 }
-                $getHubs = Hub::whereIn('country_id', $selectedCountries)->get();
+
+
+                $getHubs = Hub::whereIn('id', $hubsSelectedByUser)->groupBy('country_id')->get();
+
                 foreach($getHubs as $getHub)
                 {
+                    $getHubs = Hub::where('country_id', $getHub->country_id)->whereIn('id', $hubsSelectedByUser)->get();
                     $countryData = Country::where('id', $getHub->country_id)->first();
-                    $harray[] = ['country'=>$countryData->id,'country_name'=>$countryData->name,'hubs_array'=>$getHubs];
+                    $UserTempHubsCity = UserTempHub::where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
+                    $harray[] = ['country_id' => $getHub->country_id,'country_name' => $countryData->name,'selected_hubs' => $getHubs, 'selected_city' => $UserTempHubsCity];
                 }
-
             }
-            /*if(count($UserTempHubs) > 0)
-            {
-                foreach($UserTempHubs as $UserTempHub)
-                {
-                    $selectedCountries[] = $UserTempHub->country_id;
-                }
-            }*/
-
-
-
-            
-              
+           
             $hubs = ['hubs' => $harray];
             return response()->json(['success' => $this->successStatus,
                                         'data' => $hubs,
