@@ -224,6 +224,50 @@ class FeaturedListingsController extends CoreController
     }
 
     /* 
+     * get all featured listing
+     * 
+     */
+    public function getAllFeaturedListing()
+    {
+        try
+        {
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            
+            $products = [];
+
+            foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+                
+                $featuredListing = FeaturedListing::with('image')
+                                    ->where('user_id', $this->user->user_id)
+                                    ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                    ->orderBy('featured_listing_id','DESC')->get(); 
+
+                $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
+                
+            }
+
+            $data = ['products' => $products];
+
+
+            if($data)
+            {
+                return response()->json(['success' => $this->successStatus,
+                             'data' => $data,
+                            ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No listing found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+            }                 
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /* 
      * delete featured listing
      * @params $request
      */
