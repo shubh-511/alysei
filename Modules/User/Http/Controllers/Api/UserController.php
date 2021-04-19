@@ -298,7 +298,7 @@ class UserController extends CoreController
      * @params 
      */
 
-    public function getUserSubmitedFields()
+    public function getUserSubmitedFields($getFieldsForTab='')
     {
         try
         { 
@@ -481,9 +481,16 @@ class UserController extends CoreController
             $data = ['step_1'=>$steps,'products' => $products];
 
             /*************************/
+            if(!empty($getFieldsForTab))
+            {
+                return $steps;
+            }
+            else
+            {
+                return response()->json(['success'=>$this->successStatus,'data' => $data,'response_time'=>$response_time], $this->successStatus); 
+            }
 
-
-            return response()->json(['success'=>$this->successStatus,'data' => $data,'response_time'=>$response_time], $this->successStatus); 
+            
         }      
         catch(\Exception $e)
         {
@@ -1007,7 +1014,7 @@ class UserController extends CoreController
 
             /********About tab***/
 
-            $userAboutTab = $this->getUserSubmitedFields();
+            $userAboutTab = $this->getUserSubmitedFields(1);
 
             /*********************/
 
