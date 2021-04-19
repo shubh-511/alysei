@@ -11,6 +11,8 @@ use Modules\Activity\Entities\ActivityAction;
 use Modules\User\Entities\FeaturedListing;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
+use Modules\User\Entities\UserSelectedHub;
+use Modules\User\Entities\UserTempHub;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Modules\User\Entities\Certificate;
@@ -899,43 +901,23 @@ class UserController extends CoreController
             $userTempHub = UserTempHub::where('user_id', $loggedInUser->user_id)->count();
             $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->count();
 
-            if($userSelectedHub > 0 || $userTempHub > 0)
-            {
-                $userSelectedHub = true;
-            } 
-            else
-            {
-                $userSelectedHub = false;
-            }
-
             $userData = User::where('user_id', $loggedInUser->user_id)->first();
-            $userAbout = $userData->about;
-            if(!empty($userData->avatar_id))
-            {
-                $userAvatar = true;
-            }
-            else
-            {
-                $userAvatar = false;
-            }
-
-            if(!empty($userData->cover_id))
-            {
-                $userCover = true;
-            }
-            else
-            {
-                $userCover = false;
-            }
-
+            
+            $userFeaturedListing = ($featuredListing > 0) ? true : false;
+            $userSelectedHub = ($userSelectedHub > 0 || $userTempHub > 0) ? true : false;
+            $userAvatar = (!empty($userData->avatar_id)) ? true : false;
+            $userCover = (!empty($userData->cover_id)) ? true : false;
             $userAbout = (!empty($userData->about)) ? true : false;
             
 
             return response()->json(['success' => $this->successStatus,
+                                'user_id' => $loggedInUser->user_id,
+                                'role_id' => $loggedInUser->role_id,
                                 'is_hub_selected' => $userSelectedHub,
                                 'is_profile_pic_uploaded' => $userAvatar,
                                 'is_cover_pic_uploaded' => $userCover,
                                 'is_about_updated' => $userAbout,
+                                'is_featured_listing_updated' => $userFeaturedListing,
                             ], $this->successStatus);
 
 
