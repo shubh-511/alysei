@@ -23,7 +23,7 @@ class SeedFeaturedListingFieldsTableSeeder extends Seeder
 
                         array("title"=>"Recipe Type",'type'=>'text','name'=>'recipe_type','required'=>'yes'),
 
-                        array("title"=>"Address",'type'=>'text','name'=>'address','required'=>'yes'),
+                        array("title"=>"Address",'type'=>'map','name'=>'address','required'=>'yes'),
 
                         array("title"=>"Event Time & Date",'type'=>'datetime','name'=>'time_and_date','required'=>'yes'),
 
