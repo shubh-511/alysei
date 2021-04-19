@@ -243,16 +243,21 @@ class HubController extends Controller
                 {
                     $getHubs = Hub::where('country_id', $getHub->country_id)->whereIn('id', $hubsSelectedByUser)->get();
                     $countryData = Country::where('id', $getHub->country_id)->first();
+                    $stateData = State::where('id', $getHub->state_id)->get();
+                    $UserTempHubsState = UserTempHub::with('state:id,name')->where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->groupBy('country_id')->get();
                     $UserTempHubsCity = UserTempHub::with('city:id,name')->where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
+
+                    $mergedStates = $UserTempHubsState->merge($stateData);
+                    $resultStates = $mergedStates->all();
+
                     $merged = $getHubs->merge($UserTempHubsCity);
                     $result = $merged->all();
-                    $harray[] = ['country_id' => $getHub->country_id,'country_name' => $countryData->name,'hubs' => $result];
+                    $harray[] = ['country_id' => $getHub->country_id,'country_name' => $countryData->name,'hubs' => $result, 'states' => $resultStates];
                 }
             }
            
-            $hubs = ['country' => $harray];
             return response()->json(['success' => $this->successStatus,
-                                        'data' => $hubs,
+                                        'country' => $harray,
                                     ], $this->successStatus);
                 
         }

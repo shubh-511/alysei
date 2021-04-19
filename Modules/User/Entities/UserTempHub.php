@@ -20,4 +20,9 @@ class UserTempHub extends Model
         return $this->belongsTo(City::class, 'city_id','id');
     }
 
+    public function state()
+    {
+        return $this->belongsTo(State::class, 'state_id','id');
+    }
+
 }
