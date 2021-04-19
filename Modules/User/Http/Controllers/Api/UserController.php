@@ -1007,7 +1007,7 @@ class UserController extends CoreController
 
             /********About tab***/
 
-            
+            $userAboutTab = $this->getUserSubmitedFields();
 
             /*********************/
 
