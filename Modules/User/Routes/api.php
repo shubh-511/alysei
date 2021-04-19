@@ -74,6 +74,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('unblock/user', 'Api\BlockUserController@unBlockUser');
 
 	Route::get('get/profile/progress', 'Api\UserController@getProfileProgress');
+	Route::get('get/profile', 'Api\UserController@getProfile');
 
 
 });

@@ -929,6 +929,110 @@ class UserController extends CoreController
     }
 
     /*
+     * Get Profile API in single
+     *
+     */
+    public function getProfile()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+            $profilePercentage = $this->profileStatus($loggedInUser->user_id);
+            User::where('user_id', $loggedInUser->user_id)->update(['profile_percentage' => $profilePercentage]);
+
+            $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
+
+            $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
+
+            $postCount = ActivityAction::where('subject_id', $loggedInUser->user_id)->count();
+            $connectionsCount = Connection::where('is_approved', '1')->where('resource_id', $loggedInUser->user_id)->orWhere('user_id', $loggedInUser->user_id)->count();
+            $followerCount = Follower::where('follow_user_id', $loggedInUser->user_id)->count();
+
+
+            /*****Featured Listings****/
+
+            $userFieldInfo = [];
+
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            
+            $products = [];
+            
+            foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+                
+                $featuredListing = FeaturedListing::with('image')
+                                    ->where('user_id', $this->user->user_id)
+                                    ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                    ->orderBy('featured_listing_id','DESC')->get(); 
+
+                $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
+                
+            }
+
+            //Get Featured Listing Fields
+
+            //Get Featured Type
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
+            $fieldsData = [];
+            foreach ($featuredTypes as $key => $value) {
+
+                $value->title = $this->translate('messages.'.$value->title,$value->title);
+
+                $value->options = $this->getFeaturedListingFieldOptionParent($value->featured_listing_field_id);
+
+                if(!empty($value->options)){
+                    foreach ($value->options as $k => $oneDepth) {
+
+                            $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
+                        }
+                }
+
+                $fieldsData[$value->featured_listing_type_slug][] = $value;
+            }
+
+            foreach($fieldsData as $fieldsDataKey => $fieldsDataValue){
+                    
+
+                $key = array_search($fieldsDataKey, array_column($products, 'slug'));
+
+                $products[$key]['fields'] = $fieldsDataValue;
+            }
+
+            /*************************/
+
+            /******Post Tab********/
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->orderBy('activity_action_id','DESC')->paginate(15);
+            
+            /*********************/
+
+            /********About tab***/
+
+            
+
+            /*********************/
+
+            /********Contact tab***/
+
+            $contact = User::select('user_id','role_id','email','phone','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
+
+            /*********************/
+
+
+           
+            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost, 'about_tab' => [], 'contact_tab' => $contact];
+
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $data
+                            ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+        
+    }
+
+    /*
      * Get Member Profile
      *
      */
