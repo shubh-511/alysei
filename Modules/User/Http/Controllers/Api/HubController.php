@@ -219,7 +219,6 @@ class HubController extends Controller
         try
         {
             $user = $this->user;
-            $jsonArray = [];
             $harray = [];
             $UserTempHubsCity = [];
             
@@ -228,47 +227,34 @@ class HubController extends Controller
 
             $UserTempHubs = UserTempHub::where('user_id', $user->user_id)->get();
             $selectedCountries = array();
-            if(count($UserSelectedHubs) > 0 || count($UserTempHubs) > 0)
+            if(count($UserSelectedHubs) > 0)
             {
                 foreach($UserSelectedHubs as $UserSelectedHub)
                 {
                     $selectedHub = Hub::where('id', $UserSelectedHub->hub_id)->first();
                     $selectedCountries[] = $selectedHub->country_id;
                 }
-
-
-                $getHubs = Hub::whereIn('id', $hubsSelectedByUser)->groupBy('country_id')->get();
-
-                foreach($getHubs as $getHub)
+            }
+            if(count($UserTempHubs) > 0)
+            {
+                foreach($UserTempHubs as $UserTempHub)
                 {
-                    $getHubs = Hub::where('country_id', $getHub->country_id)->whereIn('id', $hubsSelectedByUser)->get();
-                    $countryData = Country::where('id', $getHub->country_id)->first();
-                    $stateData = State::where('id', $getHub->state_id)->get();
-                    $UserTempHubsState = UserTempHub::where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->groupBy('country_id')->get();
-                    $UserTempHubsCity = UserTempHub::where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
-
-                    foreach($UserTempHubsCity as $tempKey => $tempHubCity)
-                    {
-                        $cityData = City::where('id', $tempHubCity->city_id)->first();
-                        $UserTempHubsCity[$tempKey]->title = $cityData->name;
-                    }
-                    foreach($UserTempHubsState as $tempStateKey => $tempHubState)
-                    {
-                        $stateName = State::where('id', $tempHubState->state_id)->first();
-                        $UserTempHubsState[$tempStateKey]->name = $stateName->name;
-                    }
-
-                    $mergedStates = $UserTempHubsState->merge($stateData);
-                    $resultStates = $mergedStates->all();
-
-                    $merged = $getHubs->merge($UserTempHubsCity);
-                    $result = $merged->all();
-                    $harray[] = ['country_id' => $getHub->country_id,'country_name' => $countryData->name,'hubs' => $result, 'states' => $resultStates];
+                    $selectedCountries[] = $UserTempHub->country_id;
                 }
             }
-           
+            $selectedCountries = array_unique($selectedCountries);
+            if(count($selectedCountries) > 0)
+            {
+                foreach($selectedCountries as $selectedCountry)
+                {
+                    $countryData = Country::where('id', $selectedCountry)->first();
+                    $hubsData = Hub::whereIn('id', $hubsSelectedByUser)->where('country_id', $selectedCountry)->get();
+                    $UserTemporaryHubs = UserTempHub::with('city:id,name')->where('user_id', $user->user_id)->where('country_id', $selectedCountry)->get();
+                    $harray[] = ['country_id' => $countryData->id,'country_name' => $countryData->name,'hubs' => $hubsData, 'cities' => $UserTemporaryHubs];
+                }
+            }
             return response()->json(['success' => $this->successStatus,
-                                        'country' => $harray,
+                                        'data' => $harray,
                                     ], $this->successStatus);
                 
         }
