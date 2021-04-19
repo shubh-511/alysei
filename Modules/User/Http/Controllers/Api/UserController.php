@@ -886,6 +886,67 @@ class UserController extends CoreController
     }
 
     /*
+     * Get profile progress
+     *
+     */
+    public function getProfileProgress()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            $userSelectedHub = UserSelectedHub::where('user_id', $loggedInUser->user_id)->count();  
+            $userTempHub = UserTempHub::where('user_id', $loggedInUser->user_id)->count();
+            $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->count();
+
+            if($userSelectedHub > 0 || $userTempHub > 0)
+            {
+                $userSelectedHub = true;
+            } 
+            else
+            {
+                $userSelectedHub = false;
+            }
+
+            $userData = User::where('user_id', $loggedInUser->user_id)->first();
+            $userAbout = $userData->about;
+            if(!empty($userData->avatar_id))
+            {
+                $userAvatar = true;
+            }
+            else
+            {
+                $userAvatar = false;
+            }
+
+            if(!empty($userData->cover_id))
+            {
+                $userCover = true;
+            }
+            else
+            {
+                $userCover = false;
+            }
+
+            $userAbout = (!empty($userData->about)) ? true : false;
+            
+
+            return response()->json(['success' => $this->successStatus,
+                                'is_hub_selected' => $userSelectedHub,
+                                'is_profile_pic_uploaded' => $userAvatar,
+                                'is_cover_pic_uploaded' => $userCover,
+                                'is_about_updated' => $userAbout,
+                            ], $this->successStatus);
+
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Get Member Profile
      *
      */
