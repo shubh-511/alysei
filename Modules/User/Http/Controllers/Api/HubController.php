@@ -244,8 +244,19 @@ class HubController extends Controller
                     $getHubs = Hub::where('country_id', $getHub->country_id)->whereIn('id', $hubsSelectedByUser)->get();
                     $countryData = Country::where('id', $getHub->country_id)->first();
                     $stateData = State::where('id', $getHub->state_id)->get();
-                    $UserTempHubsState = UserTempHub::with('state:id,name')->where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->groupBy('country_id')->get();
-                    $UserTempHubsCity = UserTempHub::with('city:id,name')->where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
+                    $UserTempHubsState = UserTempHub::where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->groupBy('country_id')->get();
+                    $UserTempHubsCity = UserTempHub::where('user_id', $user->user_id)->where('country_id', $getHub->country_id)->get();
+
+                    foreach($UserTempHubsCity as $tempKey => $tempHubCity)
+                    {
+                        $cityData = City::where('id', $tempHubCity->city_id)->first();
+                        $UserTempHubsCity[$tempKey]->title = $cityData->name;
+                    }
+                    foreach($UserTempHubsState as $tempStateKey => $tempHubState)
+                    {
+                        $stateName = State::where('id', $tempHubState->state_id)->first();
+                        $UserTempHubsState[$tempStateKey]->name = $stateName->name;
+                    }
 
                     $mergedStates = $UserTempHubsState->merge($stateData);
                     $resultStates = $mergedStates->all();
