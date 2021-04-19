@@ -17,7 +17,7 @@ class CreateUserFieldValuesTable extends Migration
             $table->increments('user_field_value_id');
             $table->bigInteger('user_id');
             $table->integer('user_field_id');
-            $table->string('value');
+            $table->text('value');
             $table->timestamps();
         });
     }
