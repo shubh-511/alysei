@@ -220,7 +220,6 @@ class HubController extends Controller
         {
             $user = $this->user;
             $harray = [];
-            $UserTempHubsCity = [];
             
             $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
             $hubsSelectedByUser = $UserSelectedHubs->pluck('hub_id')->toArray();
