@@ -909,6 +909,7 @@ class UserController extends CoreController
             $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->count();
 
             $userData = User::where('user_id', $loggedInUser->user_id)->first();
+            $profilePercentage = $this->profileStatus($loggedInUser->user_id);
             
             $userFeaturedListing = ($featuredListing > 0) ? true : false;
             $userSelectedHub = ($userSelectedHub > 0 || $userTempHub > 0) ? true : false;
@@ -916,7 +917,7 @@ class UserController extends CoreController
             $userCover = (!empty($userData->cover_id)) ? true : false;
             $userAbout = (!empty($userData->about)) ? true : false;
 
-            $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $loggedInUser->profile_percentage];
+            $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage];
 
             $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar];
             $dataCoverImage = ['title' => 'Cover Image','status' => $userCover];
