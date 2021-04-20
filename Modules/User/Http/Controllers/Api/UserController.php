@@ -915,16 +915,30 @@ class UserController extends CoreController
             $userAvatar = (!empty($userData->avatar_id)) ? true : false;
             $userCover = (!empty($userData->cover_id)) ? true : false;
             $userAbout = (!empty($userData->about)) ? true : false;
-            
 
+            $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $loggedInUser->profile_percentage];
+
+            $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar];
+            $dataCoverImage = ['title' => 'Cover Image','status' => $userCover];
+            $dataAbout = ['title' => 'About','status' => $userAbout];
+            $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub];
+            $dataFeaturedListing = ['title' => 'Featured listing','status' => $userFeaturedListing];
+
+            if($loggedInUser->role_id == 10)
+            {
+                $dataProgress = [$dataProfileImage, $dataCoverImage, $dataAbout];
+            }
+            else
+            {
+                $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $dataFeaturedListing];
+            }
+
+            
+                           
             return response()->json(['success' => $this->successStatus,
-                                'user_id' => $loggedInUser->user_id,
-                                'role_id' => $loggedInUser->role_id,
-                                'is_hub_selected' => $userSelectedHub,
-                                'is_profile_pic_uploaded' => $userAvatar,
-                                'is_cover_pic_uploaded' => $userCover,
-                                'is_about_updated' => $userAbout,
-                                'is_featured_listing_updated' => $userFeaturedListing,
+            					'data' => $data,
+                                'data_progress' => $dataProgress
+                                
                             ], $this->successStatus);
 
 
