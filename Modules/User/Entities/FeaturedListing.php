@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
 class FeaturedListing extends Model
 {
-	protected $fillable = ["title","description","image_id","featured_listing_type_id","created_at","updated_at","user_id"];
+	protected $fillable = ["title","description","image_id","listing_url","featured_listing_type_id","created_at","updated_at","user_id"];
 
     public function user()
     {
