@@ -1031,6 +1031,74 @@ class UserController extends CoreController
 
             $userAboutTab = $this->getUserSubmitedFields(1);
 
+            $role_id = $this->user->role_id;
+            $user_id = $this->user->user_id;
+
+            
+            $roleFields = DB::table('user_field_map_roles')->select('user_fields.title','user_fields.user_field_id','user_fields.type')
+                          ->join('user_fields', 'user_fields.user_field_id', '=', 'user_field_map_roles.user_field_id')
+                          ->where("role_id","=",$role_id)
+                          ->where("require_update","=",'true')
+                          ->where("conditional","=",'no')
+                          ->orderBy("edit_profile_field_order","asc")
+                          ->get();
+
+
+            if($roleFields){
+                foreach ($roleFields as $key => $value) {
+                    $radioFieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->first();
+                    
+                            
+                    $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
+                    if($roleFields[$key]->type == 'radio')
+                    {
+                        if(($radioFieldValue->value == 'Yes' ||  $radioFieldValue->value == '1'))
+                            $roleFields[$key]->value = $radioFieldValue->value;
+                        else
+                            $roleFields[$key]->value = 'No';
+                    }
+                    elseif($roleFields[$key]->type !='text' && $roleFields[$key]->type !='email')
+                    {
+                        $arrayValues = array();
+                        $fieldValues = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->get();
+                        if(count($fieldValues) > 0)
+                        {
+                            foreach($fieldValues as $fieldValue)
+                            {
+                                $options = DB::table('user_field_options')
+                                        //->where('user_id', $user_id)
+                                        ->where('user_field_option_id', $fieldValue->value)
+                                        ->first();
+                                if(!empty($options->option))
+                                $arrayValues[] = $options->option;
+                                
+                            }
+                        }
+                        $roleFields[$key]->value = join(", ", $arrayValues);
+                        
+                    }
+                    else
+                    {
+                        $fieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->first();
+                        $roleFields[$key]->value = $fieldValue->value??'';
+                    }
+                    
+
+                }
+            }
+
+
+
+
             /*********************/
 
             /********Contact tab***/
@@ -1041,7 +1109,7 @@ class UserController extends CoreController
 
 
            
-            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost, 'about_tab' => $userAboutTab, 'contact_tab' => $contact];
+            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost, 'about_tab' => $roleFields, 'contact_tab' => $contact];
 
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data
