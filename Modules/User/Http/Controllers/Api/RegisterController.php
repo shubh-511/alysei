@@ -8,6 +8,7 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\Role;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use App\Attachment;
 use Modules\User\Entities\City;
 use Validator;
 use DB;
@@ -68,13 +69,22 @@ class RegisterController extends CoreController
 
             $response_time = (microtime(true) - LARAVEL_START)*1000;
             $screens = DB::table('walk_through_screens')
-                        ->select('title','description','order','role_id')
+                        ->select('title','description','order','role_id','image_id')
                         ->where('role_id','=',$roleId)
                         ->orderBy('order','asc')->get();
 
             foreach ($screens as $key => $screen) {
                 $screens[$key]->title = $this->translate('messages.'.$screen->title,$screen->title);
                 $screens[$key]->description = $this->translate('messages.'.$screen->description,$screen->description);
+                $attachment = Attachment::where('id', $screen->image_id)->first();
+                if(!empty($attachment))
+                {
+                    $screens[$key]->image_id = $attachment->attachment_url;
+                }
+                else
+                {
+                    $screens[$key]->image_id = '';
+                }
             }
 
             return response()->json(['success'=>$this->successStatus,'data' =>$screens,'response_time'=>$response_time],$this->successStatus); 
