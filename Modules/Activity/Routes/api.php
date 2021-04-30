@@ -39,5 +39,6 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('accept/reject/request', 'Api\ConnectUserController@acceptOrRejectConnection');
 
 	Route::get('get/all/member/post', 'Api\ActivityController@getAllMemberPosts');
+	Route::get('get/activity/feed', 'Api\ActivityController@getActivityFeeds');
 
 });

@@ -276,24 +276,55 @@ class ActivityController extends CoreController
             $loggedInUserHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
             $loggedInUserHubs = $loggedInUserHubs->pluck('hub_id')->toArray();
 
+
             $myConnections = Connection::select('*','user_id as poster_id')->where('resource_id', $user->user_id)->where('is_approved', '1')->get();
-            $myConnections = $myConnections->pluck('poster_id')->toArray();
+            $myConnections = $myConnections->pluck('poster_id');
 
             $myFollowers = Follower::select('*','follow_user_id as poster_id')->where('user_id', $user->user_id)->get();
-            $myFollowers = $myFollowers->pluck('poster_id')->toArray();
+            $myFollowers = $myFollowers->pluck('poster_id');
 
             $merged = $myConnections->merge($myFollowers);
             $userIds = $merged->all();
+            $userIds = array_unique($userIds);
 
             if(count($userIds) > 0)
             {
-                $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->whereIn('subject_id', $userIds)->get();
+                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->whereIn('subject_id', $userIds)->where('privacy', 'public')->orWhere('privacy', 'followers')->paginate(10);
+                
             }
             else
             {
-                $message = "Invalid post Id";
+                $activityPosts = ActivityAction::with('attachments.attachment_link','subject_id')->where('privacy', 'public')->orWhere('user_id', $user->user_id)->paginate(10);
+
+                
+            }
+
+            if(count($activityPosts) > 0)
+            {
+                foreach($activityPosts as $key => $activityPost)
+                {
+                    $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
+                    if(!empty($isLikedActivityPost))
+                    {
+                        $activityPosts[$key]->like_flag = 1;
+                    }
+                    else
+                    {
+                        $activityPosts[$key]->like_flag = 0;
+                    }
+                    //$activityPosts[$key]->created_at = $activityPost->created_at->diffForHumans();   
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $activityPosts,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No post to display";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
             }
+            
             
         }
         catch(\Exception $e)
