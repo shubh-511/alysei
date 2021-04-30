@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('add/post', 'Api\ActivityController@addPost');
 	Route::post('edit/post', 'Api\ActivityController@editPost');
+	Route::post('share/post', 'Api\ActivityController@sharePost');
 	Route::post('delete/post', 'Api\ActivityController@deletePost');
 	Route::get('get/post/detail', 'Api\ActivityController@getPostDetails');
 

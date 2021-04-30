@@ -9,6 +9,9 @@ use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\CoreComment;
+use Modules\User\Entities\UserSelectedHub;
+use Modules\Activity\Entities\Connection;
+use Modules\Activity\Entities\Follower;
 use Modules\Activity\Entities\ActivityLike;
 use Modules\Activity\Entities\ActivityActionType;
 use Modules\Activity\Entities\ActivityAttachment;
@@ -90,6 +93,72 @@ class ActivityController extends CoreController
             }
             else
             {
+                $message = 'Something went wrong!';
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+           
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Share Post
+     * @Params $request
+     */
+    public function sharePost(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $requestFields = $request->params;
+            //$requestedFields = json_decode($requestFields, true);
+            $requestedFields = $requestFields;
+            
+            $rules = $this->validateSharePostData($requestedFields);
+
+            $validator = Validator::make($requestedFields, $rules);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $actionType = $this->checkActionType($requestedFields["action_type"], 5);
+            if($actionType[1] > 0)
+            {
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
+            }
+            else
+            {
+                $activityActionType = ActivityActionType::where("type", $requestedFields["action_type"])->first();
+                $activityAction = new ActivityAction;
+                $activityAction->type = $activityActionType->activity_action_type_id;
+                $activityAction->subject_type = "user";
+                $activityAction->subject_id = $user->user_id;
+                $activityAction->object_type = "user";
+                $activityAction->object_id = $user->user_id;
+                $activityAction->body = $requestedFields["body"];
+                $activityAction->privacy = $requestedFields["privacy"];
+                $activityAction->shared_post_id = $requestedFields["shared_post_id"];
+                //$activityAction->attachment_count = count($requestedFields["attachments"]);
+                $activityAction->save();
+            }
+
+            /*if(count($requestedFields["attachments"]) > 0)
+            {
+                $this->uploadAttchments($requestedFields["attachments"], $activityAction->activity_action_id);
+            }*/
+            if($activityAction)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'message' => $this->translate('messages.'."Post shared successfuly!","Post shared successfuly!"),
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = 'Something went wrong!';
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
            
@@ -185,6 +254,44 @@ class ActivityController extends CoreController
             else
             {
                 $message = "This post does not exist";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+            }
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get Activity Feeds
+     * @Params $request
+     */
+    public function getActivityFeeds()
+    {
+        try
+        {
+            $user = $this->user;
+            $loggedInUserHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
+            $loggedInUserHubs = $loggedInUserHubs->pluck('hub_id')->toArray();
+
+            $myConnections = Connection::select('*','user_id as poster_id')->where('resource_id', $user->user_id)->where('is_approved', '1')->get();
+            $myConnections = $myConnections->pluck('poster_id')->toArray();
+
+            $myFollowers = Follower::select('*','follow_user_id as poster_id')->where('user_id', $user->user_id)->get();
+            $myFollowers = $myFollowers->pluck('poster_id')->toArray();
+
+            $merged = $myConnections->merge($myFollowers);
+            $userIds = $merged->all();
+
+            if(count($userIds) > 0)
+            {
+                $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->whereIn('subject_id', $userIds)->get();
+            }
+            else
+            {
+                $message = "Invalid post Id";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
             }
             
@@ -591,6 +698,23 @@ class ActivityController extends CoreController
         return $rules;
     }
 
+    public function validateSharePostData($requestedFields)
+    {
+        $rules = [];
+          foreach ($requestedFields as $key => $field) {
+                if($key == 'action_type'){
+                    $rules[$key] = 'required|max:190';
+                }
+                elseif($key == 'privacy'){
+                    $rules[$key] = 'required|max:190';
+                }
+                elseif($key == 'shared_post_id'){
+                    $rules[$key] = 'required';
+                }
+            }
+        return $rules;    
+    }
+
     /*
      * Check Action Type
      * @Params $type
@@ -644,6 +768,17 @@ class ActivityController extends CoreController
                 if($activityActionType->commentable == '0')
                 {
                     $status = [$this->translate('messages.'."You are not authorised to comment on this post","You are not authorised to comment on this post"), 1];
+                }
+                else
+                {
+                    $status = [$this->translate('messages.'."Success","Success"), 0];
+                }
+            }
+            elseif($addOrUpdate == 5) // check is_sharable activity post
+            {
+                if($activityActionType->shareable == '0')
+                {
+                    $status = [$this->translate('messages.'."You are not authorised to share this post","You are not authorised to share this post"), 1];
                 }
                 else
                 {

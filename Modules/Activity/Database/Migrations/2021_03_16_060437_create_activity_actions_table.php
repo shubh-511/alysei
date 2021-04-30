@@ -22,6 +22,7 @@ class CreateActivityActionsTable extends Migration
             $table->integer('object_id');
             $table->text('body')->nullable();
             $table->text('params')->nullable();
+            $table->integer('shared_post_id')->default(0);
             $table->integer('attachment_count')->default(0);
             $table->integer('comment_count')->default(0);
             $table->integer('like_count')->default(0);
