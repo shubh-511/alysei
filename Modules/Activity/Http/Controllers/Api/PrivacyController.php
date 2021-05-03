@@ -148,7 +148,7 @@ class PrivacyController extends CoreController
             {
                 if(empty($checkPrivacyDataExist))
                 {
-                    $privacy = new Privacy;
+                    $privacy = new UserPrivacy;
                     $privacy->user_id = $user->user_id;
                     $privacy->allow_message_from = $request->allow_message_from;
                     $privacy->who_can_view_age = $request->who_can_view_age;
@@ -207,15 +207,14 @@ class PrivacyController extends CoreController
                 {
                     $privacy = new Privacy;
                     $privacy->user_id = $user->user_id;
-                    $privacy->allow_message_from = $request->allow_message_from;
-                    $privacy->who_can_view_age = $request->who_can_view_age;
-                    $privacy->who_can_view_profile = $request->who_can_view_profile;
-                    $privacy->who_can_connect = $request->who_can_connect;
+                    $privacy->private_messages = $request->private_messages;
+                    $privacy->when_someone_request_to_follow = $request->when_someone_request_to_follow;
+                    $privacy->weekly_updates = $request->weekly_updates;
                     $privacy->save();
                 }
                 else
                 {
-                    UserPrivacy::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
+                    UserPrivacy::where('user_id', $user->user_id)->update(['private_messages' => $request->private_messages, 'when_someone_request_to_follow' => $request->when_someone_request_to_follow, 'weekly_updates' => $request->weekly_updates]);
 
                 }             
                 $message = "Email preferences has been saved";
