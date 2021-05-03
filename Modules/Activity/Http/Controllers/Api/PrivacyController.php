@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use App\Http\Traits\UploadImageTrait;
-use Modules\Activity\Entities\Privacy;
+use Modules\Activity\Entities\UserPrivacy;
 use Modules\Activity\Entities\ConnectFollowPermission;
 use Modules\Activity\Entities\MapPermissionRole;
 use Modules\User\Entities\Role;
@@ -82,7 +82,7 @@ class PrivacyController extends CoreController
         {
             $user = $this->user;
             $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = Privacy::where('user_id', $user->user_id)->first();
+            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
 
             if(!empty($checkUser))
             {
@@ -142,7 +142,7 @@ class PrivacyController extends CoreController
             }
 
             $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = Privacy::where('user_id', $user->user_id)->first();
+            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
 
             if(!empty($checkUser))
             {
@@ -158,7 +158,7 @@ class PrivacyController extends CoreController
                 }
                 else
                 {
-                    Privacy::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
+                    UserPrivacy::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
 
                 }             
                     $message = "Privacy settings has been saved";
@@ -199,7 +199,7 @@ class PrivacyController extends CoreController
             }
 
             $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = Privacy::where('user_id', $user->user_id)->first();
+            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
 
             if(!empty($checkUser))
             {
@@ -215,7 +215,7 @@ class PrivacyController extends CoreController
                 }
                 else
                 {
-                    Privacy::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
+                    UserPrivacy::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
 
                 }             
                 $message = "Email preferences has been saved";
