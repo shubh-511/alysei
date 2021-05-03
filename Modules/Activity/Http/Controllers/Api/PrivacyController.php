@@ -46,7 +46,7 @@ class PrivacyController extends CoreController
         try
         {
             $user = $this->user;
-            $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer'])->orderBy('order')->get();
+            $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
 
             
             foreach ($roles as $key => $role) {

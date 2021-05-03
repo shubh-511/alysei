@@ -8,6 +8,7 @@ use Modules\User\Entities\User;
 class Privacy extends Model
 {
 	protected $primaryKey = 'privacy_id';
+	protected $table = 'privacies';
     protected $fillable = [];
 
     public function user()
