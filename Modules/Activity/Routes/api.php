@@ -41,4 +41,9 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/all/member/post', 'Api\ActivityController@getAllMemberPosts');
 	Route::get('get/activity/feed', 'Api\ActivityController@getActivityFeeds');
 
+	Route::get('get/roles/for/connection', 'Api\PrivacyController@getRolesForConnection');
+	Route::get('get/user/privacy', 'Api\PrivacyController@getPrivacyData');
+	Route::post('save/privacy', 'Api\PrivacyController@savePrivacy');
+	Route::post('save/email/preference', 'Api\PrivacyController@saveEmailPreference');
+
 });
