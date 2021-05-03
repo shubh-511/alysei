@@ -290,21 +290,22 @@ class ActivityController extends CoreController
 
             if(count($userIds) > 0)
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->whereIn('subject_id', $userIds)->where('privacy', 'public')->orWhere('privacy', 'followers')->paginate(10);
+                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->whereIn('subject_id', $userIds)->where('privacy', 'public')->orWhere('privacy', 'followers')->inRandomOrder()->paginate(10);
                 
             }
             else
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('privacy', 'public')->orWhere('subject_id', $user->user_id)->paginate(10);
+                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('privacy', 'public')->orWhere('subject_id', $user->user_id)->inRandomOrder()->paginate(10);
             }
 
             if(count($activityPosts) > 0)
             {
-                $myRecentPost = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('subject_id', $user->user_id)->first();
-                if(!empty($myRecentPost) && $myRecentPost->created_at->diffForHumans() < 30 )
+                /*$myRecentPost = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('subject_id', $user->user_id)->orderBy('activity_action_id', 'DESC')->get();
+                if(!empty($myRecentPost) && $myRecentPost->first()->created_at->diffForHumans() < 30 )
                 {
-                    array_unshift($activityPosts, $myRecentPost);
-                }
+                    $myRecentPost->toBase()->merge($activityPosts);
+                    //array_unshift($activityPosts->toArray(), $myRecentPost);
+                }*/
                 foreach($activityPosts as $key => $activityPost)
                 {
                     $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
@@ -316,7 +317,7 @@ class ActivityController extends CoreController
                     {
                         $activityPosts[$key]->like_flag = 0;
                     }
-                    $activityPosts[$key]->created_at = $activityPost->created_at->diffForHumans();   
+                    $activityPosts[$key]->posted_at = $activityPost->created_at->diffForHumans();   
                 }
 
                 return response()->json(['success' => $this->successStatus,
