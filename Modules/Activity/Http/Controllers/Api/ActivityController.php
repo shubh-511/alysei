@@ -290,12 +290,12 @@ class ActivityController extends CoreController
 
             if(count($userIds) > 0)
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->whereIn('subject_id', $userIds)->where('privacy', 'public')->orWhere('privacy', 'followers')->inRandomOrder()->paginate(10);
+                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->whereIn('subject_id', $userIds)->where('privacy', 'public')->orWhere('privacy', 'followers')->inRandomOrder()->orderBy('created_at', 'DESC')->paginate(10);
                 
             }
             else
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('privacy', 'public')->orWhere('subject_id', $user->user_id)->inRandomOrder()->paginate(10);
+                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('privacy', 'public')->orWhere('subject_id', $user->user_id)->inRandomOrder()->orderBy('created_at', 'DESC')->paginate(10);
             }
 
             if(count($activityPosts) > 0)
@@ -308,6 +308,7 @@ class ActivityController extends CoreController
                 }*/
                 foreach($activityPosts as $key => $activityPost)
                 {
+                    //is activity liked
                     $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
                     if(!empty($isLikedActivityPost))
                     {
@@ -317,6 +318,18 @@ class ActivityController extends CoreController
                     {
                         $activityPosts[$key]->like_flag = 0;
                     }
+
+                    //shared post
+                    $activityShared = ActivityAction::where('activity_action_id', $activityPost->shared_post_id)->first();
+                    if(!empty($activityShared))
+                    {
+                        $activityPosts[$key]->shared_post_id = $activityShared;
+                    }
+                    else
+                    {
+                        $activityPosts[$key]->shared_post_id = '';   
+                    }
+                    
                     $activityPosts[$key]->posted_at = $activityPost->created_at->diffForHumans();   
                 }
 
