@@ -285,6 +285,7 @@ class ActivityController extends CoreController
 
             $merged = $myConnections->merge($myFollowers);
             $userIds = $merged->all();
+            array_push($userIds, $user->user_id);
             $userIds = array_unique($userIds);
 
             if(count($userIds) > 0)
@@ -294,13 +295,16 @@ class ActivityController extends CoreController
             }
             else
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link','subject_id')->where('privacy', 'public')->orWhere('user_id', $user->user_id)->paginate(10);
-
-                
+                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('privacy', 'public')->orWhere('subject_id', $user->user_id)->paginate(10);
             }
 
             if(count($activityPosts) > 0)
             {
+                $myRecentPost = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('subject_id', $user->user_id)->first();
+                if(!empty($myRecentPost) && $myRecentPost->created_at->diffForHumans() < 30 )
+                {
+                    array_unshift($activityPosts, $myRecentPost);
+                }
                 foreach($activityPosts as $key => $activityPost)
                 {
                     $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
@@ -312,7 +316,7 @@ class ActivityController extends CoreController
                     {
                         $activityPosts[$key]->like_flag = 0;
                     }
-                    //$activityPosts[$key]->created_at = $activityPost->created_at->diffForHumans();   
+                    $activityPosts[$key]->created_at = $activityPost->created_at->diffForHumans();   
                 }
 
                 return response()->json(['success' => $this->successStatus,
