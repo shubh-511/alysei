@@ -5,10 +5,10 @@ namespace Modules\Activity\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Modules\User\Entities\User;
 
-class Privacy extends Model
+class UserPrivacy extends Model
 {
 	protected $primaryKey = 'privacy_id';
-	protected $table = 'privacies';
+	protected $table = 'user_privacies';
     protected $fillable = [];
 
     public function user()

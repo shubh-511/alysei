@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePrivacyTable extends Migration
+class CreateUserPrivaciesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class CreatePrivacyTable extends Migration
      */
     public function up()
     {
-        Schema::create('privacy', function (Blueprint $table) {
-            $table->increments('id');
+        Schema::create('user_privacies', function (Blueprint $table) {
+            $table->increments('user_privacy_id');
 
             //Privacy
             $table->bigInteger('user_id');
