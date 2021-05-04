@@ -65,7 +65,7 @@ class SearchController extends CoreController
                 }
 
                 $users = User::select('user_id','role_id','name')
-                ->where('email', 'LIKE', '%' . $keyWord . '%')
+                ->where('email', 'LIKE', '%' . $request->keyword . '%')
                 //->orderBy('name')
                 ->get();
 
