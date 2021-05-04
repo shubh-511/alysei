@@ -19,6 +19,6 @@ use Illuminate\Http\Request;
 Route::get('get/privacy/policy', 'PageController@privacyAndPolicy');
 Route::group(['middleware' => 'auth:api'], function(){
 
-
+	Route::get('search', 'Api\SearchController@search');
 
 });
