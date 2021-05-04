@@ -81,33 +81,21 @@ class PrivacyController extends CoreController
         try
         {
             $user = $this->user;
-            $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
+            $userPrivacy = User::select('user_id','allow_message_from','who_can_view_age','who_can_view_profile','who_can_connect')->where('user_id', $user->user_id)->first();
 
-            if(!empty($checkUser))
+            $userEmailPreference = User::select('user_id','private_messages','when_someone_request_to_follow','weekly_updates')->where('user_id', $user->user_id)->first();
+            
+            if(!empty($userPrivacy))
             {
-                if(empty($checkPrivacyDataExist))
-                {
-                    $privacyData = ['user_id' => $user->user_id, 'allow_message_from' => 'anyone', 'who_can_view_age' => 'anyone', 'who_can_view_profile' => 'anyone', 'who_can_connect' => 'anyone'];
+               
+                $privacyData = ['user_id' => $userPrivacy->user_id, 'allow_message_from' => $userPrivacy->allow_message_from, 'who_can_view_age' => $userPrivacy->who_can_view_age, 'who_can_view_profile' => $userPrivacy->who_can_view_profile, 'who_can_connect' => $userPrivacy->who_can_connect];
 
-                    $messagePreference = ['user_id' => $user->user_id, 'private_messages' => '1', 'when_someone_request_to_follow' => '1', 'weekly_updates' => '1'];
-
-                    return response()->json(['success' => $this->successStatus,
-                                         'privacy_data' => $privacyData,
-                                         'email_preference' => $messagePreference,
-                                        ], $this->successStatus);
-                }
-                else
-                {
-                    $privacyData = ['user_id' => $user->user_id, 'allow_message_from' => $checkPrivacyDataExist->allow_message_from, 'who_can_view_age' => $checkPrivacyDataExist->who_can_view_age, 'who_can_view_profile' => $checkPrivacyDataExist->who_can_view_profile, 'who_can_connect' => $checkPrivacyDataExist->who_can_connect];
-
-                    $messagePreference = ['user_id' => $user->user_id, 'private_messages' => $checkPrivacyDataExist->private_messages, 'when_someone_request_to_follow' => $checkPrivacyDataExist->when_someone_request_to_follow, 'weekly_updates' => $checkPrivacyDataExist->weekly_updates];
-                    
-                    return response()->json(['success' => $this->successStatus,
-                                         'privacy_data' => $privacyData,
-                                         'email_preference' => $messagePreference,
-                                        ], $this->successStatus);
-                }
+                $messagePreference = ['user_id' => $user->user_id, 'private_messages' => $userEmailPreference->private_messages, 'when_someone_request_to_follow' => $userEmailPreference->when_someone_request_to_follow, 'weekly_updates' => $userEmailPreference->weekly_updates];
+                
+                return response()->json(['success' => $this->successStatus,
+                                     'privacy_data' => $privacyData,
+                                     'email_preference' => $messagePreference,
+                                    ], $this->successStatus);
             }
             else
             {
@@ -142,29 +130,16 @@ class PrivacyController extends CoreController
             }
 
             $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
 
             if(!empty($checkUser))
             {
-                if(empty($checkPrivacyDataExist))
-                {
-                    $privacy = new UserPrivacy;
-                    $privacy->user_id = $user->user_id;
-                    $privacy->allow_message_from = $request->allow_message_from;
-                    $privacy->who_can_view_age = $request->who_can_view_age;
-                    $privacy->who_can_view_profile = $request->who_can_view_profile;
-                    $privacy->who_can_connect = $request->who_can_connect;
-                    $privacy->save();
-                }
-                else
-                {
-                    UserPrivacy::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
-
-                }             
-                    $message = "Privacy settings has been saved";
-                    return response()->json(['success' => $this->successStatus,
-                                         'message' => $this->translate('messages.'.$message,$message),
-                                        ], $this->successStatus);
+                
+               User::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
+                            
+                $message = "Privacy settings has been saved";
+                return response()->json(['success' => $this->successStatus,
+                                     'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);
             }
             else
             {
@@ -199,26 +174,14 @@ class PrivacyController extends CoreController
             }
 
             $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
 
             if(!empty($checkUser))
             {
-                if(empty($checkPrivacyDataExist))
-                {
-                    $privacy = new Privacy;
-                    $privacy->user_id = $user->user_id;
-                    $privacy->private_messages = $request->private_messages;
-                    $privacy->when_someone_request_to_follow = $request->when_someone_request_to_follow;
-                    $privacy->weekly_updates = $request->weekly_updates;
-                    $privacy->save();
-                }
-                else
-                {
-                    UserPrivacy::where('user_id', $user->user_id)->update(['private_messages' => $request->private_messages, 'when_someone_request_to_follow' => $request->when_someone_request_to_follow, 'weekly_updates' => $request->weekly_updates]);
-
-                }             
+                
+                User::where('user_id', $user->user_id)->update(['private_messages' => $request->private_messages, 'when_someone_request_to_follow' => $request->when_someone_request_to_follow, 'weekly_updates' => $request->weekly_updates]);
+                           
                 $message = "Email preferences has been saved";
-                    return response()->json(['success' => $this->successStatus,
+                return response()->json(['success' => $this->successStatus,
                                          'message' => $this->translate('messages.'.$message,$message),
                                         ], $this->successStatus);
             }
