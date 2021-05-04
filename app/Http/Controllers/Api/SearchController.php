@@ -64,7 +64,22 @@ class SearchController extends CoreController
                     return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                $this->searchUser($request->keyword);
+                $users = User::select('user_id','role_id','name')
+                ->where('email', 'LIKE', '%' . $keyWord . '%')
+                //->orderBy('name')
+                ->get();
+
+                if(count($users) > 0)
+                {
+                    return response()->json(['success' => $this->successStatus,
+                                         'data' => $users
+                                        ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "No users found for this keyword";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
             }
         }
         catch(\Exception $e)
@@ -81,22 +96,7 @@ class SearchController extends CoreController
     {
         
 
-        $users = User::select('user_id','role_id','name')
-        ->where('email', 'LIKE', '%' . $keyWord . '%')
-        //->orderBy('name')
-        ->get();
-
-        if(count($users) > 0)
-        {
-            return response()->json(['success' => $this->successStatus,
-                                 'data' => $users
-                                ], $this->successStatus);
-        }
-        else
-        {
-            $message = "No users found for this keyword";
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-        }
+        
     }
 
 
