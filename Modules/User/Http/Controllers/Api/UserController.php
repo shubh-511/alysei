@@ -1109,7 +1109,7 @@ class UserController extends CoreController
 
 
            
-            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost, 'about_tab' => $roleFields, 'contact_tab' => $contact];
+            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'about_tab' => $roleFields, 'contact_tab' => $contact];
 
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data
