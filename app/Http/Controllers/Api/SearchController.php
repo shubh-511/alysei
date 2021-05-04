@@ -56,7 +56,15 @@ class SearchController extends CoreController
 
             if($request->search_type == 1)
             {
-                $this->searchUser();
+                $validator = Validator::make($request->all(), [ 
+                    'keyword' => 'required' 
+                ]);
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+
+                $this->searchUser($request->keyword);
             }
         }
         catch(\Exception $e)
@@ -69,25 +77,19 @@ class SearchController extends CoreController
     /*
     * Searching User
     */
-    public function searchUser()
+    public function searchUser($keyWord)
     {
-        $validator = Validator::make($request->all(), [ 
-            'keyword' => 'required' 
-        ]);
-
-        if ($validator->fails()) { 
-            return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-        }
+        
 
         $users = User::select('user_id','role_id','name')
-        ->where('email', 'LIKE', '%' . $request->keyword . '%')
+        ->where('email', 'LIKE', '%' . $keyWord . '%')
         //->orderBy('name')
         ->get();
 
         if(count($users) > 0)
         {
             return response()->json(['success' => $this->successStatus,
-                                 'data' => $roles
+                                 'data' => $users
                                 ], $this->successStatus);
         }
         else
