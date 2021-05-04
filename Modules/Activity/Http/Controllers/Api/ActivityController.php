@@ -10,6 +10,7 @@ use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\CoreComment;
 use Modules\User\Entities\UserSelectedHub;
+use App\Attachment;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
 use Modules\Activity\Entities\ActivityLike;
@@ -290,12 +291,26 @@ class ActivityController extends CoreController
 
             if(count($userIds) > 0)
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->whereIn('subject_id', $userIds)->where('privacy', 'public')->orWhere('privacy', 'followers')->inRandomOrder()->orderBy('created_at', 'DESC')->paginate(10);
+                $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                ->with('attachments.attachment_link')
+                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+                ->whereIn('subject_id', $userIds)
+                ->where('privacy', 'public')
+                ->orWhere('privacy', 'followers')
+                ->inRandomOrder()->orderBy('created_at', 'DESC')
+                ->paginate(10);
                 
             }
             else
             {
-                $activityPosts = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('privacy', 'public')->orWhere('subject_id', $user->user_id)->inRandomOrder()->orderBy('created_at', 'DESC')->paginate(10);
+                $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                ->with('attachments.attachment_link')
+                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+                ->where('privacy', 'public')
+                ->orWhere('subject_id', $user->user_id)
+                ->inRandomOrder()
+                ->orderBy('created_at', 'DESC')
+                ->paginate(10);
             }
 
             if(count($activityPosts) > 0)
@@ -320,7 +335,7 @@ class ActivityController extends CoreController
                     }
 
                     //shared post
-                    $activityShared = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
+                    $activityShared = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')->with('attachments.attachment_link')->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id','avatar_id','subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
                     if(!empty($activityShared))
                     {
                         $activityPosts[$key]->shared_post_id = $activityShared;
