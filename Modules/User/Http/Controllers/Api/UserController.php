@@ -1122,6 +1122,181 @@ class UserController extends CoreController
         
     }
 
+
+    /*
+     * Get Visitor Profile API
+     *
+     */
+    public function getVisitorProfile(Request $request)
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'visitor_profile_id' => 'required'           
+            ]);
+
+        
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $request->visitor_profile_id)->first();
+
+            $loggedInUserData = User::where('user_id', $loggedInUser->user_id)->first();
+
+            $userAbout = User::select('about')->where('user_id', $request->visitor_profile_id)->first();
+
+            $postCount = ActivityAction::where('subject_id', $request->visitor_profile_id)->count();
+            $connectionsCount = Connection::where('is_approved', '1')->where('resource_id', $request->visitor_profile_id)->orWhere('user_id', $request->visitor_profile_id)->count();
+            $followerCount = Follower::where('follow_user_id', $request->visitor_profile_id)->count();
+
+
+            /*****Featured Listings****/
+
+            $userFieldInfo = [];
+
+            $fieldsTypes = $this->getFeaturedListingTypes($userData->role_id);
+            
+            $products = [];
+            
+            foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+                
+                $featuredListing = FeaturedListing::with('image')
+                                    ->where('user_id', $request->visitor_profile_id)
+                                    ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                    ->orderBy('featured_listing_id','DESC')->get(); 
+
+                $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
+                
+            }
+
+            //Get Featured Listing Fields
+
+            //Get Featured Type
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($userData->role_id);
+            $fieldsData = [];
+            foreach ($featuredTypes as $key => $value) {
+
+                $value->title = $this->translate('messages.'.$value->title,$value->title);
+
+                $value->options = $this->getFeaturedListingFieldOptionParent($value->featured_listing_field_id);
+
+                if(!empty($value->options)){
+                    foreach ($value->options as $k => $oneDepth) {
+
+                            $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
+                        }
+                }
+
+                $fieldsData[$value->featured_listing_type_slug][] = $value;
+            }
+
+            foreach($fieldsData as $fieldsDataKey => $fieldsDataValue){
+                    
+
+                $key = array_search($fieldsDataKey, array_column($products, 'slug'));
+
+                $products[$key]['fields'] = $fieldsDataValue;
+            }
+
+            /*************************/
+
+            /******Post Tab********/
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $request->visitor_profile_id)->orderBy('activity_action_id','DESC')->paginate(15);
+            
+            /*********************/
+
+            /********About tab***/
+
+            $role_id = $userData->role_id;
+            $user_id = $request->visitor_profile_id;
+
+            
+            $roleFields = DB::table('user_field_map_roles')->select('user_fields.title','user_fields.user_field_id','user_fields.type')
+                          ->join('user_fields', 'user_fields.user_field_id', '=', 'user_field_map_roles.user_field_id')
+                          ->where("role_id","=",$role_id)
+                          ->where("require_update","=",'true')
+                          ->where("conditional","=",'no')
+                          ->orderBy("edit_profile_field_order","asc")
+                          ->get();
+
+
+            if($roleFields){
+                foreach ($roleFields as $key => $value) {
+                    $radioFieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->first();
+                    
+                            
+                    $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
+                    if($roleFields[$key]->type == 'radio')
+                    {
+                        if(($radioFieldValue->value == 'Yes' ||  $radioFieldValue->value == '1'))
+                            $roleFields[$key]->value = $radioFieldValue->value;
+                        else
+                            $roleFields[$key]->value = 'No';
+                    }
+                    elseif($roleFields[$key]->type !='text' && $roleFields[$key]->type !='email')
+                    {
+                        $arrayValues = array();
+                        $fieldValues = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->get();
+                        if(count($fieldValues) > 0)
+                        {
+                            foreach($fieldValues as $fieldValue)
+                            {
+                                $options = DB::table('user_field_options')
+                                        //->where('user_id', $user_id)
+                                        ->where('user_field_option_id', $fieldValue->value)
+                                        ->first();
+                                if(!empty($options->option))
+                                $arrayValues[] = $options->option;
+                                
+                            }
+                        }
+                        $roleFields[$key]->value = join(", ", $arrayValues);
+                        
+                    }
+                    else
+                    {
+                        $fieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->first();
+                        $roleFields[$key]->value = $fieldValue->value??'';
+                    }
+                    
+
+                }
+            }
+
+            /*********************/
+
+            /********Contact tab***/
+
+            $contact = User::select('user_id','role_id','email','phone','address','website','fb_link')->where('user_id', $request->visitor_profile_id)->first();
+
+            /*********************/
+            
+            //$loggedInUserData;
+            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost,'about_tab' => $roleFields, 'contact_tab' => $contact];
+
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $data
+                            ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+        
+    }
+
     /*
      * Get Member Profile
      *

@@ -52,6 +52,14 @@ class CreateUsersTable extends Migration
             $table->enum('alysei_recognition',['0','1'])->default('0')->comment("0=Not Recognised, 1=Recognised");
             $table->enum('alysei_qualitymark',['0','1'])->default('0')->comment("0=Not Marked, 1=Marked");
 
+            $table->enum('allow_message_from',['anyone','followers','community','nobody'])->default('anyone');
+            $table->enum('who_can_view_age',['anyone','followers','community','justme'])->default('anyone');
+            $table->enum('who_can_view_profile',['anyone','followers','community','justme'])->default('anyone');
+            $table->string('who_can_connect')->nullable();
+            $table->enum('private_messages',['0','1'])->default('1');
+            $table->enum('when_someone_request_to_follow',['0','1'])->default('1');
+            $table->enum('weekly_updates',['0','1'])->default('1');
+
             $table->text('address')->nullable();
             $table->string('website')->nullable();
             $table->string('fb_link')->nullable();

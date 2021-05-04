@@ -76,6 +76,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/profile/progress', 'Api\UserController@getProfileProgress');
 	Route::get('get/profile', 'Api\UserController@getProfile');
 
+	Route::get('get/visitor/profile', 'Api\UserController@getVisitorProfile');
+
 
 });
 
