@@ -88,11 +88,19 @@ class ActivityController extends CoreController
                 $activityAction->object_id = $user->user_id;
                 $activityAction->body = $request->body;
                 $activityAction->privacy = $request->privacy;
-                $activityAction->attachment_count = count($request->attachments);
+                if(!empty($request->attachments))
+                {
+                    $activityAction->attachment_count = count($request->attachments);
+                }
+                else
+                {
+                    $activityAction->attachment_count = 0;   
+                }
+                
                 $activityAction->save();
             }
 
-            if(count($request->attachments) > 0)
+            if(!empty($request->attachments) && count($request->attachments) > 0)
             {
                 $this->uploadAttchments($request->attachments, $activityAction->activity_action_id);
             }
@@ -880,8 +888,8 @@ class ActivityController extends CoreController
         {
             /*if($attchments[$key]->hasFile($attchments[$key]))
             {*/
-                //$attachmentLinkId = $this->postAttchment($attachment);
-                $attachmentLinkId = $this->createPostImage($attachment);
+                $attachmentLinkId = $this->postAttchment($attachment);
+                //$attachmentLinkId = $this->createPostImage($attachment);
 
                 $activityAttchments = new ActivityAttachment;
                 $activityAttchments->action_id = $actionId;

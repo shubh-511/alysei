@@ -94,7 +94,7 @@ trait UploadImageTrait
 
         $activityAttachmentLink = new ActivityAttachmentLink;
         $activityAttachmentLink->attachment_url = $headerTarget;
-        $activityAttachmentLink->attachment_url = $ext1;
+        $activityAttachmentLink->attachment_type = $ext1;
         $activityAttachmentLink->save();
         
         return $activityAttachmentLink->activity_attachment_link_id;
