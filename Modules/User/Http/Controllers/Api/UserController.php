@@ -1072,7 +1072,7 @@ class UserController extends CoreController
                             foreach($fieldValues as $fieldValue)
                             {
                                 $options = DB::table('user_field_options')
-                                        //->where('user_id', $user_id)
+                                        ->where('head','!=',1)
                                         ->where('user_field_option_id', $fieldValue->value)
                                         ->first();
                                 if(!empty($options->option))
