@@ -132,8 +132,18 @@ class ActivityController extends CoreController
         try
         {
             $user = $this->user;
-            $requestFields = $request->params;
-            //$requestedFields = json_decode($requestFields, true);
+            $validator = Validator::make($request->all(), [ 
+                'action_type' => 'required|max:190',
+                'privacy'     => 'required',
+                'shared_post_id'    => 'required' 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+           /* $requestFields = $request->params;
+            
             $requestedFields = $requestFields;
             
             $rules = $this->validateSharePostData($requestedFields);
@@ -142,33 +152,30 @@ class ActivityController extends CoreController
 
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-            }
+            }*/
 
-            $actionType = $this->checkActionType($requestedFields["action_type"], 5);
+            $actionType = $this->checkActionType($request->action_type, 5);
             if($actionType[1] > 0)
             {
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
             }
             else
             {
-                $activityActionType = ActivityActionType::where("type", $requestedFields["action_type"])->first();
+                $activityActionType = ActivityActionType::where("type", $request->action_type)->first();
                 $activityAction = new ActivityAction;
                 $activityAction->type = $activityActionType->activity_action_type_id;
                 $activityAction->subject_type = "user";
                 $activityAction->subject_id = $user->user_id;
                 $activityAction->object_type = "user";
                 $activityAction->object_id = $user->user_id;
-                $activityAction->body = $requestedFields["body"];
-                $activityAction->privacy = $requestedFields["privacy"];
-                $activityAction->shared_post_id = $requestedFields["shared_post_id"];
+                $activityAction->body = $request->body;
+                $activityAction->privacy = $request->privacy;
+                $activityAction->shared_post_id = $request->shared_post_id;
                 //$activityAction->attachment_count = count($requestedFields["attachments"]);
                 $activityAction->save();
             }
 
-            /*if(count($requestedFields["attachments"]) > 0)
-            {
-                $this->uploadAttchments($requestedFields["attachments"], $activityAction->activity_action_id);
-            }*/
+            
             if($activityAction)
             {
                 return response()->json(['success' => $this->successStatus,
