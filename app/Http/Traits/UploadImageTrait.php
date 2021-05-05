@@ -119,13 +119,13 @@ trait UploadImageTrait
         $image_base64 = base64_decode($image_parts[1]);
         $file = $folderPath . uniqid() . '. '.$image_type;
 
-        if (!is_dir('public/upload/' . $year)) {
+        if (!is_dir('public/uploads/' . $year)) {
           // dir doesn't exist, make it
-          mkdir('upload/promotions/' . $year);
+          mkdir('public/uploads/' . $year);
         }
-        if (!is_dir('public/upload/' . $month)) {
+        if (!is_dir('public/uploads/' . $month)) {
           // dir doesn't exist, make it
-          mkdir('upload/promotions/' . $month);
+          mkdir('public/uploads/' . $month);
         }
 
         file_put_contents($file, $image_base64);
