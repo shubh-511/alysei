@@ -38,7 +38,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/pending/request', 'Api\ConnectUserController@getMyPendingRequest');
 	Route::post('accept/reject/request', 'Api\ConnectUserController@acceptOrRejectConnection');
 
-	Route::get('get/all/member/post', 'Api\ActivityController@getAllMemberPosts');
+	Route::get('get/all/user/post/{postType}', 'Api\ActivityController@getAllUserPosts');
 	Route::get('get/activity/feed', 'Api\ActivityController@getActivityFeeds');
 
 	Route::get('get/roles/for/connection', 'Api\PrivacyController@getRolesForConnection');

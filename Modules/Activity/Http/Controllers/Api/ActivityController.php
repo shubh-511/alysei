@@ -701,13 +701,25 @@ class ActivityController extends CoreController
      * Get Member Post tab
      *
      */
-    public function getAllMemberPosts()
+    public function getAllUserPosts($postType)
     {
         try
         {
             $loggedInUser = $this->user;
-
-            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->orderBy('activity_action_id','DESC')->paginate(15);
+            if($postType == 1)
+            {
+                $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->where('attachment_count','>', 0)->orderBy('activity_action_id','DESC')->paginate(15);
+            }
+            elseif($postType == 0)
+            {
+                $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->orderBy('activity_action_id','DESC')->paginate(15);
+            }
+            else
+            {
+                $message = "Please select either 1 or 0";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            
             if(!empty($activityPost))
             {
                 return response()->json(['success' => $this->successStatus,
