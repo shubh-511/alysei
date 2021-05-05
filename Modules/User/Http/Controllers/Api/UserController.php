@@ -1141,7 +1141,7 @@ class UserController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $request->visitor_profile_id)->first();
+            $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id','allow_message_from','who_can_view_age','who_can_view_profile','who_can_connect')->with('avatar_id','cover_id')->where('user_id', $request->visitor_profile_id)->first();
 
             $loggedInUserData = User::where('user_id', $loggedInUser->user_id)->first();
 

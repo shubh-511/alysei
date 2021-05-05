@@ -868,9 +868,10 @@ class ActivityController extends CoreController
     {
         foreach($attchments as $key => $attachment)
         {
-            if($attchments[$key]->hasFile($attchments[$key]))
-            {
-                $attachmentLinkId = $this->postAttchment($attachment);
+            /*if($attchments[$key]->hasFile($attchments[$key]))
+            {*/
+                //$attachmentLinkId = $this->postAttchment($attachment);
+                $attachmentLinkId = $this->createPostImage($attachment);
 
                 $activityAttchments = new ActivityAttachment;
                 $activityAttchments->action_id = $actionId;
@@ -878,7 +879,7 @@ class ActivityController extends CoreController
                 $activityAttchments->id = $attachmentLinkId;
                 $activityAttchments->save();
 
-            }
+            //}
             
         }
         
