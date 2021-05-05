@@ -108,6 +108,9 @@ trait UploadImageTrait
     public function createPostImage($img)
     {
         $date = date("Y/m");
+        $year = date("Y");
+        $month = date("m");
+
         $folderPath = "public/uploads/".$date."/";
 
         $image_parts = explode(";base64,", $img);
@@ -115,6 +118,15 @@ trait UploadImageTrait
         $image_type = $image_type_aux[1];
         $image_base64 = base64_decode($image_parts[1]);
         $file = $folderPath . uniqid() . '. '.$image_type;
+
+        if (!is_dir('public/upload/' . $year)) {
+          // dir doesn't exist, make it
+          mkdir('upload/promotions/' . $year);
+        }
+        if (!is_dir('public/upload/' . $month)) {
+          // dir doesn't exist, make it
+          mkdir('upload/promotions/' . $month);
+        }
 
         file_put_contents($file, $image_base64);
 
