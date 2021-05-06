@@ -323,7 +323,8 @@ class ActivityController extends CoreController
                 ->whereIn('subject_id', $userIds)
                 ->where('privacy', 'public')
                 ->orWhere('privacy', 'followers')
-                ->inRandomOrder()->orderBy('created_at', 'DESC')
+                //->inRandomOrder()
+                ->orderBy('created_at', 'DESC')
                 ->paginate(10);
                 
                 
@@ -335,19 +336,13 @@ class ActivityController extends CoreController
                 ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                 ->where('privacy', 'public')
                 ->orWhere('subject_id', $user->user_id)
-                ->inRandomOrder()
+                //->inRandomOrder()
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
             }
 
             if(count($activityPosts) > 0)
             {
-                /*$myRecentPost = ActivityAction::with('attachments.attachment_link')->with('subject_id.avatar_id')->where('subject_id', $user->user_id)->orderBy('activity_action_id', 'DESC')->get();
-                if(!empty($myRecentPost) && $myRecentPost->first()->created_at->diffForHumans() < 30 )
-                {
-                    $myRecentPost->toBase()->merge($activityPosts);
-                    //array_unshift($activityPosts->toArray(), $myRecentPost);
-                }*/
                 foreach($activityPosts as $key => $activityPost)
                 {
                     //is activity liked
