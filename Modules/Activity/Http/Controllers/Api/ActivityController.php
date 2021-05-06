@@ -311,11 +311,12 @@ class ActivityController extends CoreController
 
             $merged = $myConnections->merge($myFollowers);
             $userIds = $merged->all();
-            array_push($userIds, $user->user_id);
-            $userIds = array_unique($userIds);
+            
 
             if(count($userIds) > 0)
             {
+                array_push($userIds, $user->user_id);
+                $userIds = array_unique($userIds);
                 $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
                 ->with('attachments.attachment_link')
                 ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
@@ -324,6 +325,7 @@ class ActivityController extends CoreController
                 ->orWhere('privacy', 'followers')
                 ->inRandomOrder()->orderBy('created_at', 'DESC')
                 ->paginate(10);
+                
                 
             }
             else
