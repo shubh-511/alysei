@@ -7,12 +7,15 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
+use Modules\User\Entities\UserSelectedHub; 
+use Modules\User\Entities\Hub;
 use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\UserPrivacy;
 use Modules\Activity\Entities\ConnectFollowPermission;
 use Modules\Activity\Entities\MapPermissionRole;
 use Modules\User\Entities\Role;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -56,30 +59,15 @@ class SearchController extends CoreController
 
             if($request->search_type == 1)
             {
-                $validator = Validator::make($request->all(), [ 
+                $validateSearchType = Validator::make($request->all(), [ 
                     'keyword' => 'required' 
                 ]);
 
-                if ($validator->fails()) { 
-                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                if ($validateSearchType->fails()) { 
+                    return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                $users = User::select('user_id','role_id','name')
-                ->where('email', 'LIKE', '%' . $request->keyword . '%')
-                //->orderBy('name')
-                ->get();
-
-                if(count($users) > 0)
-                {
-                    return response()->json(['success' => $this->successStatus,
-                                         'data' => $users
-                                        ], $this->successStatus);
-                }
-                else
-                {
-                    $message = "No users found for this keyword";
-                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                }
+                return $this->searchGlobalUsers($request->keyword);   
             }
         }
         catch(\Exception $e)
@@ -92,61 +80,255 @@ class SearchController extends CoreController
     /*
     * Searching User
     */
-    public function searchUser($keyWord)
+    public function searchGlobalUsers($keyWord)
     {
-        
+        $users = User::select('user_id','role_id','name','email','company_name','restaurant_name','avatar_id')->with('avatar_id')
+        ->where('email', 'LIKE', '%' . $keyWord . '%')
+        ->paginate(10);
 
-        
+        if(count($users) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                 'data' => $users
+                                ], $this->successStatus);
+        }
+        else
+        {
+            $message = "No users found for this keyword";
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }        
     }
 
 
     /*
-     * Get Privacy data
+     * Get list of hubs seleted by user
      *
      */
-    public function getPrivacyData()
+    public function getMySelectedHubs()
     {
         try
         {
             $user = $this->user;
             $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
-
+            $myHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
             if(!empty($checkUser))
             {
-                if(empty($checkPrivacyDataExist))
+                if(count($myHubs) > 0)
                 {
-                    $privacyData = ['user_id' => $user->user_id, 'allow_message_from' => 'anyone', 'who_can_view_age' => 'anyone', 'who_can_view_profile' => 'anyone', 'who_can_connect' => 'anyone'];
-
-                    $messagePreference = ['user_id' => $user->user_id, 'private_messages' => '1', 'when_someone_request_to_follow' => '1', 'weekly_updates' => '1'];
-
-                    return response()->json(['success' => $this->successStatus,
-                                         'privacy_data' => $privacyData,
-                                         'email_preference' => $messagePreference,
-                                        ], $this->successStatus);
+                    $myHubs = $myHubs->pluck('hub_id')->toArray();
+                    $hubs = Hub::select('id','title')->whereIn('id', $myHubs)->where('status', '1')->get();
+                    if(count($hubs) > 0)
+                    {
+                        return response()->json(['success' => $this->successStatus,
+                                     'hubs' => $hubs
+                                    ], $this->successStatus);
+                    }
+                    else
+                    {
+                        $message = "No hubs available";
+                        return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
                 }
                 else
                 {
-                    $privacyData = ['user_id' => $user->user_id, 'allow_message_from' => $checkPrivacyDataExist->allow_message_from, 'who_can_view_age' => $checkPrivacyDataExist->who_can_view_age, 'who_can_view_profile' => $checkPrivacyDataExist->who_can_view_profile, 'who_can_connect' => $checkPrivacyDataExist->who_can_connect];
-
-                    $messagePreference = ['user_id' => $user->user_id, 'private_messages' => $checkPrivacyDataExist->private_messages, 'when_someone_request_to_follow' => $checkPrivacyDataExist->when_someone_request_to_follow, 'weekly_updates' => $checkPrivacyDataExist->weekly_updates];
-                    
-                    return response()->json(['success' => $this->successStatus,
-                                         'privacy_data' => $privacyData,
-                                         'email_preference' => $messagePreference,
-                                        ], $this->successStatus);
+                    $message = "You have not selected any hubs";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
                 }
             }
             else
             {
                 $message = "Invalid user";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-            }   
+            }               
         }
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /*
+     * Get pickup or delivery
+     *
+     */
+    public function getPickupOrDelivery()
+    {
+        try
+        {
+            $user = $this->user;
+            $role_id = $user->role_id;
+            $steps = [];
+            $checkUser = User::where('user_id', $user->user_id)->first();
+            
+            $roleFields = DB::table('user_fields')
+                                      ->whereIn("user_field_id", [9,21,22])
+                                      ->get();
+            if(!empty($roleFields))
+            {
+                foreach ($roleFields as $key => $value)
+                {
+                    $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
+
+                    //Check Fields has option
+                    if($value->type !='text' && $value->type !='email' && $value->type !='password')
+                    {
+                        
+                        $value->options = $this->getUserFieldOptionParent($value->user_field_id);
+
+                        if(!empty($value->options))
+                        {
+                            foreach ($value->options as $k => $oneDepth) 
+                            {
+
+                                $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
+
+                                //Check Option has any Field Id
+                                $checkRow = DB::table('user_field_maps')->where('user_field_id','=',$value->user_field_id)->where('role_id', 9)->first();
+
+                                if($checkRow){
+                                    $value->parentId = $checkRow->option_id;
+                                }
+
+                                $data = $this->getUserFieldOptionsNoneParent($value->user_field_id,$oneDepth->user_field_option_id);
+
+                                $value->options[$k]->options = $data;
+
+                                
+                                foreach ($value->options[$k]->options as $optionKey => $optionValue) 
+                                {
+                                    $options = $this->getUserFieldOptionsNoneParent($optionValue->user_field_id,$optionValue->user_field_option_id);
+
+                                    $value->options[$k]->options[$optionKey]->options = $options;
+                                }  
+
+                            }
+                        }
+                    }// End Check Fields has option
+
+                    $steps[] = $value;
+                }
+                return response()->json(['success'=>$this->successStatus,'data' =>$steps], $this->successStatus); 
+            }
+            else
+            {
+                $message = "The field does not exist";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }               
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get list of field values
+     *
+     */
+    public function getFieldValues($fieldId)
+    {
+        try
+        {
+            $user = $this->user;
+            $checkUser = User::where('user_id', $user->user_id)->first();
+            
+            $roleFields = DB::table('user_fields')
+                                      ->where("user_field_id","=", $fieldId)
+                                      ->first();
+            if(!empty($checkUser))
+            {
+                if($roleFields->type !='text' && $roleFields->type !='email' && $roleFields->type !='password')
+                {
+                                
+                    $roleFields->options = $this->getUserFieldOptionParent($roleFields->user_field_id);
+
+                    if(!empty($roleFields->options)){
+
+                        foreach ($roleFields->options as $k => $oneDepth) 
+                        {
+
+                            $roleFields->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
+
+                            $data = $this->getUserFieldOptionsNoneParent($roleFields->user_field_id,$oneDepth->user_field_option_id);
+
+                            $roleFields->options[$k]->options = $data;
+
+                            
+                            foreach ($roleFields->options[$k]->options as $optionKey => $optionValue) 
+                            {
+                                $options = $this->getUserFieldOptionsNoneParent($optionValue->user_field_id,$optionValue->user_field_option_id);
+
+                                $roleFields->options[$k]->options[$optionKey]->options = $options;
+                            }  
+                                
+                        }
+                    }
+                    
+                    return response()->json(['success' => $this->successStatus,
+                                     'data' => $roleFields
+                                    ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "Undefined field type";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+            }
+            else
+            {
+                $message = "The field does not exist";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }               
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /* Get All Fields Option who are child
+     * @params $user_field_id 
+    */
+    public function getUserFieldOptionParent($fieldId){
+
+        $fieldOptionData = [];
+        
+        if($fieldId > 0){
+            $fieldOptionData = DB::table('user_field_options')
+                    ->where('user_field_id','=',$fieldId)
+                    ->where('parent','=',0)
+                    ->get();
+
+            foreach ($fieldOptionData as $key => $option) {
+                $fieldOptionData[$key]->option = $this->translate('messages.'.$option->option,$option->option);
+            }
+        }
+        
+        return $fieldOptionData;    
+        
+    }
+
+    /*
+     * Get All Fields Option who are child
+     * @params $user_field_id and $user_field_option_id
+     */
+    public function getUserFieldOptionsNoneParent($fieldId, $parentId){
+
+        $fieldOptionData = [];
+        
+        if($fieldId > 0 && $parentId > 0){
+            $fieldOptionData = DB::table('user_field_options')
+                ->where('user_field_id','=',$fieldId)
+                ->where('parent','=',$parentId)
+                ->get();                                
+
+            foreach ($fieldOptionData as $key => $option) {
+                $fieldOptionData[$key]->option = $this->translate('messages.'.$option->option,$option->option);
+            }
+        }
+        
+        return $fieldOptionData;    
+        
     }
 
     /*
@@ -207,63 +389,7 @@ class SearchController extends CoreController
     }
 
 
-    /*
-     * Save Email preference data
-     * @Params $request
-     */
-    public function saveEmailPreference(Request $request)
-    {
-        try
-        {
-            $user = $this->user;
-            $validator = Validator::make($request->all(), [ 
-                'private_messages' => 'required', 
-                'when_someone_request_to_follow' => 'required',
-                'weekly_updates' => 'required'
-            ]);
-
-            if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-            }
-
-            $checkUser = User::where('user_id', $user->user_id)->first();
-            $checkPrivacyDataExist = UserPrivacy::where('user_id', $user->user_id)->first();
-
-            if(!empty($checkUser))
-            {
-                if(empty($checkPrivacyDataExist))
-                {
-                    $privacy = new Privacy;
-                    $privacy->user_id = $user->user_id;
-                    $privacy->private_messages = $request->private_messages;
-                    $privacy->when_someone_request_to_follow = $request->when_someone_request_to_follow;
-                    $privacy->weekly_updates = $request->weekly_updates;
-                    $privacy->save();
-                }
-                else
-                {
-                    UserPrivacy::where('user_id', $user->user_id)->update(['private_messages' => $request->private_messages, 'when_someone_request_to_follow' => $request->when_someone_request_to_follow, 'weekly_updates' => $request->weekly_updates]);
-
-                }             
-                $message = "Email preferences has been saved";
-                    return response()->json(['success' => $this->successStatus,
-                                         'message' => $this->translate('messages.'.$message,$message),
-                                        ], $this->successStatus);
-            }
-            else
-            {
-                $message = "Invalid user";
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-            }            
-        }
-        catch(\Exception $e)
-        {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }
-    }
-
     
-
     /*
      * Check Role Permission
      * @Params $userRole, $FollowingUserRole
