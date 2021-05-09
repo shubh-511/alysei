@@ -69,10 +69,49 @@ class SearchController extends CoreController
 
                 return $this->searchGlobalUsers($request->keyword);   
             }
+            elseif($request->search_type == 2)
+            {
+                $validateSearchType = Validator::make($request->all(), [ 
+                    'role_id' => 'required' 
+                ]);
+
+                if ($validateSearchType->fails()) { 
+                    return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+
+                $this->searchUserByRoles($roleId);
+            }
+            else
+            {
+                $message = "Invalid search type";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
         }
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+    * Search user by roles
+    */
+    public function searchUserByRoles($roleId)
+    {
+        $users = User::select('user_id','role_id','name','email','company_name','restaurant_name','avatar_id')->with('avatar_id')
+        ->where('email', 'LIKE', '%' . $keyWord . '%')
+        ->paginate(10);
+
+        if(count($users) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                 'data' => $users
+                                ], $this->successStatus);
+        }
+        else
+        {
+            $message = "No users found for this keyword";
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
         }
     }
 
