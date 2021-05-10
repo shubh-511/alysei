@@ -81,7 +81,7 @@ class SearchController extends CoreController
                     return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                $this->searchUserByRoles($roleId, $request);
+                return $this->searchUserByRoles($request->role_id, $request);
             }
             else
             {
@@ -101,27 +101,163 @@ class SearchController extends CoreController
     public function searchUserByRoles($roleId, $request)
     {
         $usersArray = array();
-        if(empty($request->user_type))
+        $userType = 6;
+
+        if(!empty($request->hubs))
         {
-            if(!empty($request->hubs))
+            $hubs = explode(",", $request->hubs);
+            $selectedHubs = UserSelectedHub::whereIn('hub_id', $hubs)->groupBy('user_id')->get();
+            if(count($selectedHubs))
             {
-                $users = User::where('role_id', 6)->whereHas('userhubs', function ($query) use ($request)
+                $selectedHubs = $selectedHubs->pluck('user_id');
+                
+                foreach($selectedHubs as $selectedHub)
                 {
-                    $query->groupBy('user_id');
-                })->get();
+                    array_push($usersArray, $selectedHub);
+                }
             }
-            
         }
         
+        if($roleId == 3 || $roleId == 6)
+        {
+            if(!empty($request->product_type))
+            {
+                $productTypeArray = explode(",", $request->product_type);
+                $productTypes = UserFieldValue::whereIn('value', $productTypeArray)->where('user_field_id', 2)->groupBy('user_id')->get();
+                if(count($productTypes))
+                {
+                    $productTypes = $productTypes->pluck('user_id');
+                    
+                    foreach($productTypes as $productType)
+                    {
+                        array_push($usersArray, $productType);
+                    }
+                }
+            }
+            if(!empty($request->horeca))
+            {
+                $horeca = UserFieldValue::where('value', $request->horeca)->where('user_field_id', 4)->groupBy('user_id')->get();
+                if(count($horeca))
+                {
+                    $horeca = $horeca->pluck('user_id');
+                    
+                    foreach($horeca as $horecaUsers)
+                    {
+                        array_push($usersArray, $horecaUsers);
+                    }
+                }
+            }
+            if(!empty($request->private_label))
+            {
+                $privateLabels = UserFieldValue::where('value', $request->private_label)->where('user_field_id', 5)->groupBy('user_id')->get();
+                if(count($privateLabels))
+                {
+                    $privateLabels = $privateLabels->pluck('user_id');
+                   
+                    foreach($privateLabels as $privateLabel)
+                    {
+                        array_push($usersArray, $privateLabel);
+                    }
+                }
+            }
+            if(!empty($request->alysei_brand_label))
+            {
+                $brandLabels = UserFieldValue::where('value', $request->alysei_brand_label)->where('user_field_id', 6)->groupBy('user_id')->get();
+                if(count($brandLabels))
+                {
+                    $brandLabels = $brandLabels->pluck('user_id')->toArray();
+                    
+                    foreach($brandLabels as $brandLabel)
+                    {
+                        array_push($usersArray, $brandLabel);
+                    }
+                }
+            }
+            if(!empty($request->user_type) && $request->user_type == 4)
+            {
+                $roleId = 4;
+            }
+            elseif(!empty($request->user_type) && $request->user_type == 5)
+            {
+                $roleId = 5;
+            }
+        }
+        elseif($roleId == 9)
+        {
+            if(!empty($request->restaurant_type))
+            {
+                $restaurantTypes = UserFieldValue::where('value', $request->restaurant_type)->where('user_field_id', 10)->groupBy('user_id')->get();
+                if(count($restaurantTypes))
+                {
+                    $restaurantTypes = $restaurantTypes->pluck('user_id');
+                   
+                    foreach($restaurantTypes as $restaurantType)
+                    {
+                        array_push($usersArray, $restaurantType);
+                    }
+                }
+            }
+        }
+        elseif($roleId == 7)
+        {
+            if(!empty($request->expertise))
+            {
+                $expertis = explode(",", $request->expertise);
+                $userExpertise = UserFieldValue::whereIn('value', $expertis)->where('user_field_id', 11)->groupBy('user_id')->get();
+                if(count($userExpertise))
+                {
+                    $userExpertise = $userExpertise->pluck('user_id');
+                   
+                    foreach($userExpertise as $expertise)
+                    {
+                        array_push($usersArray, $expertise);
+                    }
+                }
+            }
+            if(!empty($request->title))
+            {
+                $titl = explode(",", $request->title);
+                $titles = UserFieldValue::whereIn('value', $titl)->where('user_field_id', 12)->groupBy('user_id')->get();
+                if(count($titles))
+                {
+                    $titles = $titles->pluck('user_id');
+                   
+                    foreach($titles as $title)
+                    {
+                        array_push($usersArray, $title);
+                    }
+                }
+            }
+        }
+        elseif($roleId == 8)
+        {
+            if(!empty($request->speciality))
+            {
+                $speciality = explode(",", $request->speciality);
+                $specialities = UserFieldValue::whereIn('value', $speciality)->where('user_field_id', 14)->groupBy('user_id')->get();
+                if(count($specialities))
+                {
+                    $specialities = $specialities->pluck('user_id');
+                   
+                    foreach($specialities as $specialit)
+                    {
+                        array_push($usersArray, $specialit);
+                    }
+                }
+            }
+        }
+
+
+        $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $roleId)->whereIn('user_id', $usersArray)->paginate(10);
         if(count($users) > 0)
         {
             return response()->json(['success' => $this->successStatus,
-                                 'data' => $users
+                                'data' => $users
                                 ], $this->successStatus);
         }
         else
         {
-            $message = "No users found for this keyword";
+            $message = "No users found";
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
         }
     }
