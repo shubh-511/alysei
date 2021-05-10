@@ -79,7 +79,7 @@ class SearchController extends CoreController
                     return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                $this->searchUserByRoles($roleId);
+                $this->searchUserByRoles($roleId, $request);
             }
             else
             {
@@ -96,8 +96,12 @@ class SearchController extends CoreController
     /*
     * Search user by roles
     */
-    public function searchUserByRoles($roleId)
+    public function searchUserByRoles($roleId, $request)
     {
+        $if(empty($request->user_type))
+        {
+            
+        }
         $users = User::select('user_id','role_id','name','email','company_name','restaurant_name','avatar_id')->with('avatar_id')
         ->where('email', 'LIKE', '%' . $keyWord . '%')
         ->paginate(10);
