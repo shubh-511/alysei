@@ -30,4 +30,8 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Attachment::class, 'cover_id','id');
     }
+
+    public function userhubs(){
+        return $this->hasMany(UserSelectedHub::class, 'user_id','user_id');
+    }
 }

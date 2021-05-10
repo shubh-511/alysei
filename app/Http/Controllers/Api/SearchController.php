@@ -9,6 +9,8 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\UserSelectedHub; 
 use Modules\User\Entities\Hub;
+use Modules\User\Entities\UserField;
+use Modules\User\Entities\UserFieldValue;
 use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\UserPrivacy;
 use Modules\Activity\Entities\ConnectFollowPermission;
@@ -98,14 +100,19 @@ class SearchController extends CoreController
     */
     public function searchUserByRoles($roleId, $request)
     {
-        $if(empty($request->user_type))
+        $usersArray = array();
+        if(empty($request->user_type))
         {
+            if(!empty($request->hubs))
+            {
+                $users = User::where('role_id', 6)->whereHas('userhubs', function ($query) use ($request)
+                {
+                    $query->groupBy('user_id');
+                })->get();
+            }
             
         }
-        $users = User::select('user_id','role_id','name','email','company_name','restaurant_name','avatar_id')->with('avatar_id')
-        ->where('email', 'LIKE', '%' . $keyWord . '%')
-        ->paginate(10);
-
+        
         if(count($users) > 0)
         {
             return response()->json(['success' => $this->successStatus,
