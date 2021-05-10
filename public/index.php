@@ -6,7 +6,14 @@
  * @package  Laravel
  * @author   Taylor Otwell <taylor@laravel.com>
  */
-header('Access-Control-Allow-Origin: http://localhost:3000, https://alyseiweb.ibyteworkshop.com');
+$multipleHeaders = ['http://localhost:3000', 'https://alyseiweb.ibyteworkshop.com'];
+$http_origin = $_SERVER['HTTP_ORIGIN'];
+
+if ($http_origin == "http://localhost:3000" || $http_origin == "https://alyseiweb.ibyteworkshop.com")
+{  
+    header("Access-Control-Allow-Origin: $http_origin");
+}
+//header('Access-Control-Allow-Origin: https://alyseiweb.ibyteworkshop.com');
 header('Access-Control-Allow-Methods: *');
 header('Access-Control-Allow-Headers: *');
 
