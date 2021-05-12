@@ -117,6 +117,32 @@ class SearchController extends CoreController
                 }
             }
         }
+        if(!empty($request->country))
+        {
+            $countries = UserFieldValue::where('value', $request->country)->where('user_field_id', 13)->groupBy('user_id')->get();
+            if(count($countries))
+            {
+                $countries = $countries->pluck('user_id');
+               
+                foreach($countries as $selectedCountry)
+                {
+                    array_push($usersArray, $selectedCountry);
+                }
+            }
+        }
+        if(!empty($request->region))
+        {
+            $regions = UserFieldValue::where('value', $request->region)->where('user_field_id', 28)->groupBy('user_id')->get();
+            if(count($regions))
+            {
+                $regions = $regions->pluck('user_id');
+               
+                foreach($regions as $selectedRegion)
+                {
+                    array_push($usersArray, $selectedRegion);
+                }
+            }
+        }
         
         if($roleId == 3 || $roleId == 6)
         {

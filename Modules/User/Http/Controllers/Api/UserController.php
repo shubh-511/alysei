@@ -1053,14 +1053,14 @@ class UserController extends CoreController
                     
                             
                     $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
-                    if($roleFields[$key]->type == 'radio')
+                    /*if($roleFields[$key]->type == 'radio')
                     {
                         if(($radioFieldValue->value == 'Yes' ||  $radioFieldValue->value == '1'))
                             $roleFields[$key]->value = $radioFieldValue->value;
                         else
                             $roleFields[$key]->value = 'No';
-                    }
-                    elseif($roleFields[$key]->type !='text' && $roleFields[$key]->type !='email')
+                    }*/
+                    if($roleFields[$key]->type !='text' && $roleFields[$key]->type !='email')
                     {
                         $arrayValues = array();
                         $fieldValues = DB::table('user_field_values')

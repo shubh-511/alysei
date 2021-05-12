@@ -698,18 +698,28 @@ class ActivityController extends CoreController
      * Get Member Post tab
      *
      */
-    public function getAllUserPosts($postType)
+    public function getAllUserPosts($havingAttachment)
     {
         try
         {
             $loggedInUser = $this->user;
-            if($postType == 1)
+            if($havingAttachment == 1)
             {
-                $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->where('attachment_count','>', 0)->orderBy('activity_action_id','DESC')->paginate(15);
+                $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                ->with('attachments.attachment_link')
+                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+                ->where('subject_id', $loggedInUser->user_id)
+                ->where('attachment_count','>', 0)
+                ->orderBy('activity_action_id','DESC')->paginate(15);
             }
-            elseif($postType == 0)
+            elseif($havingAttachment == 0)
             {
-                $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('subject_id', $loggedInUser->user_id)->orderBy('activity_action_id','DESC')->paginate(15);
+                $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                ->with('attachments.attachment_link')
+                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+                ->where('subject_id', $loggedInUser->user_id)
+                ->orderBy('activity_action_id','DESC')
+                ->paginate(15);
             }
             else
             {
