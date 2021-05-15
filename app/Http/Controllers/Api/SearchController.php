@@ -223,6 +223,59 @@ class SearchController extends CoreController
                     }
                 }
             }
+            if(!empty($request->pickup))
+            {
+                $pickUps = UserFieldValue::where('value', $request->pickup)->where('user_field_id', 9)->groupBy('user_id')->get();
+                if(count($pickUps))
+                {
+                    $pickUps = $pickUps->pluck('user_id');
+                   
+                    foreach($pickUps as $pickUp)
+                    {
+                        array_push($usersArray, $pickUp);
+                    }
+                }
+            }
+            if(!empty($request->pickupdiscount))
+            {
+                $pickUpDiscounts = UserFieldValue::where('value', $request->pickupdiscount)->where('user_field_id', 21)->groupBy('user_id')->get();
+                if(count($pickUpDiscounts))
+                {
+                    $pickUpDiscounts = $pickUpDiscounts->pluck('user_id');
+                   
+                    foreach($pickUpDiscounts as $pickUpDiscount)
+                    {
+                        array_push($usersArray, $pickUpDiscount);
+                    }
+                }
+            }
+            if(!empty($request->delivery))
+            {
+                $deleveries = UserFieldValue::where('value', $request->delivery)->where('user_field_id', 9)->groupBy('user_id')->get();
+                if(count($deleveries))
+                {
+                    $deleveries = $deleveries->pluck('user_id');
+                   
+                    foreach($deleveries as $delevery)
+                    {
+                        array_push($usersArray, $delevery);
+                    }
+                }
+            }
+            if(!empty($request->delivery_discount))
+            {
+                $deleveryDiscounts = UserFieldValue::where('value', $request->delivery_discount)->where('user_field_id', 22)->groupBy('user_id')->get();
+                if(count($deleveryDiscounts))
+                {
+                    $deleveryDiscounts = $deleveryDiscounts->pluck('user_id');
+                   
+                    foreach($deleveryDiscounts as $deleveryDiscount)
+                    {
+                        array_push($usersArray, $deleveryDiscount);
+                    }
+                }
+            }
+
         }
         elseif($roleId == 7)
         {
