@@ -211,9 +211,9 @@ class ActivityController extends CoreController
             $rules = $this->validateData($requestedFields, 2);*/
 
             $validator = Validator::make($request->all(), [ 
+                'post_id' => 'required',
                 'action_type' => 'required|max:190',
-                'privacy'     => 'required',
-                'shared_post_id'    => 'required' 
+                'privacy'     => 'required'
             ]);
 
 
