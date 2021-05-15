@@ -204,32 +204,39 @@ class ActivityController extends CoreController
         try
         {
             $user = $this->user;
-            $requestFields = $request->params;
-            //$requestedFields = json_decode($requestFields, true);
+            /*$requestFields = $request->params;
+            
             $requestedFields = $requestFields;
             
-            $rules = $this->validateData($requestedFields, 2);
+            $rules = $this->validateData($requestedFields, 2);*/
 
-            $validator = Validator::make($requestedFields, $rules);
+            $validator = Validator::make($request->all(), [ 
+                'action_type' => 'required|max:190',
+                'privacy'     => 'required',
+                'shared_post_id'    => 'required' 
+            ]);
+
+
+            //$validator = Validator::make($requestedFields, $rules);
 
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $actionType = $this->checkActionType($requestedFields["action_type"], 2);
+            $actionType = $this->checkActionType($request->action_type, 2);
             if($actionType[1] > 0)
             {
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
             }
             else
             {
-                $activityActionType = ActivityActionType::where("type", $requestedFields["action_type"])->first();
-                $activityAction = ActivityAction::where('activity_action_id', $requestedFields["post_id"])->where('subject_id', $user->user_id)->first();
+                $activityActionType = ActivityActionType::where("type", $request->action_type)->first();
+                $activityAction = ActivityAction::where('activity_action_id', $request->post_id)->where('subject_id', $user->user_id)->first();
                 if(!empty($activityAction))
                 {
                     $activityAction->type = $activityActionType->activity_action_type_id;
-                    $activityAction->body = $requestedFields["body"];
-                    $activityAction->privacy = $requestedFields["privacy"];
+                    $activityAction->body = $request->body;
+                    $activityAction->privacy = $request->privacy;
                     $activityAction->save();
 
                     return response()->json(['success' => $this->successStatus,
