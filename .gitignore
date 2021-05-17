@@ -4,6 +4,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/phpminiadmin.php
 .env
 .env.backup
 .phpunit.result.cache
