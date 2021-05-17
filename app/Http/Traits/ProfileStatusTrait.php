@@ -29,21 +29,25 @@ trait ProfileStatusTrait
         $userSelectedHub = UserSelectedHub::where('user_id', $userId)->get();  // 25%
         $userTempHub = UserTempHub::where('user_id', $userId)->get();
 
-        if($user->role_id == 10)
+        if($user->role_id == 10 || $user->role_id == 7)
         {
-            if(empty($user->cover_id) && empty($user->avatar_id) && empty($user->about))
+            if(empty($user->cover_id) && empty($user->avatar_id) && empty($user->about) && empty($user->phone))
             {
                 $profilePercentage = "25";
             }
-            elseif(!empty($user->cover_id) && empty($user->avatar_id) && empty($user->about))
+            elseif(!empty($user->cover_id) && empty($user->avatar_id) && empty($user->about) && empty($user->phone))
             {
                 $profilePercentage = "50";
             }
-            elseif(empty($user->cover_id) && !empty($user->avatar_id) && empty($user->about))
+            elseif(empty($user->cover_id) && !empty($user->avatar_id) && empty($user->about) && empty($user->phone))
             {
                 $profilePercentage = "50";
             }
-            elseif(empty($user->cover_id) && empty($user->avatar_id) && !empty($user->about))
+            elseif(empty($user->cover_id) && empty($user->avatar_id) && !empty($user->about) && empty($user->phone))
+            {
+                $profilePercentage = "50";
+            }
+            elseif(empty($user->cover_id) && empty($user->avatar_id) && empty($user->about) && !empty($user->phone))
             {
                 $profilePercentage = "50";
             }

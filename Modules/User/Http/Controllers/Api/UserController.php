@@ -916,6 +916,7 @@ class UserController extends CoreController
             $userAvatar = (!empty($userData->avatar_id)) ? true : false;
             $userCover = (!empty($userData->cover_id)) ? true : false;
             $userAbout = (!empty($userData->about)) ? true : false;
+            $userContact = (!empty($userData->phone)) ? true : false;
 
             $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage];
 
@@ -923,15 +924,16 @@ class UserController extends CoreController
             $dataCoverImage = ['title' => 'Cover Image','status' => $userCover];
             $dataAbout = ['title' => 'About','status' => $userAbout];
             $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub];
+            $dataContactInfo = ['title' => 'Contact Info','status' => $userContact];
             $dataFeaturedListing = ['title' => 'Featured listing','status' => $userFeaturedListing];
 
-            if($loggedInUser->role_id == 10)
+            if($loggedInUser->role_id == 10 || $loggedInUser->role_id == 7)
             {
-                $dataProgress = [$dataProfileImage, $dataCoverImage, $dataAbout];
+                $dataProgress = [$dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo];
             }
             else
             {
-                $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $dataFeaturedListing];
+                $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo, $dataFeaturedListing];
             }
 
             
