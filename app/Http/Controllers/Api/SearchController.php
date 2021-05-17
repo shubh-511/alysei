@@ -18,7 +18,6 @@ use Modules\Activity\Entities\MapPermissionRole;
 use Modules\User\Entities\Role;
 use Carbon\Carbon;
 use DB;
-
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
