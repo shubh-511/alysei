@@ -120,7 +120,7 @@ class SearchController extends CoreController
         }
         if(!empty($request->state))
         {
-            $hubsByState = Hub::where('state', $request->state)->first();
+            $hubsByState = Hub::where('state_id', $request->state)->first();
             if(!empty($hubsByState))
             {
                 array_push($hubsArray, $hubsByState->id);
