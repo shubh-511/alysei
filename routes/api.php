@@ -25,4 +25,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/pickup/delivery/fields', 'Api\SearchController@getPickupOrDelivery');
 	Route::get('search', 'Api\SearchController@search');
 
+	Route::get('get/roles/by/hubid/{hubid}', 'Api\SearchController@getRolesByHub');
+	Route::get('get/usersin/role', 'Api\SearchController@getUserInCurrentRole');
+
 });

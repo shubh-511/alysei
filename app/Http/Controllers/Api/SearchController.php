@@ -170,6 +170,87 @@ class SearchController extends CoreController
         
     }
 
+    /*Get roles by hub
+    */
+    public function getRolesByHub($hubId)
+    {
+        try
+        {
+            $user = $this->user;   
+            
+            $hub = Hub::where('id', $hubId)->first();         
+            if(!empty($hub))
+            {
+                $users = UserSelectedHub::where('hub_id', $hubId)->get();
+                if(count($users) > 0)
+                {
+                    $users = $users->pluck('user_id');
+                    $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+
+                    foreach($roles as $key => $role)
+                    {
+                        $roles[$key]->name = $this->translate('messages.'.$roles[$key]->name,$roles[$key]->name);
+                        $userWithRole = User::whereHas(
+                            'roles', function($q) use ($role){
+                                $q->where('slug', $role->slug);
+                            }
+                        )->whereIn('user_id', $users)->count();
+                        $roles[$key]->user_count = $userWithRole;
+                    }
+
+                    return response()->json(['success' => $this->successStatus,
+                                    'data' => $roles
+                                    ], $this->successStatus);
+                }
+            }
+            else
+            {
+                $message = "Invalid hub";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+        
+    }
+
+    /*Get User list by roles
+    */
+    public function getUserInCurrentRole(Request $request)
+    {
+        try
+        {
+            $user = $this->user;   
+            $validateSearchType = Validator::make($request->all(), [ 
+                'hub_id' => 'required', 
+                'role_id' => 'required' 
+            ]);
+
+            if ($validateSearchType->fails()) { 
+                return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $users = UserSelectedHub::where('hub_id', $request->hub_id)->get();
+            if(count($users) > 0)
+            {
+                $users = $users->pluck('user_id');
+
+                $userWithRole = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
+                    
+                return response()->json(['success' => $this->successStatus,
+                                'data' => $userWithRole
+                                ], $this->successStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+        
+    }
+
     /*
     * Search user by roles
     */
