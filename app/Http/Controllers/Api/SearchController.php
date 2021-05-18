@@ -9,6 +9,7 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\UserSelectedHub; 
 use Modules\User\Entities\Hub;
+use Modules\User\Entities\State;
 use Modules\User\Entities\UserField;
 use Modules\User\Entities\UserFieldValue;
 use App\Http\Traits\UploadImageTrait;
@@ -83,6 +84,10 @@ class SearchController extends CoreController
 
                 return $this->searchUserByRoles($request->role_id, $request);
             }
+            elseif($request->search_type == 3)
+            {
+                return $this->searchUserByHubs($request);
+            }
             else
             {
                 $message = "Invalid search type";
@@ -93,6 +98,76 @@ class SearchController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /*
+    * Search users by hubs
+    */
+    public function searchUserByHubs($request)
+    {
+        $hubsArray = array();
+        
+        if(!empty($request->keyword))
+        {
+            $hubs = Hub::where('title', 'LIKE', '%' . $request->keyword . '%')->get();
+            if(count($hubs) > 0)
+            {
+                foreach($hubs as $hub)
+                {
+                    array_push($hubsArray, $hub->id);
+                }
+            }
+        }
+        if(!empty($request->state))
+        {
+            $hubsByState = Hub::where('state', $request->state)->first();
+            if(!empty($hubsByState))
+            {
+                array_push($hubsArray, $hubsByState->id);
+            }
+        }
+
+        $hubs = Hub::with('image')->whereIn('id', $hubsArray)->where('status', 1)->get(10);
+        if(count($hubs) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $hubs
+                                ], $this->successStatus);
+        }
+        else
+        {
+            $message = "No hubs found";
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+    }
+
+    /*Get states list
+    */
+    public function getStates()
+    {
+        try
+        {
+            $user = $this->user;   
+            $userCountry = User::where('user_id', $user->user_id)->first();         
+           
+            $states = State::select('id','name','country_id')->where('country_id', $userCountry->country_id)->get();
+            if(count($states) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                    'data' => $states
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No states found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+        
     }
 
     /*
