@@ -525,7 +525,7 @@ class SearchController extends CoreController
      * Get list of hubs seleted by user
      *
      */
-    public function getMySelectedHubs()
+    public function getAllHubs()
     {
         try
         {
@@ -534,7 +534,19 @@ class SearchController extends CoreController
             $myHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
             if(!empty($checkUser))
             {
-                if(count($myHubs) > 0)
+                $hubs = Hub::select('id','title')->where('status', '1')->get();
+                if(count($hubs) > 0)
+                {
+                    return response()->json(['success' => $this->successStatus,
+                                 'hubs' => $hubs
+                                ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "No hubs available";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                /*if(count($myHubs) > 0)
                 {
                     $myHubs = $myHubs->pluck('hub_id')->toArray();
                     $hubs = Hub::select('id','title')->whereIn('id', $myHubs)->where('status', '1')->get();
@@ -554,7 +566,7 @@ class SearchController extends CoreController
                 {
                     $message = "You have not selected any hubs";
                     return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                }
+                }*/
             }
             else
             {

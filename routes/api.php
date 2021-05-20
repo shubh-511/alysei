@@ -20,7 +20,7 @@ Route::get('get/privacy/policy', 'PageController@privacyAndPolicy');
 Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/mycountry/states', 'Api\SearchController@getStates');
-	Route::get('get/my/selected/hubs', 'Api\SearchController@getMySelectedHubs');
+	Route::get('get/all/hubs', 'Api\SearchController@getAllHubs');
 	Route::get('get/field/value/{fieldId}', 'Api\SearchController@getFieldValues');
 	Route::get('get/pickup/delivery/fields', 'Api\SearchController@getPickupOrDelivery');
 	Route::get('search', 'Api\SearchController@search');
