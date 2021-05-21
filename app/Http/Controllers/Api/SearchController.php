@@ -127,7 +127,7 @@ class SearchController extends CoreController
             }
         }
 
-        $hubs = Hub::with('image')->whereIn('id', $hubsArray)->where('status', '1')->paginate(10);
+        $hubs = Hub::with('image:id,attachment_url','country:id,name','state:id,name')->whereIn('id', $hubsArray)->where('status', '1')->paginate(10);
         if(count($hubs) > 0)
         {
             return response()->json(['success' => $this->successStatus,

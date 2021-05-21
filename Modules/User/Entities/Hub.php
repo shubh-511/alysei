@@ -11,4 +11,12 @@ class Hub extends Model
     {
         return $this->belongsTo(Attachment::class, 'image_id','id');
     }
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id','id');
+    }
+    public function state()
+    {
+        return $this->belongsTo(State::class, 'state_id','id');
+    }
 }
