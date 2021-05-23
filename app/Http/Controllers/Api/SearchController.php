@@ -257,6 +257,7 @@ class SearchController extends CoreController
     public function searchUserByRoles($roleId, $request)
     {
         $usersArray = array();
+        $condition = '';
         $userType = 6;
 
         if(!empty($request->hubs))
@@ -272,6 +273,15 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedHub);
                 }
             }
+            if(count($usersArray) > 0)
+            {
+                $usersInHubs = join(",", $usersArray);
+                if($condition != '')
+                $condition .=" and users.user_id in (".$usersInHubs.")";
+                else
+                $condition .="users.user_id in (".$usersInHubs.")";
+            }
+            
         }
         if(!empty($request->country))
         {
@@ -285,6 +295,15 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedCountry);
                 }
             }
+            if(count($usersArray) > 0)
+            {
+                $usersInCountry = join(",", $usersArray);
+                if($condition != '')
+                $condition .=" and users.user_id in (".$usersInCountry.")";
+                else
+                $condition .="users.user_id in (".$usersInCountry.")";
+            }
+            
         }
         if(!empty($request->region))
         {
@@ -298,6 +317,15 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedRegion);
                 }
             }
+            if(count($usersArray) > 0)
+            {
+                $usersInRegion = join(",", $usersArray);
+                if($condition != '')
+                $condition .=" and users.user_id in (".$usersInRegion.")";
+                else
+                $condition .="users.user_id in (".$usersInRegion.")";
+            }
+            
         }
         
         if($roleId == 3 || $roleId == 6)
@@ -315,6 +343,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $productType);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInProductType = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInProductType.")";
+                    else
+                    $condition .="users.user_id in (".$usersInProductType.")";
+                }
+                
             }
             if(!empty($request->horeca))
             {
@@ -328,6 +365,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $horecaUsers);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInHoreca = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInHoreca.")";
+                    else
+                    $condition .="users.user_id in (".$usersInHoreca.")";
+                }
+                
             }
             if(!empty($request->private_label))
             {
@@ -341,6 +387,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $privateLabel);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInPrivateLabel = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInPrivateLabel.")";
+                    else
+                    $condition .="users.user_id in (".$usersInPrivateLabel.")";
+                }
+                
             }
             if(!empty($request->alysei_brand_label))
             {
@@ -354,6 +409,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $brandLabel);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInBrandLabel = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInBrandLabel.")";
+                    else
+                    $condition .="users.user_id in (".$usersInBrandLabel.")";
+                }
+                
             }
             if(!empty($request->user_type) && $request->user_type == 4)
             {
@@ -378,6 +442,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $restaurantType);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInRestaurantType = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInRestaurantType.")";
+                    else
+                    $condition .="users.user_id in (".$usersInRestaurantType.")";
+                }
+                
             }
             if(!empty($request->pickup))
             {
@@ -391,6 +464,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $pickUp);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInPickup = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInPickup.")";
+                    else
+                    $condition .="users.user_id in (".$usersInPickup.")";
+                }
+                
             }
             if(!empty($request->pickupdiscount))
             {
@@ -404,6 +486,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $pickUpDiscount);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInPickupDiscount = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInPickupDiscount.")";
+                    else
+                    $condition .="users.user_id in (".$usersInPickupDiscount.")";
+                }
+                
             }
             if(!empty($request->delivery))
             {
@@ -417,6 +508,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $delevery);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInDelivery = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInDelivery.")";
+                    else
+                    $condition .="users.user_id in (".$usersInDelivery.")";
+                }
+                
             }
             if(!empty($request->delivery_discount))
             {
@@ -430,6 +530,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $deleveryDiscount);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInDeliveryDiscount = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInDeliveryDiscount.")";
+                    else
+                    $condition .="users.user_id in (".$usersInDeliveryDiscount.")";
+                }
+                
             }
 
         }
@@ -448,6 +557,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $expertise);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInExpertise = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInExpertise.")";
+                    else
+                    $condition .="users.user_id in (".$usersInExpertise.")";
+                }
+                
             }
             if(!empty($request->title))
             {
@@ -462,6 +580,15 @@ class SearchController extends CoreController
                         array_push($usersArray, $title);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersInTitle = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersInTitle.")";
+                    else
+                    $condition .="users.user_id in (".$usersInTitle.")";
+                }
+                
             }
         }
         elseif($roleId == 8)
@@ -479,11 +606,27 @@ class SearchController extends CoreController
                         array_push($usersArray, $specialit);
                     }
                 }
+                if(count($usersArray) > 0)
+                {
+                    $usersSpeciality = join(",", $usersArray);
+                    if($condition != '')
+                    $condition .=" and users.user_id in (".$usersSpeciality.")";
+                    else
+                    $condition .="users.user_id in (".$usersSpeciality.")";
+                }
+                
             }
         }
 
-
-        $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $roleId)->whereIn('user_id', $usersArray)->paginate(10);
+        if($condition == '')
+        {
+            $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $roleId)->paginate(10);
+        }
+        else
+        {
+            $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $roleId)->whereRaw('('.$condition.')')->paginate(10);    
+        }
+        
         if(count($users) > 0)
         {
             return response()->json(['success' => $this->successStatus,

@@ -16,9 +16,19 @@ use Illuminate\Http\Request;
 /*Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });*/
-Route::get('get/privacy/policy', 'PageController@privacyAndPolicy');
+
+	/**Socket**/
+
+	Route::post('save/connection', 'Api\SocketConnectionController@saveConnection');
+	Route::get('get/all/connections/{userid}', 'Api\SocketConnectionController@getAllConnections');
+	Route::post('remove/socket/connection/{socketId}', 'Api\SocketConnectionController@removeSocketConnection');
+
+	/**********/
+	
+	Route::get('get/privacy/policy', 'PageController@privacyAndPolicy');
 Route::group(['middleware' => 'auth:api'], function(){
 
+	/**Search**/
 	Route::get('get/mycountry/states', 'Api\SearchController@getStates');
 	Route::get('get/all/hubs', 'Api\SearchController@getAllHubs');
 	Route::get('get/field/value/{fieldId}', 'Api\SearchController@getFieldValues');
@@ -27,5 +37,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/roles/by/hubid/{hubid}', 'Api\SearchController@getRolesByHub');
 	Route::get('get/usersin/role', 'Api\SearchController@getUserInCurrentRole');
+	/*********/
+
+
 
 });
