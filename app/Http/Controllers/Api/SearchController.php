@@ -49,8 +49,8 @@ class SearchController extends CoreController
      */
     public function search(Request $request)
     {
-        try
-        {
+        /*try
+        {*/
             $user = $this->user;
             $validator = Validator::make($request->all(), [ 
                 'search_type' => 'required' 
@@ -82,33 +82,36 @@ class SearchController extends CoreController
                     return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                return $this->searchUserByRoles($request->role_id, $request);
+                return $this->searchUserByRoles($request->role_id, $request, $user->user_id);
             }
             elseif($request->search_type == 3)
             {
-                return $this->searchUserByHubs($request);
+                return $this->searchUserByHubs($request, $user->user_id);
             }
             else
             {
                 $message = "Invalid search type";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
-        }
+        /*}
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }
+        }*/
     }
 
     /*
     * Search users by hubs
     */
-    public function searchUserByHubs($request)
+    public function searchUserByHubs($request, $myId)
     {
         $hubsArray = array();
+        $condition = '';
+        $isSearch = 0;
         
         if(!empty($request->keyword))
         {
+            $isSearch = 1;
             $hubs = Hub::where('title', 'LIKE', '%' . $request->keyword . '%')->get();
             if(count($hubs) > 0)
             {
@@ -117,17 +120,50 @@ class SearchController extends CoreController
                     array_push($hubsArray, $hub->id);
                 }
             }
+            if(count($hubsArray) > 0)
+            {
+                if($condition != '')
+                $condition .=" and hubs.title LIKE "."'%".$request->keyword."%'"."";
+                else
+                $condition .="hubs.title LIKE "."'%".$request->keyword."%'"."";
+            }
         }
         if(!empty($request->state))
         {
+            $isSearch = 1;
             $hubsByState = Hub::where('state_id', $request->state)->first();
             if(!empty($hubsByState))
             {
+                if($condition != '')
+                $condition .=" and hubs.state_id = ".$hubsByState->state_id."";
+                else
+                $condition .="hubs.state_id = ".$hubsByState->state_id."";
                 array_push($hubsArray, $hubsByState->id);
             }
+            
         }
 
-        $hubs = Hub::with('image:id,attachment_url','country:id,name','state:id,name')->whereIn('id', $hubsArray)->where('status', '1')->paginate(10);
+        if($isSearch == 0)
+        {
+            $myHubsArray = [];
+            $myHubs = UserSelectedHub::where('user_id', $myId)->get();
+            if(count($myHubs) > 0)
+            {
+                $myHubsArray = $myHubs->pluck('hub_id');
+                $hubs = Hub::with('image:id,attachment_url','country:id,name','state:id,name')->whereIn('id', $myHubsArray)->where('status', '1')->paginate(10);
+            }
+            else
+            {
+                $hubs = [];
+            }
+            
+        }
+        else
+        {
+            $hubs = Hub::with('image:id,attachment_url','country:id,name','state:id,name')->whereRaw('('.$condition.')')->where('status', '1')->paginate(10);
+        }
+
+        
         if(count($hubs) > 0)
         {
             return response()->json(['success' => $this->successStatus,
@@ -254,14 +290,15 @@ class SearchController extends CoreController
     /*
     * Search user by roles
     */
-    public function searchUserByRoles($roleId, $request)
+    public function searchUserByRoles($roleId, $request, $myId)
     {
         $usersArray = array();
-        $condition = '';
+        $condition = 0;
         $userType = 6;
 
         if(!empty($request->hubs))
         {
+            $condition = 1;
             $hubs = explode(",", $request->hubs);
             $selectedHubs = UserSelectedHub::whereIn('hub_id', $hubs)->groupBy('user_id')->get();
             if(count($selectedHubs))
@@ -273,18 +310,11 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedHub);
                 }
             }
-            if(count($usersArray) > 0)
-            {
-                $usersInHubs = join(",", $usersArray);
-                if($condition != '')
-                $condition .=" and users.user_id in (".$usersInHubs.")";
-                else
-                $condition .="users.user_id in (".$usersInHubs.")";
-            }
             
         }
         if(!empty($request->country))
         {
+            $condition = 1;
             $countries = UserFieldValue::where('value', $request->country)->where('user_field_id', 13)->groupBy('user_id')->get();
             if(count($countries))
             {
@@ -295,18 +325,11 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedCountry);
                 }
             }
-            if(count($usersArray) > 0)
-            {
-                $usersInCountry = join(",", $usersArray);
-                if($condition != '')
-                $condition .=" and users.user_id in (".$usersInCountry.")";
-                else
-                $condition .="users.user_id in (".$usersInCountry.")";
-            }
             
         }
         if(!empty($request->region))
         {
+            $condition = 1;
             $regions = UserFieldValue::where('value', $request->region)->where('user_field_id', 28)->groupBy('user_id')->get();
             if(count($regions))
             {
@@ -317,14 +340,6 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedRegion);
                 }
             }
-            if(count($usersArray) > 0)
-            {
-                $usersInRegion = join(",", $usersArray);
-                if($condition != '')
-                $condition .=" and users.user_id in (".$usersInRegion.")";
-                else
-                $condition .="users.user_id in (".$usersInRegion.")";
-            }
             
         }
         
@@ -332,6 +347,7 @@ class SearchController extends CoreController
         {
             if(!empty($request->product_type))
             {
+                $condition = 1;
                 $productTypeArray = explode(",", $request->product_type);
                 $productTypes = UserFieldValue::whereIn('value', $productTypeArray)->where('user_field_id', 2)->groupBy('user_id')->get();
                 if(count($productTypes))
@@ -343,18 +359,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $productType);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInProductType = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInProductType.")";
-                    else
-                    $condition .="users.user_id in (".$usersInProductType.")";
-                }
                 
             }
             if(!empty($request->horeca))
             {
+                $condition = 1;
                 $horeca = UserFieldValue::where('value', $request->horeca)->where('user_field_id', 4)->groupBy('user_id')->get();
                 if(count($horeca))
                 {
@@ -365,18 +374,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $horecaUsers);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInHoreca = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInHoreca.")";
-                    else
-                    $condition .="users.user_id in (".$usersInHoreca.")";
-                }
                 
             }
             if(!empty($request->private_label))
             {
+                $condition = 1;
                 $privateLabels = UserFieldValue::where('value', $request->private_label)->where('user_field_id', 5)->groupBy('user_id')->get();
                 if(count($privateLabels))
                 {
@@ -387,18 +389,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $privateLabel);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInPrivateLabel = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInPrivateLabel.")";
-                    else
-                    $condition .="users.user_id in (".$usersInPrivateLabel.")";
-                }
                 
             }
             if(!empty($request->alysei_brand_label))
             {
+                $condition = 1;
                 $brandLabels = UserFieldValue::where('value', $request->alysei_brand_label)->where('user_field_id', 6)->groupBy('user_id')->get();
                 if(count($brandLabels))
                 {
@@ -408,14 +403,6 @@ class SearchController extends CoreController
                     {
                         array_push($usersArray, $brandLabel);
                     }
-                }
-                if(count($usersArray) > 0)
-                {
-                    $usersInBrandLabel = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInBrandLabel.")";
-                    else
-                    $condition .="users.user_id in (".$usersInBrandLabel.")";
                 }
                 
             }
@@ -432,6 +419,7 @@ class SearchController extends CoreController
         {
             if(!empty($request->restaurant_type))
             {
+                $condition = 1;
                 $restaurantTypes = UserFieldValue::where('value', $request->restaurant_type)->where('user_field_id', 10)->groupBy('user_id')->get();
                 if(count($restaurantTypes))
                 {
@@ -442,18 +430,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $restaurantType);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInRestaurantType = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInRestaurantType.")";
-                    else
-                    $condition .="users.user_id in (".$usersInRestaurantType.")";
-                }
                 
             }
             if(!empty($request->pickup))
             {
+                $condition = 1;
                 $pickUps = UserFieldValue::where('value', $request->pickup)->where('user_field_id', 9)->groupBy('user_id')->get();
                 if(count($pickUps))
                 {
@@ -464,18 +445,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $pickUp);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInPickup = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInPickup.")";
-                    else
-                    $condition .="users.user_id in (".$usersInPickup.")";
-                }
                 
             }
             if(!empty($request->pickupdiscount))
             {
+                $condition = 1;
                 $pickUpDiscounts = UserFieldValue::where('value', $request->pickupdiscount)->where('user_field_id', 21)->groupBy('user_id')->get();
                 if(count($pickUpDiscounts))
                 {
@@ -486,18 +460,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $pickUpDiscount);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInPickupDiscount = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInPickupDiscount.")";
-                    else
-                    $condition .="users.user_id in (".$usersInPickupDiscount.")";
-                }
                 
             }
             if(!empty($request->delivery))
             {
+                $condition = 1;
                 $deleveries = UserFieldValue::where('value', $request->delivery)->where('user_field_id', 9)->groupBy('user_id')->get();
                 if(count($deleveries))
                 {
@@ -508,18 +475,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $delevery);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInDelivery = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInDelivery.")";
-                    else
-                    $condition .="users.user_id in (".$usersInDelivery.")";
-                }
                 
             }
             if(!empty($request->delivery_discount))
             {
+                $condition = 1;
                 $deleveryDiscounts = UserFieldValue::where('value', $request->delivery_discount)->where('user_field_id', 22)->groupBy('user_id')->get();
                 if(count($deleveryDiscounts))
                 {
@@ -530,14 +490,6 @@ class SearchController extends CoreController
                         array_push($usersArray, $deleveryDiscount);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInDeliveryDiscount = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInDeliveryDiscount.")";
-                    else
-                    $condition .="users.user_id in (".$usersInDeliveryDiscount.")";
-                }
                 
             }
 
@@ -546,6 +498,7 @@ class SearchController extends CoreController
         {
             if(!empty($request->expertise))
             {
+                $condition = 1;
                 $expertis = explode(",", $request->expertise);
                 $userExpertise = UserFieldValue::whereIn('value', $expertis)->where('user_field_id', 11)->groupBy('user_id')->get();
                 if(count($userExpertise))
@@ -557,18 +510,11 @@ class SearchController extends CoreController
                         array_push($usersArray, $expertise);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInExpertise = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInExpertise.")";
-                    else
-                    $condition .="users.user_id in (".$usersInExpertise.")";
-                }
                 
             }
             if(!empty($request->title))
             {
+                $condition = 1;
                 $titl = explode(",", $request->title);
                 $titles = UserFieldValue::whereIn('value', $titl)->where('user_field_id', 12)->groupBy('user_id')->get();
                 if(count($titles))
@@ -580,14 +526,6 @@ class SearchController extends CoreController
                         array_push($usersArray, $title);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersInTitle = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersInTitle.")";
-                    else
-                    $condition .="users.user_id in (".$usersInTitle.")";
-                }
                 
             }
         }
@@ -595,6 +533,7 @@ class SearchController extends CoreController
         {
             if(!empty($request->speciality))
             {
+                $condition = 1;
                 $speciality = explode(",", $request->speciality);
                 $specialities = UserFieldValue::whereIn('value', $speciality)->where('user_field_id', 14)->groupBy('user_id')->get();
                 if(count($specialities))
@@ -606,21 +545,28 @@ class SearchController extends CoreController
                         array_push($usersArray, $specialit);
                     }
                 }
-                if(count($usersArray) > 0)
-                {
-                    $usersSpeciality = join(",", $usersArray);
-                    if($condition != '')
-                    $condition .=" and users.user_id in (".$usersSpeciality.")";
-                    else
-                    $condition .="users.user_id in (".$usersSpeciality.")";
-                }
                 
             }
         }
 
-        if($condition == '')
+        if($condition == 0)
         {
-            $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $roleId)->paginate(10);
+            $myHubs = UserSelectedHub::where('user_id', $myId)->get();
+            if(isset($myHubs) && count($myHubs) > 0)
+            {
+                $myHubs = $myHubs->pluck('hub_id');
+                $defaultHubs = UserSelectedHub::whereIn('hub_id', $myHubs)->get();
+                $defaultHubsUser = $defaultHubs->pluck('user_id');
+
+                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')
+                ->whereIn('user_id', $defaultHubsUser)
+                ->where('role_id', $roleId)->paginate(10);
+            }
+            else
+            {
+                $users = [];
+            }
+            
         }
         else
         {

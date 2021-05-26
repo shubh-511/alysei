@@ -42,7 +42,15 @@ class RegisterController extends CoreController
             }
 
             foreach ($importerRoles as $key => $role) {
-                $importerRoles[$key]->name = $this->translate('messages.'.$importerRoles[$key]->name,$importerRoles[$key]->name);
+                if($importerRoles[$key]->name == "US Importers & Distributers")
+                {
+                    $importerRoles[$key]->name = $this->translate('messages.'.'Importer & Distributor','Importer & Distributor');
+                }
+                else
+                {
+                    $importerRoles[$key]->name = $this->translate('messages.'.$importerRoles[$key]->name,$importerRoles[$key]->name);
+                }
+
                 $importerRoles[$key]->image = "public/images/roles/".$role->slug.".png";
             }
 
