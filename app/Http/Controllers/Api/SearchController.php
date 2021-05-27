@@ -49,8 +49,8 @@ class SearchController extends CoreController
      */
     public function search(Request $request)
     {
-        /*try
-        {*/
+        try
+        {
             $user = $this->user;
             $validator = Validator::make($request->all(), [ 
                 'search_type' => 'required' 
@@ -93,11 +93,11 @@ class SearchController extends CoreController
                 $message = "Invalid search type";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
-        /*}
+        }
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }*/
+        }
     }
 
     /*
@@ -226,6 +226,7 @@ class SearchController extends CoreController
                     foreach($roles as $key => $role)
                     {
                         $roles[$key]->name = $this->translate('messages.'.$roles[$key]->name,$roles[$key]->name);
+                        $roles[$key]->image = "public/images/roles/".$role->slug.".jpg";
                         $userWithRole = User::whereHas(
                             'roles', function($q) use ($role){
                                 $q->where('slug', $role->slug);
@@ -295,6 +296,7 @@ class SearchController extends CoreController
         $usersArray = array();
         $condition = 0;
         $userType = 6;
+        $hubUserCount = $countryUsercount = $regionUserCount = $productUserCount = $horecaUserCount = $privateLabelCount = $brandLabelCount = $restaurantTypeCount = $pickUpsUserCount = $deliveryUserCount = $expertiseUserCount = $titleCount = $specialityCount = 1;
 
         if(!empty($request->hubs))
         {
@@ -309,6 +311,10 @@ class SearchController extends CoreController
                 {
                     array_push($usersArray, $selectedHub);
                 }
+            }
+            if(count($usersArray) == 0)
+            {
+                $hubUserCount = 0;
             }
             
         }
@@ -325,6 +331,10 @@ class SearchController extends CoreController
                     array_push($usersArray, $selectedCountry);
                 }
             }
+            if(count($usersArray) == 0)
+            {
+                $countryUsercount = 0;
+            }
             
         }
         if(!empty($request->region))
@@ -339,6 +349,10 @@ class SearchController extends CoreController
                 {
                     array_push($usersArray, $selectedRegion);
                 }
+            }
+            if(count($usersArray) == 0)
+            {
+                $regionUserCount = 0;
             }
             
         }
@@ -359,6 +373,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $productType);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $productUserCount = 0;
+                }
                 
             }
             if(!empty($request->horeca))
@@ -373,6 +391,10 @@ class SearchController extends CoreController
                     {
                         array_push($usersArray, $horecaUsers);
                     }
+                }
+                if(count($usersArray) == 0)
+                {
+                    $horecaUserCount = 0;
                 }
                 
             }
@@ -389,6 +411,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $privateLabel);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $privateLabelCount = 0;
+                }
                 
             }
             if(!empty($request->alysei_brand_label))
@@ -403,6 +429,10 @@ class SearchController extends CoreController
                     {
                         array_push($usersArray, $brandLabel);
                     }
+                }
+                if(count($usersArray) == 0)
+                {
+                    $brandLabelCount = 0;
                 }
                 
             }
@@ -430,6 +460,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $restaurantType);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $restaurantTypeCount = 0;
+                }
                 
             }
             if(!empty($request->pickup))
@@ -444,6 +478,10 @@ class SearchController extends CoreController
                     {
                         array_push($usersArray, $pickUp);
                     }
+                }
+                if(count($usersArray) == 0)
+                {
+                    $pickUpsUserCount = 0;
                 }
                 
             }
@@ -460,6 +498,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $pickUpDiscount);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $count = 0;
+                }
                 
             }
             if(!empty($request->delivery))
@@ -475,6 +517,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $delevery);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $deliveryUserCount = 0;
+                }
                 
             }
             if(!empty($request->delivery_discount))
@@ -489,6 +535,10 @@ class SearchController extends CoreController
                     {
                         array_push($usersArray, $deleveryDiscount);
                     }
+                }
+                if(count($usersArray) == 0)
+                {
+                    $count = 0;
                 }
                 
             }
@@ -510,6 +560,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $expertise);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $expertiseUserCount = 0;
+                }
                 
             }
             if(!empty($request->title))
@@ -525,6 +579,10 @@ class SearchController extends CoreController
                     {
                         array_push($usersArray, $title);
                     }
+                }
+                if(count($usersArray) == 0)
+                {
+                    $titleCount = 0;
                 }
                 
             }
@@ -545,6 +603,10 @@ class SearchController extends CoreController
                         array_push($usersArray, $specialit);
                     }
                 }
+                if(count($usersArray) == 0)
+                {
+                    $specialityCount = 0;
+                }
                 
             }
         }
@@ -558,9 +620,13 @@ class SearchController extends CoreController
                 $defaultHubs = UserSelectedHub::whereIn('hub_id', $myHubs)->get();
                 $defaultHubsUser = $defaultHubs->pluck('user_id');
 
-                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')
+                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')
+                ->with('avatar_id')
                 ->whereIn('user_id', $defaultHubsUser)
-                ->where('role_id', $roleId)->paginate(10);
+                ->where('user_id', '!=' , $myId)
+                ->where('role_id', $roleId)
+                ->groupBy('user_id')
+                ->paginate(10);
             }
             else
             {
@@ -570,7 +636,21 @@ class SearchController extends CoreController
         }
         else
         {
-            $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $roleId)->whereRaw('('.$condition.')')->paginate(10);    
+            if($countryUsercount == 0 || $regionUserCount == 0 || $productUserCount == 0 || $horecaUserCount == 0 || $privateLabelCount == 0 || $brandLabelCount == 0 || $restaurantTypeCount == 0 || $pickUpsUserCount == 0 || $deliveryUserCount == 0 || $expertiseUserCount == 0 || $titleCount == 0 || $specialityCount == 0)
+            {
+                $users = [];
+            }
+            else
+            {
+                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')
+                ->with('avatar_id')
+                ->where('role_id', $roleId)
+                ->where('user_id', '!=' , $myId)
+                ->whereIn('user_id', $usersArray)
+                ->groupBy('user_id')
+                ->paginate(10);  
+            }
+              
         }
         
         if(count($users) > 0)
