@@ -177,6 +177,93 @@ class SearchController extends CoreController
         }
     }
 
+    /*
+    /*Subscribe/Unsubscribe hub
+    */
+    public function subscribeOrUnsubscribeHub(Request $request)
+    {
+        try
+        {
+            $user = $this->user;   
+            $validateData = Validator::make($request->all(), [ 
+                'hub_id' => 'required', 
+                'subscription_type' => 'required'  // 1 = subscribe, 0 = unsubscribe
+            ]);
+
+            if ($validateData->fails()) { 
+                return response()->json(['errors'=>$validateData->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $hub = Hub::where('id', $request->hub_id)->first();
+            if(!empty($hub))
+            {
+                $isSubscribedWithHub = UserSelectedHub::where('user_id', $user->user_id)->where('hub_id', $request->hub_id)->first();
+                if($request->subscription_type == 1)
+                {
+                    if(!empty($isSubscribedWithHub))
+                    {
+                        $message = "You have already subscribed to this hub";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+                    }
+                    else
+                    {
+                        $selectedHub = new UserSelectedHub;
+                        $selectedHub->user_id = $user->user_id;
+                        $selectedHub->hub_id = $request->hub_id;
+                        $selectedHub->save();
+
+                        $message = "You have subscribed to this hub";
+                        return response()->json(['success' => $this->successStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                    }
+                }
+                elseif($request->subscription_type == 0)
+                {
+                    if(!empty($isSubscribedWithHub))
+                    {
+                        $unsubscribeWithHub = UserSelectedHub::where('user_id', $user->user_id)->where('hub_id', $request->hub_id)->delete();
+                        if($unsubscribeWithHub == 1)
+                        {
+                            $message = "You have unsubscribed from this hub";
+                            return response()->json(['success' => $this->successStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                        }
+                        else
+                        {
+                            $message = "You have to first subscribe to this hub";
+                            return response()->json(['success' => $this->exceptionStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->exceptionStatus);
+                        }
+                    }
+                    else
+                    {
+                        $message = "You have to first subscribe to this hub";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                }
+                else
+                {
+                    $message = "Invalid subscription type";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            }
+            else
+            {
+                $message = "Invalid hub id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+        
+    }
+
     /*Get states list
     */
     public function getStates()
@@ -213,6 +300,16 @@ class SearchController extends CoreController
         try
         {
             $user = $this->user;   
+
+            $isHubSelected = UserSelectedHub::where('user_id', $user->user_id)->where('hub_id', $hubId)->first();
+            if(!empty($isHubSelected))
+            {
+                $subscription = 1;
+            }
+            else
+            {
+                $subscription = 0;
+            }
             
             $hub = Hub::where('id', $hubId)->first();         
             if(!empty($hub))
@@ -221,11 +318,14 @@ class SearchController extends CoreController
                 if(count($users) > 0)
                 {
                     $users = $users->pluck('user_id');
-                    $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+                    $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer','voyagers'])->orderBy('order')->get();
 
                     foreach($roles as $key => $role)
                     {
-                        $roles[$key]->name = $this->translate('messages.'.$roles[$key]->name,$roles[$key]->name);
+                        if($roles[$key]->name == "US Importers & Distributers")
+                        {
+                            $roles[$key]->name = $this->translate('messages.'.'Importer & Distributor','Importer & Distributor');
+                        }
                         $roles[$key]->image = "public/images/roles/".$role->slug.".jpg";
                         $userWithRole = User::whereHas(
                             'roles', function($q) use ($role){
@@ -236,6 +336,7 @@ class SearchController extends CoreController
                     }
 
                     return response()->json(['success' => $this->successStatus,
+                                    'is_subscribed_with_hub' => $subscription,
                                     'data' => $roles
                                     ], $this->successStatus);
                 }

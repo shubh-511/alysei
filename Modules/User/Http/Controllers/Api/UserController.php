@@ -1246,7 +1246,6 @@ class UserController extends CoreController
                         $arrayValues = array();
                         $fieldValues = DB::table('user_field_values')
                                     ->where('user_id', $user_id)
-                                    ->where('head', 0)->where('parent', 0)
                                     ->where('user_field_id', $value->user_field_id)
                                     ->get();
                         if(count($fieldValues) > 0)
@@ -1255,6 +1254,7 @@ class UserController extends CoreController
                             {
                                 $options = DB::table('user_field_options')
                                         //->where('user_id', $user_id)
+                                        ->where('head', 0)->where('parent', 0)
                                         ->where('user_field_option_id', $fieldValue->value)
                                         ->first();
                                 if(!empty($options->option))

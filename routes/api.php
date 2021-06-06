@@ -26,7 +26,7 @@ use Illuminate\Http\Request;
 	/**********/
 	
 	Route::get('get/privacy/policy', 'PageController@privacyAndPolicy');
-Route::group(['middleware' => 'auth:api'], function(){
+	Route::group(['middleware' => 'auth:api'], function(){
 
 	/**Search**/
 	Route::get('get/mycountry/states', 'Api\SearchController@getStates');
@@ -37,6 +37,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/roles/by/hubid/{hubid}', 'Api\SearchController@getRolesByHub');
 	Route::get('get/usersin/role', 'Api\SearchController@getUserInCurrentRole');
+
+	Route::post('subscribe/unsubscribe/hub', 'Api\SearchController@subscribeOrUnsubscribeHub');	
 	/*********/
 
 
