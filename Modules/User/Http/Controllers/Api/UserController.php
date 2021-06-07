@@ -920,12 +920,14 @@ class UserController extends CoreController
 
             $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage];
 
+            $fieldsType = $this->getFeaturedType($this->user->role_id);
+
             $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar];
             $dataCoverImage = ['title' => 'Cover Image','status' => $userCover];
             $dataAbout = ['title' => 'About','status' => $userAbout];
             $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub];
             $dataContactInfo = ['title' => 'Contact Info','status' => $userContact];
-            $dataFeaturedListing = ['title' => 'Featured listing','status' => $userFeaturedListing];
+            $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing];
 
             if($loggedInUser->role_id == 10 || $loggedInUser->role_id == 7)
             {
@@ -1697,6 +1699,19 @@ class UserController extends CoreController
         
     }   
 
+    /*
+     * Get Featured Type Using Role Id
+     * @params $roleId
+     */
+    public function getFeaturedType($roleId){
+        $featuredTypes = DB::table("featured_listing_types as flt")
+            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+
+            ->where("fltrm.role_id","=",$roleId)
+            ->first();
+
+        return $featuredTypes;
+    }
     
 
     /*
