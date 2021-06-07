@@ -10,9 +10,10 @@ use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Modules\Marketplace\Entities\MarketplaceProductCategory;
 use Modules\Marketplace\Entities\MarketplaceProductSubcategory;
 use Modules\Marketplace\Entities\MarketplaceBrandLabel;
-use Modules\Marketplace\Entities\MarketplaceBrandLabel;
 use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
+use Illuminate\Support\Facades\Auth; 
+use Validator;
 
 class ProductController extends CoreController
 {

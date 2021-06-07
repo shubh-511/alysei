@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Attachment;
 use Modules\Marketplace\Entities\WalkthroughScreen;
 use App\Http\Controllers\CoreController;
+use Illuminate\Support\Facades\Auth; 
 
 class WalkthroughScreenController extends CoreController
 {

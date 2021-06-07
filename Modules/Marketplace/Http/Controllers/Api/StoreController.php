@@ -9,6 +9,8 @@ use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
+use Illuminate\Support\Facades\Auth; 
+use Validator;
 
 class StoreController extends CoreController
 {

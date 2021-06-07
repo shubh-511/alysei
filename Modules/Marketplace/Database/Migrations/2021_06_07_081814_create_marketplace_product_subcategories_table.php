@@ -14,8 +14,8 @@ class CreateMarketplaceProductSubcategoriesTable extends Migration
     public function up()
     {
         Schema::create('marketplace_product_subcategories', function (Blueprint $table) {
-            $table->increments('id');
-            $table->unsignedBigInteger('marketplace_product_subcategory_id');
+            $table->increments('marketplace_product_subcategory_id');
+            $table->unsignedBigInteger('marketplace_product_category_id');
             $table->string('name');
             $table->enum('status',['0','1'])->default('1')->comment('1=active, 0=inactive');
             $table->timestamps();

@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Attachment;
 use Modules\Marketplace\Entities\MarketplacePackage;
 use App\Http\Controllers\CoreController;
+use Illuminate\Support\Facades\Auth; 
 
 class PackageController extends CoreController
 {
@@ -41,7 +42,7 @@ class PackageController extends CoreController
                 $packages[$key]->name = $this->translate('messages.'.$package->name,$package->name);
             }
 
-            return response()->json(['success'=>$this->successStatus,'data' =>$package,'response_time'=>$response_time],$this->successStatus); 
+            return response()->json(['success'=>$this->successStatus,'data' =>$packages,'response_time'=>$response_time],$this->successStatus); 
 
         }
         catch(\Exception $e)
