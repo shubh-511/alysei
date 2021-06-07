@@ -10,6 +10,8 @@ use App\Attachment;
 use Modules\Activity\Entities\ActivityAttachment;
 use Modules\Activity\Entities\ActivityAttachmentLink;
 use Illuminate\Support\Facades\Auth; 
+use Modules\Marketplace\Entities\MarketplaceStoreGallery;
+use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Validator;
 //use App\Events\UserRegisterEvent;
 
@@ -98,6 +100,48 @@ trait UploadImageTrait
         $activityAttachmentLink->save();
         
         return $activityAttachmentLink->activity_attachment_link_id;
+    }
+
+    /***
+    Post Galleries
+    ***/
+    public function postGallery($img, $moduleId, $storeOrProduct)
+    {
+        $date = date("Y/m");
+        $target='uploads/'.$date;
+        if(!empty($img))
+        {
+            $headerImageName=$img->getClientOriginalName();
+            $ext1=$img->getClientOriginalExtension();
+            $temp1=explode(".",$headerImageName);
+            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
+            $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
+            $img->move($target,$newHeaderLogo);
+        }
+        else
+        {
+            $headerTarget = '';
+        }
+
+        if($storeOrProduct == 1)
+        {
+            $activityAttachmentLink = new MarketplaceStoreGallery;
+            $activityAttachmentLink->marketplace_store_id = $moduleId;    
+        }
+        elseif($storeOrProduct == 2)
+        {
+            $activityAttachmentLink = new MarketplaceProductGallery;
+            $activityAttachmentLink->marketplace_product_id = $moduleId;
+        }
+        
+        $activityAttachmentLink->attachment_url = $headerTarget;
+        $activityAttachmentLink->attachment_type = $ext1;
+        $activityAttachmentLink->save();
+
+        /*if($storeOrProduct == 1)
+            return $activityAttachmentLink->marketplace_store_gallery_id;
+        elseif($storeOrProduct == 2)
+            return $activityAttachmentLink->marketplace_product_gallery_id;*/
     }
 
     /** 
