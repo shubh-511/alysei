@@ -7,6 +7,10 @@ use Illuminate\Http\Response;
 use App\Attachment;
 use Modules\Marketplace\Entities\MarketplaceProduct;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
+use Modules\Marketplace\Entities\MarketplaceProductCategory;
+use Modules\Marketplace\Entities\MarketplaceProductSubcategory;
+use Modules\Marketplace\Entities\MarketplaceBrandLabel;
+use Modules\Marketplace\Entities\MarketplaceBrandLabel;
 use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
 
@@ -28,7 +32,104 @@ class ProductController extends CoreController
             return $next($request);
         });
     }
+
+    /*
+     * Get Product Categories
+     * 
+     */
+    public function getProductCategories()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $categories = MarketplaceProductCategory::where('status', '1')->get();
+            if(count($categories) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                    'count' => count($categories),
+                                    'data' => $categories,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No product categories found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+     /*
+     * Get Product SubCategories
+     * 
+     */
+    public function getProductSubcategories(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'product_category_id' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $subCategories = MarketplaceProductSubcategory::where('marketplace_product_category_id', $request->product_category_id)->where('status', '1')->get();
+            if(count($subCategories) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                    'count' => count($subCategories),
+                                    'data' => $subCategories,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No product subcategories found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
     
+    /*
+     * Get Brand Labels
+     * 
+     */
+    public function getBrandLabels()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $labels = MarketplaceBrandLabel::where('status', '1')->get();
+            if(count($labels) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                    'count' => count($labels),
+                                    'data' => $labels,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No brand labels found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /*
      * Save Product Details
      * @Params $request
