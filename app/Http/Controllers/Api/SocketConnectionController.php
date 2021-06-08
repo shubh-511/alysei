@@ -52,7 +52,7 @@ class SocketConnectionController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $isConnectedUser = SocketConnection::where('user_id', $request->user_id)->where('socket_id', $request->socket_id)->first();
+            $isConnectedUser = SocketConnection::where('user_id', $request->user_id)->first();
             if(empty($isConnectedUser))
             {
                 $newConnection = new SocketConnection;
@@ -68,6 +68,7 @@ class SocketConnectionController extends CoreController
             }
             else
             {
+                $connection = SocketConnection::where('user_id', $request->user_id)->update(["socket_id" => $request->socket_id]);
                 return response()->json(['success' => $this->successStatus,
                                      //'data' => $newConnection,
                                     ], $this->successStatus);
