@@ -16,6 +16,8 @@ use Modules\User\Entities\UserTempHub;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Modules\User\Entities\Certificate;
+use Modules\Activity\Entities\ConnectFollowPermission;
+use Modules\Activity\Entities\MapPermissionRole;
 use Modules\User\Entities\Country;
 use App\Http\Traits\ProfileStatusTrait;
 use Validator;
@@ -1128,6 +1130,38 @@ class UserController extends CoreController
 
 
     /*
+     * Get Permission For Sending Requests
+     * 
+     */
+    public function getPermissions($roleId)
+    {
+        try
+        {
+            $permissions = ConnectFollowPermission::select('connect_follow_permission_id','role_id','permission_type')->where('role_id', $roleId)->get();
+            if(count($permissions) > 0)
+            {
+                foreach($permissions as $key => $permission)
+                {
+                    $mapPermission = MapPermissionRole::select('map_permission_role_id','connect_follow_permission_id','role_id')->where('connect_follow_permission_id', $permission->connect_follow_permission_id)->get();
+                    $permissions[$key]->map_permissions = $mapPermission;
+                }
+
+                return $permissions;
+            }
+            else
+            {
+                $message = "No privillege granted for sending request or following someone";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
      * Get Visitor Profile API
      *
      */
@@ -1147,6 +1181,38 @@ class UserController extends CoreController
 
             $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id','allow_message_from','who_can_view_age','who_can_view_profile','who_can_connect')->with('avatar_id','cover_id')->where('user_id', $request->visitor_profile_id)->first();
 
+            $permissions = $this->getPermissions($loggedInUser->role_id);
+
+            //return $permissions;
+            foreach($permissions as $permission)
+            {
+                if($permission->permission_type == 1)
+                {
+                    foreach($permission->map_permissions as $per)
+                    {
+                        if($userData->role_id == $per->role_id)
+                        {
+                            $userData->available_to_connect = 1;
+                            break;
+                        }                        
+                    } 
+                }
+                if($permission->permission_type == 2)
+                {
+                    foreach($permission->map_permissions as $per)
+                    {
+                        if($userData->role_id == $per->role_id)
+                        {
+                            $userData->available_to_follow = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            (!empty($userData->available_to_connect)) ? $userData->available_to_connect = 1 : $userData->available_to_connect = 0;
+            (!empty($userData->available_to_follow)) ? $userData->available_to_follow = 1 : $userData->available_to_follow = 0;
+            
             $loggedInUserData = User::where('user_id', $loggedInUser->user_id)->first();
 
             $userAbout = User::select('about')->where('user_id', $request->visitor_profile_id)->first();

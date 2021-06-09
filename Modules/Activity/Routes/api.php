@@ -24,7 +24,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('delete/post', 'Api\ActivityController@deletePost');
 	Route::get('get/post/detail', 'Api\ActivityController@getPostDetails');
 
-	Route::post('post/like', 'Api\ActivityController@likeUnlikePost');
+	
 	Route::post('post/comment', 'Api\ActivityController@commentPost');
 	Route::post('delete/post/comment', 'Api\ActivityController@deletePostComment');
 	Route::post('reply/post/comment', 'Api\ActivityController@replyPost');

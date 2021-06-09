@@ -12,6 +12,11 @@ use App\Http\Traits\UploadImageTrait;
 use Modules\User\Entities\Role;
 use Carbon\Carbon;
 use DB;
+use Modules\Activity\Entities\ActivityLike;
+use Modules\Activity\Entities\ActivityAction;
+use Modules\Activity\Entities\ActivityActionType;
+use Modules\Activity\Entities\ActivityAttachment;
+use Modules\Activity\Entities\ActivityAttachmentLink;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -34,6 +39,106 @@ class SocketConnectionController extends CoreController
             return $next($request);
         });
     }*/
+
+    /*
+     * Like Post
+     * @Params $request
+     */
+    public function likeUnlikePost(Request $request)
+    {
+        try
+        {
+            //$user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                //'ww' => 'required',
+                'user_id' => 'required',
+                'post_id' => 'required',
+                'like_or_unlike' => 'required', // 1 for like 0 for unlike
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
+            if(!empty($activityPost))
+            {
+                if($request->like_or_unlike == 1)
+                {
+                    $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
+
+
+                    if(!empty($isLikedActivityPost))
+                    {
+                        $message = "You have already liked this post";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+                    }
+                    else
+                    {
+                        $activityLike = new ActivityLike;
+                        $activityLike->resource_id = $request->post_id;
+                        $activityLike->poster_type = "user";
+                        $activityLike->poster_id = $request->user_id;
+                        $activityLike->save();
+
+                        $activityPost->like_count = $activityPost->like_count + 1;
+                        $activityPost->save();
+
+                        $message = "You liked this post";
+                        return response()->json(['success' => $this->successStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                    }
+                }
+                elseif($request->like_or_unlike == 0)
+                {
+                    $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
+                    if(!empty($isLikedActivityPost))
+                    {
+                        $isUnlikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->delete();
+                        if($isUnlikedActivityPost == 1)
+                        {
+                            $activityPost->like_count = $activityPost->like_count - 1;
+                            $activityPost->save();
+
+                            $message = "You unliked this post";
+                            return response()->json(['success' => $this->successStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                        }
+                        else
+                        {
+                            $message = "You have to first like this post";
+                            return response()->json(['success' => $this->exceptionStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->exceptionStatus);
+                        }
+                    }
+                    else
+                    {
+                        $message = "You have not liked this post";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                }
+                else
+                {
+                    $message = "Invalid like/unlike type";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            }
+            else
+            {
+                $message = "Invalid post id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
 
 
     /*
