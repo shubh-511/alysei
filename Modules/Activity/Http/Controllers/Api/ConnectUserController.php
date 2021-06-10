@@ -87,6 +87,7 @@ class ConnectUserController extends CoreController
             $user = $this->user;
             $validator = Validator::make($request->all(), [ 
                 'user_id' => 'required', 
+                'reason_to_connect' =>  'required'
             ]);
 
             if ($validator->fails()) { 
@@ -139,16 +140,46 @@ class ConnectUserController extends CoreController
     }
 
     /*
-     * Get Pending Requests
+     * Get Pending Recieved Requests
      * 
      */
-    public function getMyPendingRequest()
+    public function getMyPendingRecievedRequest()
     {
         try
         {
             $user = $this->user;
 
-            $requests = Connection::with('user')->where('user_id', $user->user_id)->get();
+            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->get();
+            if(count($requests) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                    'count' => count($requests),
+                                    'data' => $requests,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No pending requests found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get Pending Sent Requests
+     * 
+     */
+    public function getMyPendingSentRequest()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $user->user_id)->get();
             if(count($requests) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
