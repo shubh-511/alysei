@@ -273,7 +273,7 @@ class SearchController extends CoreController
             $user = $this->user;   
             $userCountry = User::where('user_id', $user->user_id)->first();         
            
-            $states = State::select('id','name','country_id')->where('country_id', $userCountry->country_id)->get();
+            $states = State::select('id','name','country_id')->where('country_id', $userCountry->country_id)->where('status', '1')->get();
             if(count($states) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
