@@ -10,6 +10,7 @@ use Modules\User\Entities\User;
 use App\SocketConnection;
 use App\Http\Traits\UploadImageTrait;
 use Modules\User\Entities\Role;
+use Modules\Activity\Entities\CoreComment;
 use Carbon\Carbon;
 use DB;
 use Modules\Activity\Entities\ActivityLike;
@@ -39,6 +40,66 @@ class SocketConnectionController extends CoreController
             return $next($request);
         });
     }*/
+
+
+    /*
+     * Comment Post
+     * @Params $request
+     */
+    public function commentPost(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [ 
+                'user_id'  => 'required',
+                'post_id' => 'required',
+                'comment' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
+            if(!empty($activityPost))
+            {
+                $activityActionType = ActivityActionType::where('activity_action_type_id', $activityPost->type)->first();
+                $actionType = $this->checkActionType($activityActionType->type);
+                if($actionType[1] > 0)
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
+                }
+                else
+                {
+                    $activityComment = new CoreComment;
+                    $activityComment->resource_type = "user";
+                    $activityComment->resource_id = $request->post_id;
+                    $activityComment->poster_type = "user";
+                    $activityComment->poster_id = $request->user_id;
+                    $activityComment->body = $request->comment;
+                    $activityComment->save();
+
+                    $activityPost->comment_count = $activityPost->comment_count + 1;
+                    $activityPost->save();
+
+                    $message = "Your comment has been posted successfully";
+                    return response()->json(['success' => $this->successStatus,
+                                             'message' => $this->translate('messages.'.$message,$message),
+                                            ], $this->successStatus);
+                }
+            }
+            else
+            {
+                $message = "Invalid post id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
 
     /*
      * Like Post
@@ -238,5 +299,33 @@ class SocketConnectionController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /*
+     * Check Action Type
+     * @Params $type
+     */
+
+    public function checkActionType($type)
+    {
+        $status = [];
+        $activityActionType = ActivityActionType::where("type", $type)->first();
+        if(!empty($activityActionType))
+        {
+            if($activityActionType->commentable == '0')
+            {
+                $status = [$this->translate('messages.'."You are not authorised to comment on this post","You are not authorised to comment on this post"), 1];
+            }
+            else
+            {
+                $status = [$this->translate('messages.'."Success","Success"), 0];
+            }            
+        }
+        else
+        {
+            $status = [$this->translate('messages.'."Invalid action type","Invalid action type"), 3];
+        }
+        
+        return $status;
     }
 }
