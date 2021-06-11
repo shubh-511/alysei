@@ -23,7 +23,7 @@ class CreateMarketplaceProductsTable extends Migration
             $table->longText('description');
             $table->string('keywords');
             $table->integer('product_category_id');
-            $table->integer('product_subcategory_id');
+            $table->integer('product_subcategory_id')->nullable();
             $table->string('quantity_available');
             $table->string('brand_label_id');
             $table->string('min_order_quantity');

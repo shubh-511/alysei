@@ -145,7 +145,7 @@ class ProductController extends CoreController
                 'description' => 'required',
                 'keywords' => 'required|max:255',
                 'product_category_id' => 'required',
-                'product_subcategory_id' => 'required',
+                //'product_subcategory_id' => 'required',
                 'quantity_available' => 'required|max:255',
                 'brand_label_id' => 'required|max:255',
                 'min_order_quantity' => 'required',
