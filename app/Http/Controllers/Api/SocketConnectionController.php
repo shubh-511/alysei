@@ -129,13 +129,13 @@ class SocketConnectionController extends CoreController
                     $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
 
 
-                    if(!empty($isLikedActivityPost))
+                    /*if(!empty($isLikedActivityPost))
                     {
                         $message = "You have already liked this post";
                         return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
                     }
                     else
-                    {
+                    {*/
                         $activityLike = new ActivityLike;
                         $activityLike->resource_id = $request->post_id;
                         $activityLike->poster_type = "user";
@@ -149,7 +149,7 @@ class SocketConnectionController extends CoreController
                         return response()->json(['success' => $this->successStatus,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->successStatus);
-                    }
+                    //}
                 }
                 elseif($request->like_or_unlike == 0)
                 {
@@ -249,11 +249,11 @@ class SocketConnectionController extends CoreController
     /*
      * Get all connection by userid
     */
-    public function getAllConnections($userId)
+    public function getAllConnections($userId,$postOwner='')
     {
         try
         {
-            $isConnectedUser = SocketConnection::where('user_id', $userId)->get();
+            $isConnectedUser = SocketConnection::where('user_id', $userId)->orWhere('user_id', $postOwner)->get();
             if(count($isConnectedUser) > 0)
             {
                 return response()->json(['success' => $this->successStatus,

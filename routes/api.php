@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 	Route::post('post/comment', 'Api\SocketConnectionController@commentPost');
 	Route::post('post/like', 'Api\SocketConnectionController@likeUnlikePost');
 	Route::post('save/connection', 'Api\SocketConnectionController@saveConnection');
-	Route::get('get/all/connections/{userid}', 'Api\SocketConnectionController@getAllConnections');
+	Route::get('get/all/connections/{userid}/{postOwner}', 'Api\SocketConnectionController@getAllConnections');
 	Route::post('remove/socket/connection/{socketId}', 'Api\SocketConnectionController@removeSocketConnection');
 
 	/**********/

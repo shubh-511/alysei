@@ -3,7 +3,9 @@
 namespace Modules\User\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use Illuminate\Routing\Controller;
+use Illuminate\Http\Response;
+use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User;
 use Modules\User\Entities\BlockList;
 use Carbon\Carbon;
@@ -11,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Validator;
 //use App\Events\UserRegisterEvent;
 
-class BlockUserController extends Controller
+class BlockUserController extends CoreController
 {
     public $successStatus = 200;
     public $validationStatus = 422;
@@ -49,15 +51,24 @@ class BlockUserController extends Controller
             
             if(!empty($user))
             {
-                $blockList = new BlockList;
-                $blockList->user_id = $loggedInUser->user_id;
-                $blockList->block_user_id = $request->block_user_id;
-                $blockList->save();
+                $checkList = BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->block_user_id)->first();
+                if(empty($checkList))
+                {
+                    $blockList = new BlockList;
+                    $blockList->user_id = $loggedInUser->user_id;
+                    $blockList->block_user_id = $request->block_user_id;
+                    $blockList->save();
 
-                return response()->json(['success' => $this->successStatus,
-                                        'message' => $this->translate('messages.'."User blocked successfuly!","User blocked successfuly!")
-                                         'data' => $blockList,
-                                        ], $this->successStatus);
+                    return response()->json(['success' => $this->successStatus,
+                                            'message' => $this->translate('messages.'."User blocked successfuly!","User blocked successfuly!"),
+                                             'data' => $blockList,
+                                            ], $this->successStatus);
+                }
+                else
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."This user is already in your block list","This user is already in your block list")]], $this->exceptionStatus);       
+                }
+                
             }
             else
             {
@@ -91,10 +102,10 @@ class BlockUserController extends Controller
             
             if(!empty($user))
             {
-                $blockList = new BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->block_user_id)->first();
+                $blockList = BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->block_user_id)->first();
                 if(!empty($blockList))
                 {
-                    $blockList = new BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->block_user_id)->delete();
+                    $blockList = BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->block_user_id)->delete();
 
                     return response()->json(['success' => $this->successStatus,
                                             'message' => $this->translate('messages.'."User unblocked successfuly!","User unblocked successfuly!")
@@ -126,7 +137,7 @@ class BlockUserController extends Controller
         try
         {
             $loggedInUser = $this->user;
-            $blockList = new BlockList::with('user:user_id')->with('blockuser:user_id')->where('user_id', $loggedInUser->user_id)->orderBy('block_list_id','DESC')->get();
+            $blockList = BlockList::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->with('blockuser:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','blockuser.avatar_id')->where('user_id', $loggedInUser->user_id)->orderBy('block_list_id','DESC')->get();
             if(count($blockList) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
