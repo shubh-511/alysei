@@ -185,6 +185,10 @@ class RegisterController extends CoreController
                         $userData['country_id'] = $inputData['country'];
                         
                     }
+                    if(array_key_exists('state',$inputData)){
+                        $userData['state'] = $inputData['state'];
+                        
+                    }
 
                     $user = User::create($userData); 
                     

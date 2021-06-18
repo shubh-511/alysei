@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 
 Route::group(['middleware' => 'auth:api'], function(){
 
+	Route::get('get/store/prefilled/values', 'Api\StoreController@getPreFilledValues');
 	Route::get('get/marketplace/walkthrough', 'Api\WalkthroughScreenController@getWalkThroughScreens');
 	Route::get('get/marketplace/packages', 'Api\PackageController@getPackages');
 	Route::get('get/marketplace/product/categories', 'Api\ProductController@getProductCategories');

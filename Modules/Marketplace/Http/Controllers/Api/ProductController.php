@@ -14,6 +14,7 @@ use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
+use DB;
 
 class ProductController extends CoreController
 {
@@ -47,10 +48,38 @@ class ProductController extends CoreController
             $categories = MarketplaceProductCategory::where('status', '1')->get();
             if(count($categories) > 0)
             {
-                return response()->json(['success' => $this->successStatus,
-                                    'count' => count($categories),
-                                    'data' => $categories,
+                $arrayValues = array();
+                $fieldValues = DB::table('user_field_values')
+                            ->where('user_id', $user->user_id)
+                            ->where('user_field_id', 2)
+                            ->get();
+                if(count($fieldValues) > 0)
+                {
+                    $i=1;
+                    foreach($fieldValues as $fieldValue)
+                    {
+                        $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_option_id', $fieldValue->value)
+                                ->first();
+                        
+                        //$arrayValues[] = $options->option;
+                        if(!empty($options->option))
+                        $arrayValues[] = ['marketplace_product_category_id'=>$options->user_field_option_id, 'name' => $options->option];
+                        $i++;
+                    }
+                    return response()->json(['success' => $this->successStatus,
+                                    'count' => count($arrayValues),
+                                    'data' => $arrayValues,
                                     ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "No product categories found";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+
+                
             }
             else
             {

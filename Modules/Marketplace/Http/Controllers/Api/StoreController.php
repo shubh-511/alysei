@@ -8,6 +8,7 @@ use App\Attachment;
 use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 use App\Http\Controllers\CoreController;
+use Modules\User\Entities\User;
 use App\Http\Traits\UploadImageTrait;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -30,6 +31,28 @@ class StoreController extends CoreController
             return $next($request);
         });
     }
+
+
+    /*
+    * Get Store Prefilled values
+    *
+    */
+    public function getPreFilledValues()
+    {
+        try
+        {
+            $user = $this->user;
+            $userDetail = User::select('company_name','about','phone','email','website','address','state')->with('state:id,name')->where('user_id', $user->user_id)->first();
+            
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $userDetail
+                            ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+    }
     
     /*
      * Save Store Details
@@ -44,7 +67,8 @@ class StoreController extends CoreController
                 'description' => 'required',
                 'website' => 'required|max:255',
                 'store_region' => 'required',
-                'location' => 'required|max:255',
+                'phone' =>  'required',
+                //'location' => 'required|max:255',
                 'lattitude' => 'required|max:255',
                 'longitude' => 'required|max:255',
                 'logo_id' => 'required',
@@ -65,6 +89,7 @@ class StoreController extends CoreController
                 $store->name = $request->name;
                 $store->description = $request->description;
                 $store->website = $request->website;
+                $store->phone = $request->phone;
                 $store->store_region = $request->store_region;
                 $store->location = $request->location;
                 $store->lattitude = $request->lattitude;
@@ -73,6 +98,8 @@ class StoreController extends CoreController
                 $store->logo_id = $this->uploadImage($request->file('logo_id'));
                 $store->banner_id = $this->uploadImage($request->file('banner_id'));
                 $store->save();
+
+                $userDetail = User::where('user_id', $user->user_id)->update(['about' => $request->description, 'company_name' => $request->name, 'website' => $request->website, 'phone' => $request->phone, 'address' => $request->location]);
 
                 if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
                 {

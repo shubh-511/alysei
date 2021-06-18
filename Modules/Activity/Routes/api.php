@@ -24,7 +24,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('share/post', 'Api\ActivityController@sharePost');
 	Route::post('delete/post', 'Api\ActivityController@deletePost');
 	Route::get('get/post/detail', 'Api\ActivityController@getPostDetails');
-
+	Route::get('get/products/for/connection', 'Api\ConnectUserController@getProductListToConnect');
 	
 	
 	Route::post('delete/post/comment', 'Api\ActivityController@deletePostComment');

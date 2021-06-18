@@ -19,6 +19,7 @@ class CreateConnectionsTable extends Migration
             $table->integer('user_id');
             $table->text('reason_to_connect')->nullabel();
             $table->enum('is_approved',['0','1'])->default(0)->comment("0=Pending,1=Approved");
+            $table->text('product_ids')->nullabel();
             $table->timestamps();
         });
     }

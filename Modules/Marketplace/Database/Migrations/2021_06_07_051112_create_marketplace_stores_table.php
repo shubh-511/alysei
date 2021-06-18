@@ -20,6 +20,7 @@ class CreateMarketplaceStoresTable extends Migration
             $table->string('name');
             $table->longText('description');
             $table->string('website');
+            $table->string('phone');
             $table->integer('store_region');
             $table->string('location');
             $table->string('lattitude');

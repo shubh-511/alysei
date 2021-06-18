@@ -15,6 +15,7 @@ use Modules\User\Entities\UserSelectedHub;
 use Modules\User\Entities\UserTempHub;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\User\Entities\Certificate;
 use Modules\Activity\Entities\ConnectFollowPermission;
 use Modules\Activity\Entities\MapPermissionRole;
@@ -274,15 +275,34 @@ class UserController extends CoreController
         try{
                 $input = $request->all();
 
-                /*$validator = Validator::make($input, [ 
-                    'email' => 'required|unique:users,email,'.$this->user->user_id.',user_id', 
+                $validator = Validator::make($input, [ 
+                    'address' => 'required', 
                 ]);
 
                 if ($validator->fails()) { 
-                    return response()->json(['errors'=>$validator->errors(),'success' => $this->validationStatus], $this->validationStatus);
-                }*/
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
                 
                 $user = User::where('user_id','=',$this->user->user_id)->update($input);
+                $myStore = MarketplaceStore::where('user_id', $this->user->user_id)->first();
+                if(!empty($myStore))
+                {
+                    if(!empty($request->phone))
+                    {
+                        $myStore->phone = $request->phone;
+                        $myStore->save();
+                    }
+                    if(!empty($request->address))
+                    {
+                        $myStore->location = $request->address;
+                        $myStore->save();
+                    }
+                    if(!empty($request->website))
+                    {
+                        $myStore->website = $request->website;
+                        $myStore->save();
+                    }
+                }
 
                 return response()->json(['success' => $this->successStatus,
                                  'data' => $user,
@@ -667,6 +687,78 @@ class UserController extends CoreController
         
     }
 
+
+    /* 
+     * Update Profile/cover image
+     * @params $request
+     */
+    public function updateProfileCoverImage(Request $request)
+    {
+        try
+        {
+            $input = $request->all();
+
+            $validator = Validator::make($input, [ 
+                'image_type' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $userProfile = User::where('user_id', $this->user->user_id)->first();
+            if($request->image_type == 1)
+            {
+                $validatorAvatar = Validator::make($input, [ 
+                    'avatar_id' => 'required', 
+                ]);
+
+                if ($validatorAvatar->fails()) { 
+                    return response()->json(['errors'=>$validatorAvatar->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+                if(!empty($request->file('avatar_id')))
+                {
+                    $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
+                    $userProfile->save();
+                }
+
+                $message = "Profile image updated successfully";
+                return response()->json(['success' => $this->successStatus,
+                             'message' => $this->translate('messages.'.$message,$message),
+                            ], $this->successStatus);
+            }
+            elseif($request->image_type == 2)
+            {
+                $validatorCover = Validator::make($input, [ 
+                    'cover_id' => 'required', 
+                ]);
+
+                if ($validatorCover->fails()) { 
+                    return response()->json(['errors'=>$validatorCover->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+                if(!empty($request->file('cover_id')))
+                {
+                    $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
+                    $userProfile->save();
+                }
+                
+                $message = "Cover image updated successfully";
+                return response()->json(['success' => $this->successStatus,
+                             'message' => $this->translate('messages.'.$message,$message),
+                            ], $this->successStatus);
+            }
+            else
+            {
+                $message = "Image type is not valid";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+            }
+                         
+        }
+        catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /* 
      * Remove profile cover image
      * @params $request
@@ -922,18 +1014,27 @@ class UserController extends CoreController
 
             $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage];
 
-            $fieldsType = $this->getFeaturedType($this->user->role_id);
+            if($loggedInUser->role_id != 10)
+            {
+                $fieldsType = $this->getFeaturedType($this->user->role_id);
+                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing];
+            }
+            
 
             $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar];
             $dataCoverImage = ['title' => 'Cover Image','status' => $userCover];
             $dataAbout = ['title' => 'About','status' => $userAbout];
             $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub];
             $dataContactInfo = ['title' => 'Contact Info','status' => $userContact];
-            $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing];
+            
 
-            if($loggedInUser->role_id == 10 || $loggedInUser->role_id == 7)
+            if($loggedInUser->role_id == 10)
             {
                 $dataProgress = [$dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo];
+            }
+            elseif($loggedInUser->role_id == 7)
+            {
+                $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo];
             }
             else
             {

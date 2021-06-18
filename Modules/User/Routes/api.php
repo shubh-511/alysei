@@ -32,6 +32,9 @@ Route::get('get/countries', 'Api\CountryController@getCountries');
 
 Route::group(['middleware' => 'auth:api'], function(){
 
+	
+	Route::post('update/avatar/cover/image', 'Api\UserController@updateProfileCoverImage');
+
 	Route::get('userinfo', 'Api\UserController@userinfo');
 	Route::get('user/settings', 'Api\FeaturedListingsController@userSettings');
 	Route::post('update/user/settings', 'Api\UserController@updateUserSettings');

@@ -17,6 +17,7 @@ use Modules\Activity\Entities\ActivityAttachmentLink;
 use Modules\Activity\Entities\ConnectFollowPermission;
 use Modules\Activity\Entities\MapPermissionRole;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -114,6 +115,11 @@ class ConnectUserController extends CoreController
                         $newConnection->reason_to_connect = $request->reason_to_connect;
                         $newConnection->save();
 
+                        /*if(!empty($request->user_field_option_id))
+                        {
+                            
+                        }*/
+
                         $message = "Connection request has been sent!";
                         return response()->json(['success' => $this->successStatus,
                                              'message' => $this->translate('messages.'.$message,$message),
@@ -162,6 +168,51 @@ class ConnectUserController extends CoreController
                 $message = "No pending requests found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get Pending Recieved Requests
+     * 
+     */
+    public function getProductListToConnect()
+    {
+        try
+        {
+            $user = $this->user;
+            
+            $arrayValues = array();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->get();
+            if(count($fieldValues) > 0)
+            {
+                foreach($fieldValues as $fieldValue)
+                {
+                    $options = DB::table('user_field_options')
+                            ->where('head', 0)->where('parent', 0)
+                            ->where('user_field_option_id', $fieldValue->value)
+                            ->first();
+                    
+                    //$arrayValues[] = $options->option;
+                    if(!empty($options->option))
+                    $arrayValues[] = ['user_field_option_id'=>$options->user_field_option_id, 'option' => $options->option];
+                }
+                return response()->json(['success' => $this->successStatus,
+                                'count' => count($arrayValues),
+                                'data' => $arrayValues,
+                                ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No products found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }      
         }
         catch(\Exception $e)
         {

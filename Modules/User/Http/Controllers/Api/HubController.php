@@ -5,6 +5,7 @@ namespace Modules\User\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Modules\User\Entities\Hub; 
+use App\Http\Controllers\CoreController;
 use Modules\User\Entities\City;
 use Modules\User\Entities\State;
 use Modules\User\Entities\Country;
@@ -16,7 +17,7 @@ use Modules\User\Entities\UserSelectedHub;
 use Illuminate\Routing\Controller;
 use Validator;
 
-class HubController extends Controller
+class HubController extends CoreController
 {
     public $successStatus = 200;
     public $validationStatus = 422;
@@ -166,6 +167,73 @@ class HubController extends Controller
     /***
     get Hubs
     ***/
+    /*public function getHubs(Request $request) //this ons is changes as latest
+    {
+        try
+        {
+            $user = $this->user;
+            
+            $validator = Validator::make($request->all(), [ 
+                'country_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $getHubsStates = Hub::where('country_id', $request->country_id)->get();
+            if(count($getHubsStates) > 0)
+            {
+                $getStateIds = $getHubsStates->pluck('state_id')->toArray();
+                if(count($getStateIds) > 0)
+                {
+                    $stateData = State::whereIn('id', $getStateIds)->where('status', '1')->get();
+                    foreach($stateData as $keyState => $states)
+                    {
+                        $UserSelectedHubs = UserSelectedHub::where('user_id', $user->user_id)->get();
+                        if(count($UserSelectedHubs) > 0 )
+                        {
+                            foreach($UserSelectedHubs as $UserSelectedHub)
+                            {
+                                $selectedHub = Hub::where('id', $UserSelectedHub->hub_id)->first();
+                                $selectedStates[] = $selectedHub->state_id;
+                            }
+                        }
+                        $hubs = Hub::with('image')->where('country_id', $request->country_id)->where('state_id', $states->id)->get();
+                        foreach($hubs as $key => $hub)
+                        {
+                            $UserSelectedHub = UserSelectedHub::where('user_id', $user->user_id)->where('hub_id', $hub->id)->first();
+                            if(!empty($UserSelectedHub) && $hub->id == $UserSelectedHub->hub_id)
+                            {
+                                $hubs[$key]->is_selected = true;
+                            }
+                            else
+                            {
+                                $hubs[$key]->is_selected = false;
+                            }
+                        }
+                        $harray[] = ['state_id'=>$states->id,'state_name'=>$states->name, 'is_selected'=> (in_array($states->id, $selectedStates)) ? true : false   ,'hubs_array'=>$hubs];
+                    }
+
+                    $hubs = ['hubs' => $harray];
+                    return response()->json(['success' => $this->successStatus,
+                                        'data' => $hubs,
+                                    ], $this->successStatus);
+                }
+            }  
+            else
+            {
+                $message = "We do not have any hub in this country";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);    
+            }                         
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }*/
+
+
     public function getHubs(Request $request)
     {
         try

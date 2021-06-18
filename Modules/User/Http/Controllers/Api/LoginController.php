@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\CoreController;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\User\Entities\UserSelectedHub;
 use Modules\User\Entities\UserTempHub;
 use Validator;
@@ -72,8 +73,18 @@ class LoginController extends CoreController
                     {
                         $isHubSelected = false;
                     }
+                    $checkMyStoreExist = MarketplaceStore::where('user_id', $user->user_id)->first();
+                    if(empty($myStore))
+                    {
+                        $isStoreCreated = 0;
+                    }
+                    else
+                    {
+                        $isStoreCreated = 1;
+                    }
                     $userData = User::select('*','name as username')->with('roles','avatar_id','cover_id')->where('user_id', $user->user_id)->first();
                     $userData->is_hub_selected = $isHubSelected;
+                    $userData->is_store_created = $isStoreCreated;
 
                         Auth::user()->roles;
                         $token =  $user->createToken('yss')->accessToken; 
