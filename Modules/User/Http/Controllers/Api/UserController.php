@@ -1210,7 +1210,7 @@ class UserController extends CoreController
 
             /********Contact tab***/
 
-            $contact = User::select('user_id','role_id','email','phone','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
+            $contact = User::select('user_id','role_id','email','phone','country_code','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
 
             /*********************/
 
@@ -1451,7 +1451,7 @@ class UserController extends CoreController
 
             /********Contact tab***/
 
-            $contact = User::select('user_id','role_id','email','phone','address','website','fb_link')->where('user_id', $request->visitor_profile_id)->first();
+            $contact = User::select('user_id','role_id','email','phone','country_code','address','website','fb_link')->where('user_id', $request->visitor_profile_id)->first();
 
             /*********************/
             
@@ -1588,7 +1588,7 @@ class UserController extends CoreController
         {
             $loggedInUser = $this->user;
 
-            $data = User::select('user_id','role_id','email','phone','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
+            $data = User::select('user_id','role_id','email','phone','country_code','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
 
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data

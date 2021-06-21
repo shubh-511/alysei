@@ -19,7 +19,8 @@ class SeedMarketplaceBrandLabelsTableSeeder extends Seeder
 
         $data = array(
                         array("name" => "Alysei Brand label", "status" => "1"),
-                        array("name" => "Private Label", "status" => "1")
+                        array("name" => "Private Label", "status" => "1"),
+                        array("name" => "Horeca", "status" => "1")
                     );
 
         foreach ($data as $key => $value) {
