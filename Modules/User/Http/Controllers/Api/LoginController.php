@@ -74,7 +74,7 @@ class LoginController extends CoreController
                         $isHubSelected = false;
                     }
                     $checkMyStoreExist = MarketplaceStore::where('user_id', $user->user_id)->first();
-                    if(empty($myStore))
+                    if(empty($checkMyStoreExist))
                     {
                         $isStoreCreated = 0;
                     }

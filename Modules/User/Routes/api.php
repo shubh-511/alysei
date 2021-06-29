@@ -53,6 +53,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/selected/hub/states', 'Api\HubController@getSelectedHubStates');
 
 	Route::post('get/hub/city', 'Api\HubController@getHubsCity');
+	Route::get('get/state/wise/hubs', 'Api\HubController@getStateWiseHubs');
 	Route::post('get/hubs', 'Api\HubController@getHubs');
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');
 	Route::get('review/hubs', 'Api\HubController@hubsReviewSelection');

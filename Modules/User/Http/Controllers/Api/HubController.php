@@ -165,9 +165,9 @@ class HubController extends CoreController
     }
 
     /***
-    get Hubs
+    get Sate wise Hubs
     ***/
-    /*public function getHubs(Request $request) //this ons is changes as latest
+    public function getStateWiseHubs(Request $request) //this ons is changes as latest
     {
         try
         {
@@ -231,7 +231,7 @@ class HubController extends CoreController
         {
             return response()->json(['success'=>false,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
-    }*/
+    }
 
 
     public function getHubs(Request $request)

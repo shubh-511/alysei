@@ -7,9 +7,11 @@ use Modules\User\Entities\User;
 use Modules\Activity\Entities\ActivityActionType;
 use Modules\Activity\Entities\ActivityAttachment;
 use Modules\Activity\Entities\ActivityAttachmentLink;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ActivityAction extends Model
 {
+    use SoftDeletes;
 	protected $primaryKey = 'activity_action_id';
     protected $fillable = [];
 

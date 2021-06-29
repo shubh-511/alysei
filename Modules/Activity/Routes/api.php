@@ -28,17 +28,22 @@ Route::group(['middleware' => 'auth:api'], function(){
 	
 	
 	Route::post('delete/post/comment', 'Api\ActivityController@deletePostComment');
-	Route::post('reply/post/comment', 'Api\ActivityController@replyPost');
+	
 
 	Route::post('follow/user', 'Api\FollowUserController@followUnfollowUser');
 	Route::get('get/followers', 'Api\FollowUserController@getFollowersList');
+	Route::get('get/followings', 'Api\FollowUserController@getFollowingsList');
 
 	Route::get('get/permissions', 'Api\ConnectUserController@getPermissions');
 
 	Route::post('send/connection/request', 'Api\ConnectUserController@sendConnectionRequest');
+	Route::post('cancel/connection/request', 'Api\ConnectUserController@cancelConnectionRequest');
+
+	Route::get('get/connection/tabs', 'Api\ConnectUserController@getConnectionTabs');
 	Route::get('get/pending/recieved/request', 'Api\ConnectUserController@getMyPendingRecievedRequest');
 	Route::get('get/pending/sent/request', 'Api\ConnectUserController@getMyPendingSentRequest');
 	Route::post('accept/reject/request', 'Api\ConnectUserController@acceptOrRejectConnection');
+
 
 	Route::get('get/all/user/post/{postType}', 'Api\ActivityController@getAllUserPosts');
 	Route::get('get/activity/feed', 'Api\ActivityController@getActivityFeeds');

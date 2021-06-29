@@ -146,12 +146,42 @@ class FollowUserController extends CoreController
         try
         {
             $user = $this->user;
-            $myFollowers = Follower::with('user:user_id,name,email')->with('follow_user:user_id,name,email')->where('follow_user_id', $user->user_id)->get();
+            $myFollowers = Follower::with('user:user_id,name,email')->with('follow_user:user_id,name,email')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($myFollowers) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
                                          'follower_count' => count($myFollowers),  
                                          'data' => $myFollowers
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No followers found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get Following list
+     *
+     */
+    public function getFollowingsList()
+    {
+        try
+        {
+            $user = $this->user;
+            $followings = Follower::with('user:user_id,name,email')->with('follow_user:user_id,name,email')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            if(count($followings) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'follower_count' => count($followings),  
+                                         'data' => $followings
                                         ], $this->successStatus);
             }
             else

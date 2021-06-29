@@ -25,6 +25,14 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/marketplace/product/categories', 'Api\ProductController@getProductCategories');
 	Route::get('get/marketplace/product/subcategories', 'Api\ProductController@getProductSubcategories');
 	Route::get('get/marketplace/brand/label', 'Api\ProductController@getBrandLabels');
+	Route::get('checkif/store/created', 'Api\StoreController@checkIfStoreCreated');
+	Route::get('get/dashboard/screen', 'Api\StoreController@getDashboardScreen');
+
+	Route::get('get/store/details', 'Api\StoreController@getStoreDetails');
+	Route::post('update/store/details', 'Api\StoreController@updateStoreDetails');
+	Route::post('update/product/details', 'Api\ProductController@updateProductDetails');
+	Route::get('get/myproduct/list', 'Api\ProductController@getMyProductList');
+	Route::post('delete/product', 'Api\ProductController@deleteProduct');
 
 	Route::post('save/store', 'Api\StoreController@saveStoreDetails');
 	Route::post('save/product', 'Api\ProductController@saveProductDetails');

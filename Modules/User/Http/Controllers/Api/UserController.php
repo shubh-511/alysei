@@ -1285,34 +1285,88 @@ class UserController extends CoreController
             $permissions = $this->getPermissions($loggedInUser->role_id);
 
             //return $permissions;
-            foreach($permissions as $permission)
+            if(count($permissions) > 0) 
             {
-                if($permission->permission_type == 1)
+                foreach($permissions as $permission)
                 {
-                    foreach($permission->map_permissions as $per)
+                    if($permission->permission_type == 1)
                     {
-                        if($userData->role_id == $per->role_id)
+                        foreach($permission->map_permissions as $per)
                         {
-                            $userData->available_to_connect = 1;
-                            break;
-                        }                        
-                    } 
-                }
-                if($permission->permission_type == 2)
-                {
-                    foreach($permission->map_permissions as $per)
+                            if($userData->role_id == $per->role_id)
+                            {
+                                $userData->available_to_connect = 1;
+                                break;
+                            }                        
+                        } 
+                    }
+                    if($permission->permission_type == 2)
                     {
-                        if($userData->role_id == $per->role_id)
+                        foreach($permission->map_permissions as $per)
                         {
-                            $userData->available_to_follow = 1;
-                            break;
+                            if($userData->role_id == $per->role_id)
+                            {
+                                $userData->available_to_follow = 1;
+                                break;
+                            }
                         }
                     }
                 }
             }
+            
+            if(!empty($userData->available_to_connect))
+            {
+                $userData->available_to_connect = 1;
 
-            (!empty($userData->available_to_connect)) ? $userData->available_to_connect = 1 : $userData->available_to_connect = 0;
-            (!empty($userData->available_to_follow)) ? $userData->available_to_follow = 1 : $userData->available_to_follow = 0;
+                //$checkIfConnected = Connection::where('resource_id', 1)->orWhere('user_id', 1)->first();
+
+                $checkIfConnected = Connection::where(function ($query) use ($loggedInUser, $request) {
+                $query->where('resource_id', $loggedInUser->user_id)->where('user_id', $request->visitor_profile_id);
+                  })->oRwhere(function ($query) use ($loggedInUser, $request) {
+                      $query->where('resource_id', $request->visitor_profile_id)->where('user_id', $loggedInUser->user_id);
+                  })->first();
+
+                if(!empty($checkIfConnected))
+                {
+                    if($checkIfConnected->is_approved == '1')
+                    {
+                        $userData->connection_flag = 1;
+                    }
+                    elseif($checkIfConnected->resource_id == $loggedInUser->user_id)
+                    {
+                        $userData->connection_flag = 2;
+                    }
+                    elseif($checkIfConnected->resource_id == $request->visitor_profile_id)
+                    {
+                        $userData->connection_flag = 3;
+                    }
+                } 
+                else
+                {
+                    $userData->connection_flag = 0;    
+                }
+            }
+            else
+            {   
+                $userData->available_to_connect = 0;
+                $userData->connection_flag = 0;
+            }
+
+            if(!empty($userData->available_to_follow))
+            {
+                $userData->available_to_follow = 1;
+                $checkIfFollowing = Follower::where('user_id', $loggedInUser->user_id)->where('follow_user_id', $request->visitor_profile_id)->first();
+                (!empty($checkIfFollowing)) ? $userData->follow_flag = 1 : $userData->follow_flag = 0;
+            }
+            else
+            {   
+                $userData->available_to_follow = 0;
+                $userData->follow_flag = 0;
+            }
+
+            //(!empty($userData->available_to_connect)) ? $userData->available_to_connect = 1 : $userData->available_to_connect = 0;
+            //(!empty($userData->available_to_follow)) ? $userData->available_to_follow = 1 : $userData->available_to_follow = 0;
+
             
             $loggedInUserData = User::where('user_id', $loggedInUser->user_id)->first();
 

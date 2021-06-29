@@ -77,6 +77,50 @@ class ConnectUserController extends CoreController
         }
     }
 
+
+    /*
+     * Get COnnections tab (pending/recieved/my connection)
+     * @Params $request
+     */
+    public function getConnectionTabs(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'tab' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            if($request->tab == 1)
+            {
+                return $this->getMyPendingRecievedRequest($user);
+            }
+            elseif($request->tab == 2)
+            {
+                return $this->getMyConnections($user);
+            }
+            elseif($request->tab == 3)
+            {
+                return $this->getMyPendingSentRequest($user);
+            }
+            else
+            {
+                $message = "Invalid tab!";
+                return response()->json(['success' => $this->successStatus,
+                                        'message' => $this->translate('messages.'.$message,$message),
+                                        ], $this->successStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /*
      * Send Connection Request
      * @Params $request
@@ -146,16 +190,50 @@ class ConnectUserController extends CoreController
     }
 
     /*
-     * Get Pending Recieved Requests
-     * 
-     */
-    public function getMyPendingRecievedRequest()
+    * Get my connections list
+    */
+    public function getMyConnections($user)
     {
         try
         {
-            $user = $this->user;
+            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')
+            ->where('is_approved', '1')
+            //->where('user_id', $user->user_id)
+            ->orWhere(function ($query) use ($user) {
+                $query->where('resource_id', $user->user_id)
+                ->where('user_id', $user->user_id);
+            })
+            ->orderBy('connection_id', 'DESC')
+            ->get();
 
-            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->get();
+            if(count($requests) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                    'count' => count($requests),
+                                    'data' => $requests,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No connections found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get Pending Recieved Requests
+     * 
+     */
+    public function getMyPendingRecievedRequest($user)
+    {
+        try
+        {
+            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
             if(count($requests) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -224,13 +302,11 @@ class ConnectUserController extends CoreController
      * Get Pending Sent Requests
      * 
      */
-    public function getMyPendingSentRequest()
+    public function getMyPendingSentRequest($user)
     {
         try
         {
-            $user = $this->user;
-
-            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $user->user_id)->get();
+            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
             if(count($requests) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -297,6 +373,47 @@ class ConnectUserController extends CoreController
             else
             {
                 $message = "Connection id is not valid";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Cancel/Remove connection
+     * @Params $request
+     */
+    public function cancelConnectionRequest(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'visitor_profile_id' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $checkConnection = Connection::with('user')->where('user_id', $request->visitor_profile_id)->where('resource_id', $user->user_id)->first();
+            if(!empty($checkConnection))
+            {
+                $checkConnection->delete();
+
+                $message = "The request has been cancelled";
+                    
+                return response()->json(['success' => $this->successStatus,
+                                    'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "You have not send a connection request to this user";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
         }

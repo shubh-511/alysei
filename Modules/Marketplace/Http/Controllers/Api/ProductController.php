@@ -55,7 +55,6 @@ class ProductController extends CoreController
                             ->get();
                 if(count($fieldValues) > 0)
                 {
-                    $i=1;
                     foreach($fieldValues as $fieldValue)
                     {
                         $options = DB::table('user_field_options')
@@ -66,7 +65,6 @@ class ProductController extends CoreController
                         //$arrayValues[] = $options->option;
                         if(!empty($options->option))
                         $arrayValues[] = ['marketplace_product_category_id'=>$options->user_field_option_id, 'name' => $options->option];
-                        $i++;
                     }
                     return response()->json(['success' => $this->successStatus,
                                     'count' => count($arrayValues),
@@ -172,11 +170,11 @@ class ProductController extends CoreController
                 'marketplace_store_id' => 'required', 
                 'title' => 'required|max:255',
                 'description' => 'required',
-                'keywords' => 'required|max:255',
+                //'keywords' => 'required|max:255',
                 'product_category_id' => 'required',
                 //'product_subcategory_id' => 'required',
                 'quantity_available' => 'required|max:255',
-                'brand_label_id' => 'required|max:255',
+                //'brand_label_id' => 'required|max:255',
                 'min_order_quantity' => 'required',
                 'handling_instruction' => 'required',
                 'dispatch_instruction' => 'required',
@@ -222,6 +220,153 @@ class ProductController extends CoreController
            /* $message = "Your store has already been setup";
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);*/
             
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Update Product Details
+     * @Params $request
+     */
+    public function updateProductDetails(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [ 
+                'marketplace_product_id' => 'required', 
+                'title' => 'required|max:255',
+                'description' => 'required',
+                //'keywords' => 'required|max:255',
+                'product_category_id' => 'required',
+                //'product_subcategory_id' => 'required',
+                'quantity_available' => 'required|max:255',
+                //'brand_label_id' => 'required|max:255',
+                'min_order_quantity' => 'required',
+                'handling_instruction' => 'required',
+                'dispatch_instruction' => 'required',
+                'available_for_sample' => 'required',
+                'product_price' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $user = $this->user;
+
+            
+            $product = MarketplaceProduct::where('marketplace_product_id', $request->marketplace_product_id)->first();
+            if(!empty($product))
+            {
+                $product->title = $request->title;
+                $product->description = $request->description;
+                $product->keywords = $request->keywords;
+                $product->product_category_id = $request->product_category_id;
+                $product->product_subcategory_id = $request->product_subcategory_id;
+                $product->quantity_available = $request->quantity_available;
+                $product->brand_label_id = $request->brand_label_id;
+
+                $product->min_order_quantity = $request->min_order_quantity;
+                $product->handling_instruction = $request->handling_instruction;
+                $product->dispatch_instruction = $request->dispatch_instruction;
+                $product->available_for_sample = $request->available_for_sample;
+                $product->product_price = $request->product_price;
+                $product->save();
+
+                if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
+                {
+                    foreach($request->gallery_images as $images)
+                    {
+                        $attachmentLinkId = $this->postGallery($images, $product->marketplace_product_id, 2);
+                    }
+                }
+
+                return response()->json(['success'=>$this->successStatus,'data' =>$product],$this->successStatus); 
+            }
+            else
+            {
+                $message = "This product does not exist";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Get my product list
+     * 
+     */
+    public function getMyProductList()
+    {
+        try
+        {
+            $user = $this->user;
+            $productCount = MarketplaceProduct::with('labels')->where('user_id', $user->user_id)->count();
+            $myProductLists = MarketplaceProduct::with('labels')->where('user_id', $user->user_id)->paginate(10);
+            if(count($myProductLists))
+            {
+                foreach($myProductLists as $key => $myProductList)
+                {
+                    $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
+                    (count($galleries) > 0) ? $myProductLists[$key]->product_gallery = $galleries : $myProductLists[$key]->product_gallery = [];
+
+                    $myProductLists[$key]->avg_rating = "0.0";
+                    $myProductLists[$key]->total_reviews = 0;
+                }
+                return response()->json(['success'=>$this->successStatus, 'count' => $productCount, 'data' =>$myProductLists],$this->successStatus); 
+            }
+            else
+            {
+                $message = "No product list found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+
+    }
+
+
+    /*
+     * Delete product
+     * @Params $request
+     */
+    public function deleteProduct(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'marketplace_product_id' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $product = MarketplaceProduct::where('marketplace_product_id', $request->marketplace_product_id)->where('user_id', $user->user_id)->first();
+            
+            if(!empty($product))
+            {
+                $product->delete();
+                $message = "Product deleted successfully";
+                return response()->json(['success'=>$this->successStatus, 'message' => $message],$this->successStatus); 
+            }
+            else
+            {
+                $message = "No product found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
         }
         catch(\Exception $e)
         {

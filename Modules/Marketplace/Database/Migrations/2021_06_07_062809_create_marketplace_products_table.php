@@ -21,17 +21,17 @@ class CreateMarketplaceProductsTable extends Migration
             $table->unsignedBigInteger('marketplace_store_id');
             $table->string('title');
             $table->longText('description');
-            $table->string('keywords');
+            $table->string('keywords')->nullable();
             $table->integer('product_category_id');
             $table->integer('product_subcategory_id')->nullable();
             $table->string('quantity_available');
-            $table->string('brand_label_id');
+            $table->string('brand_label_id')->nullable();
             $table->string('min_order_quantity');
             $table->longtext('handling_instruction');
             $table->longtext('dispatch_instruction');
             $table->string('available_for_sample');
             $table->decimal('product_price', 10, 2);
-            $table->enum('status',['0','1','2'])->default('0')->comment('0=pending for approval, 1=active, 2=disabled');
+            $table->enum('status',['0','1'])->default('1')->comment('0=inactive, 1=active');
             $table->timestamps();
         });
     }

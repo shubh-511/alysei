@@ -43,6 +43,88 @@ class SocketConnectionController extends CoreController
 
 
     /*
+     * Get Post Comments
+     * @Params $request
+     */
+    public function getPostComments(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [ 
+                'post_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $activityAction = ActivityAction::where("activity_action_id", $request->post_id)->first();
+            if(!empty($activityAction))
+            {
+                $postComments = CoreComment::where('resource_id', $request->post_id)->where('parent_id', 0)->get();
+                if(count($postComments) > 0)
+                {
+                    return response()->json(['success' => $this->successStatus,
+                                             'data' => $postComments,
+                                            ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "No comments found for this post";
+                    return response()->json(['success'=>$this->exceptionStatus,'data' => $this->translate('messages.'.$message,$message)], $this->exceptionStatus); 
+                }
+            }
+            else
+            {
+                $message = "Invalid post Id";
+                    return response()->json(['success'=>$this->exceptionStatus,'data' => $this->translate('messages.'.$message,$message)], $this->exceptionStatus); 
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Get Comments replies
+     * @Params $request
+     */
+    public function getCommentReplies(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [ 
+                'comment_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $postComments = CoreComment::where('parent_id', $request->comment_id)->get();
+            if(count($postComments) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                         'data' => $postComments,
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No replies found under this comment";
+                return response()->json(['success'=>$this->exceptionStatus,'data' => $this->translate('messages.'.$message,$message)], $this->exceptionStatus); 
+            }
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
      * Comment Post
      * @Params $request
      */
@@ -67,7 +149,7 @@ class SocketConnectionController extends CoreController
                 $actionType = $this->checkActionType($activityActionType->type);
                 if($actionType[1] > 0)
                 {
-                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $actionType[0]]], $this->exceptionStatus);
+                    return response()->json(['success'=>$this->exceptionStatus,'message' => $actionType[0]], $this->exceptionStatus);
                 }
                 else
                 {
@@ -91,6 +173,56 @@ class SocketConnectionController extends CoreController
             else
             {
                 $message = "Invalid post id";
+                return response()->json(['success'=>$this->exceptionStatus,'message' => $this->translate('messages.'.$message,$message)], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Reply Post
+     * @Params $request
+     */
+    public function replyPost(Request $request)
+    {
+        try
+        {
+            $validator = Validator::make($request->all(), [ 
+                'user_id' => 'required',
+                'post_id' => 'required',
+                'comment_id' => 'required',
+                'reply' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
+            if(!empty($activityPost))
+            {
+                $activityComment = new CoreComment;
+                $activityComment->resource_type = "user";
+                $activityComment->resource_id = $request->post_id;
+                $activityComment->poster_type = "user";
+                $activityComment->poster_id = $request->user_id;
+                $activityComment->body = $request->reply;
+                $activityComment->parent_id = $request->comment_id;
+                $activityComment->save();
+
+                $message = "Your reply has been posted successfully";
+                return response()->json(['success' => $this->successStatus,
+                                         'message' => $this->translate('messages.'.$message,$message),
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = "Invalid post id";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
 
@@ -100,6 +232,7 @@ class SocketConnectionController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
+
 
     /*
      * Like Post
@@ -147,6 +280,7 @@ class SocketConnectionController extends CoreController
 
                         $message = "You liked this post";
                         return response()->json(['success' => $this->successStatus,
+                                                 'total_likes' => $activityPost->like_count,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->successStatus);
                     //}
@@ -164,6 +298,7 @@ class SocketConnectionController extends CoreController
 
                             $message = "You unliked this post";
                             return response()->json(['success' => $this->successStatus,
+                                                 'total_likes' => $activityPost->like_count,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->successStatus);
                         }
