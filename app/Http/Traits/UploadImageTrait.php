@@ -190,7 +190,7 @@ trait UploadImageTrait
         $attachment = ActivityAttachmentLink::where('activity_attachment_link_id',$attachmentId)->first();
         
         if($attachment){
-            unlink(env('BASE_URL').''.$attachment->attachment_url);
+            //unlink(env('APP_URL').''.$attachment->attachment_url);
             ActivityAttachmentLink::where('activity_attachment_link_id',$attachmentId)->delete();
         }
         

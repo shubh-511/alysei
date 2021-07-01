@@ -61,7 +61,7 @@ class SocketConnectionController extends CoreController
             $activityAction = ActivityAction::where("activity_action_id", $request->post_id)->first();
             if(!empty($activityAction))
             {
-                $postComments = CoreComment::where('resource_id', $request->post_id)->where('parent_id', 0)->get();
+                $postComments = CoreComment::with('poster:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('resource_id', $request->post_id)->where('parent_id', 0)->orderBy('core_comment_id', 'DESC')->get();
                 if(count($postComments) > 0)
                 {
                     return response()->json(['success' => $this->successStatus,
@@ -103,7 +103,7 @@ class SocketConnectionController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $postComments = CoreComment::where('parent_id', $request->comment_id)->get();
+            $postComments = CoreComment::with('poster:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('parent_id', $request->comment_id)->orderBy('core_comment_id', 'DESC')->get();
             if(count($postComments) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -262,13 +262,13 @@ class SocketConnectionController extends CoreController
                     $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
 
 
-                    /*if(!empty($isLikedActivityPost))
+                    if(!empty($isLikedActivityPost))
                     {
                         $message = "You have already liked this post";
                         return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
                     }
                     else
-                    {*/
+                    {
                         $activityLike = new ActivityLike;
                         $activityLike->resource_id = $request->post_id;
                         $activityLike->poster_type = "user";
@@ -283,7 +283,7 @@ class SocketConnectionController extends CoreController
                                                  'total_likes' => $activityPost->like_count,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->successStatus);
-                    //}
+                    }
                 }
                 elseif($request->like_or_unlike == 0)
                 {

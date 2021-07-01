@@ -318,7 +318,15 @@ class SearchController extends CoreController
                 if(count($users) > 0)
                 {
                     $users = $users->pluck('user_id');
-                    $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer','voyagers'])->orderBy('order')->get();
+                    if($users->role_id != 10)
+                    {
+                        $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer','voyagers'])->orderBy('order')->get();
+                    }
+                    else
+                    {
+                        $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer'])->orderBy('order')->get();
+                    }
+                    
 
                     foreach($roles as $key => $role)
                     {

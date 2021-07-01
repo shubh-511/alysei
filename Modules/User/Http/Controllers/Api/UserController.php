@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\Role;
+use Modules\User\Entities\BlockList;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\User\Entities\FeaturedListing;
 use Modules\Activity\Entities\Connection;
@@ -1012,20 +1013,26 @@ class UserController extends CoreController
             $userAbout = (!empty($userData->about)) ? true : false;
             $userContact = (!empty($userData->phone)) ? true : false;
 
-            $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage];
+            
 
             if($loggedInUser->role_id != 10)
             {
                 $fieldsType = $this->getFeaturedType($this->user->role_id);
-                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing];
+                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing'];
+
+                $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => $fieldsType->featured_listing_type_id];
+            }
+            else
+            {
+                $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => 0];
             }
             
 
-            $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar];
-            $dataCoverImage = ['title' => 'Cover Image','status' => $userCover];
-            $dataAbout = ['title' => 'About','status' => $userAbout];
-            $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub];
-            $dataContactInfo = ['title' => 'Contact Info','status' => $userContact];
+            $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar, 'redirect_to' => 'edit_profile'];
+            $dataCoverImage = ['title' => 'Cover Image','status' => $userCover, 'redirect_to' => 'edit_profile'];
+            $dataAbout = ['title' => 'About','status' => $userAbout, 'redirect_to' => 'edit_profile'];
+            $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub, 'redirect_to' => 'edit_hub'];
+            $dataContactInfo = ['title' => 'Contact Info','status' => $userContact, 'redirect_to' => 'edit_contact'];
             
 
             if($loggedInUser->role_id == 10)
@@ -1282,6 +1289,8 @@ class UserController extends CoreController
 
             $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id','allow_message_from','who_can_view_age','who_can_view_profile','who_can_connect')->with('avatar_id','cover_id')->where('user_id', $request->visitor_profile_id)->first();
 
+            $isBlockUser = BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->visitor_profile_id)->first();
+
             $permissions = $this->getPermissions($loggedInUser->role_id);
 
             //return $permissions;
@@ -1363,6 +1372,8 @@ class UserController extends CoreController
                 $userData->available_to_follow = 0;
                 $userData->follow_flag = 0;
             }
+
+            (!empty($isBlockUser)) ? $userData->block_flag = 1 : $userData->block_flag = 0;
 
             //(!empty($userData->available_to_connect)) ? $userData->available_to_connect = 1 : $userData->available_to_connect = 0;
             //(!empty($userData->available_to_follow)) ? $userData->available_to_follow = 1 : $userData->available_to_follow = 0;

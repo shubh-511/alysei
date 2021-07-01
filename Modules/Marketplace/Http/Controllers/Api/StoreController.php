@@ -43,6 +43,7 @@ class StoreController extends CoreController
         {
             $user = $this->user;
             $myStore = MarketplaceStore::where('user_id', $user->user_id)->first();
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->count();
             
             if(!empty($myStore))
             {
@@ -64,6 +65,7 @@ class StoreController extends CoreController
             return response()->json(['success' => $this->successStatus,
                                 'is_store_created' => $checkIfStoreCreated,
                                 'marketplace_store_id' => $storeId,
+                                'product_count' => $productCount,
                                 'name' => $storeName,
                                 'logo_id' => $storeLogo
                             ], $this->successStatus);
@@ -220,6 +222,9 @@ class StoreController extends CoreController
             $myStore = MarketplaceStore::where('user_id', $user->user_id)->first();
             if(!empty($myStore))
             {
+                $userDetail = User::select('company_name','about','phone','email','website','address','state')->with('state:id,name')->where('user_id', $user->user_id)->first();
+                
+                $myStore->prefilled = $userDetail;
                 $logoId = Attachment::where('id', $myStore->logo_id)->first();
                 $bannerId = Attachment::where('id', $myStore->banner_id)->first();
                 $myStore->logo_id = $logoId->attachment_url;
