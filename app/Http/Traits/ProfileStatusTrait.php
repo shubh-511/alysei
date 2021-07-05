@@ -225,6 +225,11 @@ trait ProfileStatusTrait
             {
                 $profilePercentage = "80";
             }
+            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && !empty($user->about) && !empty($user->phone) && (count($userSelectedHub) == 0))
+            {
+                //dd($userSelectedHub);
+                $profilePercentage = "80";
+            }
             else
             {
                 $profilePercentage = "100";
@@ -538,10 +543,10 @@ trait ProfileStatusTrait
             {
                 $profilePercentage = "80";
             }
-            /*elseif(!empty($user->cover_id) && !empty($user->avatar_id) && !empty($user->phone) && !empty($user->about) && count($FeaturedListing) > 0 && (count($userSelectedHub) == 0 || count($userTempHub) == 0))
+            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && empty($user->phone) && !empty($user->about) && count($FeaturedListing) > 0 && (count($userSelectedHub) == 0 || count($userTempHub) == 0))
             {
-                $profilePercentage = "890";
-            }*/
+                $profilePercentage = "70";
+            }
             else
             {
                 $profilePercentage = "100";

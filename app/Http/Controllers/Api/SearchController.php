@@ -160,7 +160,16 @@ class SearchController extends CoreController
         }
         else
         {
-            $hubs = Hub::with('image:id,attachment_url','country:id,name','state:id,name')->whereRaw('('.$condition.')')->where('status', '1')->paginate(10);
+            if($condition != '')
+            {
+                $hubs = Hub::with('image:id,attachment_url','country:id,name','state:id,name')->whereRaw('('.$condition.')')->where('status', '1')->paginate(10);    
+            }
+            else
+            {
+                $message = "No hubs found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            
         }
 
         

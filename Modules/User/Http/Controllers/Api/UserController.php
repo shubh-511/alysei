@@ -1028,8 +1028,8 @@ class UserController extends CoreController
             }
             
 
-            $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar, 'redirect_to' => 'edit_profile'];
-            $dataCoverImage = ['title' => 'Cover Image','status' => $userCover, 'redirect_to' => 'edit_profile'];
+            $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar, 'redirect_to' => 'edit_profile_image'];
+            $dataCoverImage = ['title' => 'Cover Image','status' => $userCover, 'redirect_to' => 'edit_cover_image'];
             $dataAbout = ['title' => 'About','status' => $userAbout, 'redirect_to' => 'edit_profile'];
             $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub, 'redirect_to' => 'edit_hub'];
             $dataContactInfo = ['title' => 'Contact Info','status' => $userContact, 'redirect_to' => 'edit_contact'];

@@ -13,6 +13,7 @@ use Modules\User\Entities\User;
 use App\Http\Traits\UploadImageTrait;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
+use DB;
 
 class StoreController extends CoreController
 {
@@ -94,11 +95,32 @@ class StoreController extends CoreController
                 $bannerId = Attachment::where('id', $myStore->banner_id)->first();
                 $myStore->logo_id = $logoId->attachment_url;
                 $myStore->banner_id = $bannerId->attachment_url;
+
+                $arrayValues = array();
+                $fieldValues = DB::table('user_field_values')
+                            ->where('user_id', $user->user_id)
+                            ->where('user_field_id', 2)
+                            ->get();
+                if(count($fieldValues) > 0)
+                {
+                    foreach($fieldValues as $fieldValue)
+                    {
+                        $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_option_id', $fieldValue->value)
+                                ->first();
+                        
+                        //$arrayValues[] = $options->option;
+                        if(!empty($options->option))
+                        $arrayValues[] = $options->option;
+                    }
+                }
                 
                 return response()->json(['success' => $this->successStatus,
                                         'banner' => $myStore->banner_id,
                                         'logo' => $myStore->logo_id,
                                         'total_product' => $productCount,
+                                        'total_category' => count($arrayValues),
                                         //'data' => $myStore
                                     ],$this->successStatus); 
             }
