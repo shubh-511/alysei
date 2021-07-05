@@ -285,6 +285,10 @@ class SearchController extends CoreController
             $states = State::select('id','name','country_id')->where('country_id', $userCountry->country_id)->where('status', '1')->get();
             if(count($states) > 0)
             {
+                foreach($states as $key => $state)
+                {
+                    $states[$key]->name = $this->translate('messages.'.$state->name,$state->name);
+                }
                 return response()->json(['success' => $this->successStatus,
                                     'data' => $states
                                     ], $this->successStatus);
@@ -343,6 +347,7 @@ class SearchController extends CoreController
                         {
                             $roles[$key]->name = $this->translate('messages.'.'Importer & Distributor','Importer & Distributor');
                         }
+                        $roles[$key]->name = $this->translate('messages.'.$role->name,$role->name);
                         $roles[$key]->image = "public/images/roles/".$role->slug.".jpg";
                         $userWithRole = User::whereHas(
                             'roles', function($q) use ($role){

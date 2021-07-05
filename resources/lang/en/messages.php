@@ -25,4 +25,123 @@ return [
 "locale" => "Language",
 "name" => "Name",
 "display_name" => "Display Name"
+
+//search controller
+"The search type field is required" => "The search type field is required",
+"The keyword field is required" => "The keyword field is required",
+"The role id field is required" => "The role id field is required",
+"Invalid search type" => "Invalid search type",
+"No hubs found" => "No hubs found",
+
+"The hub id field is required" => "The hub id field is required",
+"The subscription type field is required" => "The subscription type field is required",
+"You have already subscribed to this hub" => "You have already subscribed to this hub",
+"You have subscribed to this hub" => "You have subscribed to this hub",
+"You have unsubscribed from this hub" => "You have unsubscribed from this hub",
+"You have to first subscribe to this hub" => "You have to first subscribe to this hub",
+
+"You have to first subscribe to this hub" => "You have to first subscribe to this hub",
+"Invalid subscription type" => "Invalid subscription type",
+"Invalid hub id" => "Invalid hub id",
+"No states found" => "No states found",
+"Invalid hub" => "Invalid hub",
+"No users found for this keyword" => "No users found for this keyword",
+"No hubs available" => "No hubs available",
+"Invalid user" => "Invalid user",
+"Undefined field type" => "Undefined field type",
+"The field does not exist" => "The field does not exist",
+
+
+//socket controller
+"The post id field is required" => "The post id field is required",
+"No comments found for this post" => "No comments found for this post",
+"Invalid post Id" => "Invalid post Id",
+"The comment id field is required" => "The comment id field is required",
+"No replies found under this comment" => "No replies found under this comment",
+"The user id field is required" => "The user id field is required",
+"The comment field is required" => "The comment field is required",
+"Your comment has been posted successfully" => "Your comment has been posted successfully",
+"The reply field is required" => "The reply field is required",
+"Your reply has been posted successfully" => "Your reply has been posted successfully",
+"The like or unlike field is required" => "The like or unlike field is required",
+"You have already liked this post" => "You have already liked this post",
+"You liked this post" => "You liked this post",
+"You unliked this post" => "You unliked this post",
+"You have to first like this post" => "You have to first like this post",
+"You have not liked this post" => "You have not liked this post",
+"Invalid like/unlike type" => "Invalid like/unlike type",
+"No socket connection for this userId" => "No socket connection for this userId",
+"Invalid socket Id" => "Invalid socket Id",
+"You are not authorised to comment on this post","You are not authorised to comment on this post" => "You are not authorised to comment on this post","You are not authorised to comment on this post",
+"Invalid action type" => "Invalid action type",
+
+
+//User controller
+"The username has already been taken" => "The username has already been taken",
+"No privillege granted for sending request or following someone" => "No privillege granted for sending request or following someone",
+"Updated successfully" => "Updated successfully",
+"Profile Picture" => "Profile Picture",
+"Cover Image" => "Cover Image",
+"About" => "About",
+"Hub Selection" => "Hub Selection",
+"Contact Info" => "Contact Info",
+
+//block controller
+"User blocked successfuly!" => "User blocked successfuly!",
+"This user is already in your block list" => "This user is already in your block list",
+"User unblocked successfuly!" => "User unblocked successfuly!",
+"This user does not exist in your block list" => "This user does not exist in your block list",
+"This user does not exist" => "This user does not exist",
+"This user found in your block list" => "This user found in your block list",
+
+//Activity controller
+"Post added successfuly!" => "Post added successfuly!",
+"Something went wrong!" => "Something went wrong!",
+"Post shared successfuly!" => "Post shared successfuly!",
+"Post updated successfuly!" => "Post updated successfuly!",
+"This post does not exist" => "This post does not exist",
+"Post deleted successfully" => "Post deleted successfully",
+"No post to display" => "No post to display",
+"Your comment has been deleted successfully" => "Your comment has been deleted successfully",
+"Invalid comment" => "Invalid comment",
+"Please select either 1 or 0" => "Please select either 1 or 0",
+"No post found" => "No post found",
+"Currently you are not authorised to post anything" => "Currently you are not authorised to post anything",
+"You are not authorised to attach a media" => "You are not authorised to attach a media",
+"Currently you are not authorised to edit this post" => "Currently you are not authorised to edit this post",
+"Currently you are not authorised to view this post" => "Currently you are not authorised to view this post",
+"You are not authorised to comment on this post" => "You are not authorised to comment on this post",
+"You are not authorised to share this post" => "You are not authorised to share this post",
+"Invalid tab!" => "Invalid tab!",
+"No followers found" => "No followers found",
+"You are not following anyone" => "You are not following anyone",
+"Connection request has been sent!" => "Connection request has been sent!",
+"You have already sent a connection request to this user" => "You have already sent a connection request to this user",
+"No connections found" => "No connections found",
+"No pending requests found" => "No pending requests found",
+"No products found" => "No products found",
+"No pending requests found" => "No pending requests found",
+"Connection request accepted!" => "Connection request accepted!",
+"Connection request rejected" => "Connection request rejected",
+"Connection id is not valid" => "Connection id is not valid",
+"The request has been cancelled" => "The request has been cancelled",
+"You have not send a connection request to this user" => "You have not send a connection request to this user",
+"You are not authorized to connect wih this user" => "You are not authorized to connect wih this user",
+"You are now following this user" => "You are now following this user",
+"You are already following this user" => "You are already following this user",
+"You unfollowed this user" => "You unfollowed this user",
+"You have to first follow this user" => "You have to first follow this user",
+"You are not following this user" => "You are not following this user",
+"Invalid follow/unfollow type" => "Invalid follow/unfollow type",
+"Invalid following id" => "Invalid following id",
+"You are not authorized to follow this user" => "You are not authorized to follow this user",
+"Privacy settings has been saved" => "Privacy settings has been saved",
+
+
+
+
+
+
+
+
 ];

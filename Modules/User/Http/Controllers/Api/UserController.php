@@ -1028,11 +1028,11 @@ class UserController extends CoreController
             }
             
 
-            $dataProfileImage = ['title' => 'Profile Picture','status' => $userAvatar, 'redirect_to' => 'edit_profile_image'];
-            $dataCoverImage = ['title' => 'Cover Image','status' => $userCover, 'redirect_to' => 'edit_cover_image'];
-            $dataAbout = ['title' => 'About','status' => $userAbout, 'redirect_to' => 'edit_profile'];
-            $dataHubSelection = ['title' => 'Hub Selection','status' => $userSelectedHub, 'redirect_to' => 'edit_hub'];
-            $dataContactInfo = ['title' => 'Contact Info','status' => $userContact, 'redirect_to' => 'edit_contact'];
+            $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image'];
+            $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image'];
+            $dataAbout = ['title' => $this->translate('messages.'.'About','About'),'status' => $userAbout, 'redirect_to' => 'edit_profile'];
+            $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub'];
+            $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact'];
             
 
             if($loggedInUser->role_id == 10)

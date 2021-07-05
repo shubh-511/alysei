@@ -180,7 +180,7 @@ class ConnectUserController extends CoreController
             }
             else
             {
-                $message = "No followers found";
+                $message = "You are not following anyone";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
             
