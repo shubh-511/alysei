@@ -24,7 +24,7 @@ return [
 "OTP Verified" => "OTP Verified",
 "locale" => "Language",
 "name" => "Name",
-"display_name" => "Display Name"
+"display_name" => "Display Name",
 
 //search controller
 "The search type field is required" => "The search type field is required",
