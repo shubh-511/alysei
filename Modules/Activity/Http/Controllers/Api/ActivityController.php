@@ -367,11 +367,11 @@ class ActivityController extends CoreController
                     $activityShared = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')->with('attachments.attachment_link')->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
                     if(!empty($activityShared))
                     {
-                        $activityPosts[$key]->shared_post_id = $activityShared;
+                        $activityPosts[$key]->shared_post = $activityShared;
                     }
                     else
                     {
-                        $activityPosts[$key]->shared_post_id = '';   
+                        $activityPosts[$key]->shared_post = null;   
                     }
 
                     $activityPosts[$key]->posted_at = $activityPost->created_at->diffForHumans();   

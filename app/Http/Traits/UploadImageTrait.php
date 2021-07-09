@@ -67,7 +67,7 @@ trait UploadImageTrait
         $attachment = Attachment::where('id',$attachmentId)->first();
         
         if($attachment){
-            unlink(env('BASE_URL').''.$attachment->attachment_url);
+            unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$attachment->attachment_url);
             Attachment::where('id',$attachmentId)->delete();
         }
         
@@ -191,6 +191,7 @@ trait UploadImageTrait
         
         if($attachment){
             //unlink(env('APP_URL').''.$attachment->attachment_url);
+            unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$attachment->attachment_url);
             ActivityAttachmentLink::where('activity_attachment_link_id',$attachmentId)->delete();
         }
         

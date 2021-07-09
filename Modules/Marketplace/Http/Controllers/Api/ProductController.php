@@ -284,6 +284,8 @@ class ProductController extends CoreController
                         $attachmentLinkId = $this->postGallery($images, $product->marketplace_product_id, 2);
                     }
                 }
+                $galleries = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->get();
+                (count($galleries) > 0) ? $product->product_gallery = $galleries : $product->product_gallery = [];
 
                 return response()->json(['success'=>$this->successStatus,'data' =>$product],$this->successStatus); 
             }
@@ -315,6 +317,12 @@ class ProductController extends CoreController
             {
                 foreach($myProductLists as $key => $myProductList)
                 {
+                    $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_option_id', $myProductList->product_category_id)
+                                ->first();
+                    $myProductLists[$key]->product_category_name = $options->option;
+                                              
                     $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
                     (count($galleries) > 0) ? $myProductLists[$key]->product_gallery = $galleries : $myProductLists[$key]->product_gallery = [];
 

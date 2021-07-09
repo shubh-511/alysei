@@ -331,7 +331,7 @@ class SearchController extends CoreController
                 if(count($users) > 0)
                 {
                     $users = $users->pluck('user_id');
-                    if($users->role_id != 10)
+                    if($user->role_id != 10)
                     {
                         $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer','voyagers'])->orderBy('order')->get();
                     }
@@ -737,7 +737,7 @@ class SearchController extends CoreController
         if($condition == 0)
         {
             $myHubs = UserSelectedHub::where('user_id', $myId)->get();
-            if(isset($myHubs) && count($myHubs) > 0)
+            if(isset($myHubs) && count($myHubs) > 0 && $roleId != 10)
             {
                 $myHubs = $myHubs->pluck('hub_id');
                 $defaultHubs = UserSelectedHub::whereIn('hub_id', $myHubs)->get();
@@ -753,7 +753,12 @@ class SearchController extends CoreController
             }
             else
             {
-                $users = [];
+                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')
+                ->with('avatar_id')
+                ->where('user_id', '!=' , $myId)
+                ->where('role_id', $roleId)
+                ->groupBy('user_id')
+                ->paginate(10);
             }
             
         }

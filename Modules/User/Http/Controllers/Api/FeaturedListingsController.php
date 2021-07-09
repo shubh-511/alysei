@@ -41,7 +41,7 @@ class FeaturedListingsController extends CoreController
      */
     public function userSettings(){
         try{
-                $userDetails = $this->user->only(['name', 'email','company_name','restaurant_name','locale','first_name','last_name']);
+                $userDetails = $this->user->only(['name', 'email','company_name','restaurant_name','locale','first_name','last_name','website']);
 
                 $userFieldInfo = [];
 
@@ -287,22 +287,25 @@ class FeaturedListingsController extends CoreController
                     return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
                 
-                $isDeletedFeaturedListing = FeaturedListing::where('user_id','=',$this->user->user_id)->where('featured_listing_id', $request->featured_listing_id)->delete();
-                if($isDeletedFeaturedListing == 1)
+                $checkListing = FeaturedListing::where('user_id','=',$this->user->user_id)->where('featured_listing_id', $request->featured_listing_id)->first();
+                if(!empty($checkListing))
                 {
-                    FeaturedListingValue::where('featured_listing_id', $request->featured_listing_id)->delete();
-                    $message = "Featured listing deleted successfully";
-                    return response()->json(['success' => $this->successStatus,
-                                 'message' => $this->translate('messages.'.$message,$message),
-                                ], $this->successStatus);
+                    $isDeletedFeaturedListing = FeaturedListing::where('user_id','=',$this->user->user_id)->where('featured_listing_id', $request->featured_listing_id)->delete();
+                    if($isDeletedFeaturedListing == 1)
+                    {
+                        $this->deleteAttachment($checkListing->image_id);
+                        FeaturedListingValue::where('featured_listing_id', $request->featured_listing_id)->delete();
+                        $message = "Featured listing deleted successfully";
+                        return response()->json(['success' => $this->successStatus,
+                                     'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);
+                    }
+                    else
+                    {
+                        $message = "Listing does not exist";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+                    }
                 }
-                else
-                {
-                    $message = "Something went wrong";
-                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
-                }
-
-                
                                   
         }catch(\Exception $e){
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 

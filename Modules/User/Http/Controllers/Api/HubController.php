@@ -181,6 +181,7 @@ class HubController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
+            $selectedStates = array();
             $getHubsStates = Hub::where('country_id', $request->country_id)->get();
             if(count($getHubsStates) > 0)
             {

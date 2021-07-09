@@ -31,7 +31,10 @@ class SeedFeaturedListingTypeRoleMapsTableSeeder extends Seeder
                         array("featured_listing_type_id"=>3,'role_id'=>7),
                         array("featured_listing_type_id"=>4,'role_id'=>8),
                         array("featured_listing_type_id"=>2,'role_id'=>9),
-                        array("featured_listing_type_id"=>5,'role_id'=>9)
+
+                        array("featured_listing_type_id"=>5,'role_id'=>9),
+                        array("featured_listing_type_id"=>6,'role_id'=>7),
+                        array("featured_listing_type_id"=>7,'role_id'=>8),
                     );
 
         foreach ($data as $key => $value) {

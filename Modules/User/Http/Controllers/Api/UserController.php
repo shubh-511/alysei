@@ -278,6 +278,8 @@ class UserController extends CoreController
 
                 $validator = Validator::make($input, [ 
                     'address' => 'required', 
+                    //'lattitude' => 'required|max:255', 
+                    //'longitude' => 'required|max:255', 
                 ]);
 
                 if ($validator->fails()) { 
@@ -285,6 +287,7 @@ class UserController extends CoreController
                 }
                 
                 $user = User::where('user_id','=',$this->user->user_id)->update($input);
+                $userDetail = User::where('user_id','=',$this->user->user_id)->first();
                 $myStore = MarketplaceStore::where('user_id', $this->user->user_id)->first();
                 if(!empty($myStore))
                 {
@@ -296,6 +299,8 @@ class UserController extends CoreController
                     if(!empty($request->address))
                     {
                         $myStore->location = $request->address;
+                        $myStore->lattitude = $request->lattitude;
+                        $myStore->longitude = $request->longitude;
                         $myStore->save();
                     }
                     if(!empty($request->website))
@@ -303,6 +308,10 @@ class UserController extends CoreController
                         $myStore->website = $request->website;
                         $myStore->save();
                     }
+                    $myStore->name = $userDetail->company_name;
+                    $myStore->description = $userDetail->about;
+                    $myStore->store_region = $userDetail->state;
+                    $myStore->save();
                 }
 
                 return response()->json(['success' => $this->successStatus,
@@ -456,7 +465,7 @@ class UserController extends CoreController
 
             $userFieldInfo = [];
 
-            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id, 'featured');
             
             $products = [];
             
@@ -474,7 +483,7 @@ class UserController extends CoreController
             //Get Featured Listing Fields
 
             //Get Featured Type
-            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id, 'featured');
             $fieldsData = [];
             foreach ($featuredTypes as $key => $value) {
 
@@ -525,13 +534,15 @@ class UserController extends CoreController
      * Get Featured Type Using Role Id
      * @params $roleId
      */
-    public function getFeaturedListingTypes($roleId){
+    public function getFeaturedListingTypes($roleId, $featuredType){
+        
         $featuredTypes = DB::table("featured_listing_types as flt")
-            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+        ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
 
-            ->where("fltrm.role_id","=",$roleId)
-            ->get();
-
+        ->where("fltrm.role_id","=",$roleId)
+        ->where("flt.position","=",$featuredType)
+        ->get();
+        
         return $featuredTypes;
     }
 
@@ -539,22 +550,24 @@ class UserController extends CoreController
      * Get Featured Listing Fields Using Role Id
      * @params $roleId
      */
-    public function getFeaturedListingFieldsByRoleId($roleId){
+    public function getFeaturedListingFieldsByRoleId($roleId, $featuredType){
         
         $featuredTypes = DB::table("featured_listing_types as flt")
-            ->select("flt.title as featured_listing_type_title","flt.slug as featured_listing_type_slug","flfrm.*","fltrm.*","flf.*")
-            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+        ->select("flt.title as featured_listing_type_title","flt.slug as featured_listing_type_slug","flfrm.*","fltrm.*","flf.*")
+        ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
 
-            ->join("featured_listing_field_role_maps as flfrm",function ($join) {
-                $join->on('flfrm.featured_listing_type_id', '=', 'fltrm.featured_listing_type_id');
-                $join->on('flfrm.featured_listing_type_id','=','flt.featured_listing_type_id');
-            }) 
+        ->join("featured_listing_field_role_maps as flfrm",function ($join) {
+            $join->on('flfrm.featured_listing_type_id', '=', 'fltrm.featured_listing_type_id');
+            $join->on('flfrm.featured_listing_type_id','=','flt.featured_listing_type_id');
+        }) 
 
-            ->join("featured_listing_fields as flf", 'flf.featured_listing_field_id', '=', 'flfrm.featured_listing_field_id')
+        ->join("featured_listing_fields as flf", 'flf.featured_listing_field_id', '=', 'flfrm.featured_listing_field_id')
 
-            ->where("fltrm.role_id","=",$roleId)
-            ->where("flfrm.role_id","=",$roleId)
-            ->get();
+        ->where("fltrm.role_id","=",$roleId)
+        ->where("flfrm.role_id","=",$roleId)
+        ->where("flt.position","=", $featuredType)
+        ->get();
+        
 
         return $featuredTypes;
     }
@@ -666,10 +679,12 @@ class UserController extends CoreController
                 $userProfile = User::where('user_id', $user_id)->first();
                 if(!empty($request->file('avatar_id')))
                 {
+                    $this->deleteAttachment($userProfile->avatar_id);
                     $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
                 }
                 if(!empty($request->file('cover_id')))
                 {
+                    $this->deleteAttachment($userProfile->cover_id);
                     $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
                 }
                 
@@ -1065,6 +1080,76 @@ class UserController extends CoreController
     }
 
     /*
+     * Get Featured Tabs
+     *
+     */
+    public function getFeaturedTabs()
+    {
+        try
+        {
+            $loggedInUser = $this->user;
+
+            
+            $userFieldInfo = [];
+
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id, 'tabs');
+            
+            $products = [];
+            
+            foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+                
+                $featuredListing = FeaturedListing::with('image')
+                                    ->where('user_id', $this->user->user_id)
+                                    ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                    ->orderBy('featured_listing_id','DESC')->get(); 
+
+                $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
+                
+            }
+
+            //Get Featured Listing Fields
+
+            //Get Featured Type
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id, 'tabs');
+            $fieldsData = [];
+            foreach ($featuredTypes as $key => $value) {
+
+                $value->title = $this->translate('messages.'.$value->title,$value->title);
+
+                $value->options = $this->getFeaturedListingFieldOptionParent($value->featured_listing_field_id);
+
+                if(!empty($value->options)){
+                    foreach ($value->options as $k => $oneDepth) {
+
+                            $value->options[$k]->option = $this->translate('messages.'.$oneDepth->option,$oneDepth->option);
+                        }
+                }
+
+                $fieldsData[$value->featured_listing_type_slug][] = $value;
+            }
+
+            foreach($fieldsData as $fieldsDataKey => $fieldsDataValue){
+                    
+
+                $key = array_search($fieldsDataKey, array_column($products, 'slug'));
+
+                $products[$key]['fields'] = $fieldsDataValue;
+            }
+
+                       
+            return response()->json(['success' => $this->successStatus,
+                                'data' => $products
+                            ], $this->successStatus);
+
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Get Profile API in single
      *
      */
@@ -1089,7 +1174,7 @@ class UserController extends CoreController
 
             $userFieldInfo = [];
 
-            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id, 'featured');
             
             $products = [];
             
@@ -1107,7 +1192,7 @@ class UserController extends CoreController
             //Get Featured Listing Fields
 
             //Get Featured Type
-            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id, 'featured');
             $fieldsData = [];
             foreach ($featuredTypes as $key => $value) {
 
@@ -1392,7 +1477,7 @@ class UserController extends CoreController
 
             $userFieldInfo = [];
 
-            $fieldsTypes = $this->getFeaturedListingTypes($userData->role_id);
+            $fieldsTypes = $this->getFeaturedListingTypes($userData->role_id, 'featured');
             
             $products = [];
             
@@ -1410,7 +1495,7 @@ class UserController extends CoreController
             //Get Featured Listing Fields
 
             //Get Featured Type
-            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($userData->role_id);
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($userData->role_id, 'featured');
             $fieldsData = [];
             foreach ($featuredTypes as $key => $value) {
 
@@ -1559,7 +1644,7 @@ class UserController extends CoreController
 
             $userFieldInfo = [];
 
-            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id, 'featured');
             
             $products = [];
             
@@ -1577,7 +1662,7 @@ class UserController extends CoreController
             //Get Featured Listing Fields
 
             //Get Featured Type
-            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id);
+            $featuredTypes = $this->getFeaturedListingFieldsByRoleId($this->user->role_id, 'featured');
             $fieldsData = [];
             foreach ($featuredTypes as $key => $value) {
 

@@ -82,6 +82,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/visitor/profile', 'Api\UserController@getVisitorProfile');
 
+	Route::get('get/featured/tabs', 'Api\UserController@getFeaturedTabs');
+
 
 });
 

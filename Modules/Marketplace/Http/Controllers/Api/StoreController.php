@@ -8,6 +8,7 @@ use App\Attachment;
 use Modules\Marketplace\Entities\MarketplaceProduct;
 use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
+use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User;
 use App\Http\Traits\UploadImageTrait;
@@ -147,7 +148,7 @@ class StoreController extends CoreController
         try
         {
             $user = $this->user;
-            $userDetail = User::select('company_name','about','phone','email','website','address','state')->with('state:id,name')->where('user_id', $user->user_id)->first();
+            $userDetail = User::select('company_name','about','phone','email','website','address','lattitude','longitude','state')->with('state:id,name')->where('user_id', $user->user_id)->first();
             
             return response()->json(['success' => $this->successStatus,
                                 'data' => $userDetail
@@ -244,7 +245,7 @@ class StoreController extends CoreController
             $myStore = MarketplaceStore::where('user_id', $user->user_id)->first();
             if(!empty($myStore))
             {
-                $userDetail = User::select('company_name','about','phone','email','website','address','state')->with('state:id,name')->where('user_id', $user->user_id)->first();
+                $userDetail = User::select('company_name','about','phone','email','website','address','lattitude','longitude','state')->with('state:id,name')->where('user_id', $user->user_id)->first();
                 
                 $myStore->prefilled = $userDetail;
                 $logoId = Attachment::where('id', $myStore->logo_id)->first();
@@ -311,23 +312,27 @@ class StoreController extends CoreController
 
                 if(!empty($request->file('logo_id')))
                 {
+                    $this->deleteAttachment($store->logo_id);
                     $store->logo_id = $this->uploadImage($request->file('logo_id'));    
                 }
                 if(!empty($request->file('banner_id')))
                 {
+                    $this->deleteAttachment($store->banner_id);
                     $store->banner_id = $this->uploadImage($request->file('banner_id'));    
                 }
                 $store->save();
 
                 $userDetail = User::where('user_id', $user->user_id)->update(['about' => $request->description, 'company_name' => $request->name, 'website' => $request->website, 'phone' => $request->phone, 'address' => $request->location]);
 
-                if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
+                if(!empty($request->gallery_images) && count($request->gallery_images) > 1)
                 {
                     foreach($request->gallery_images as $images)
                     {
                         $attachmentLinkId = $this->postGallery($images, $store->marketplace_store_id, 1);
                     }
                 }
+                $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $store->marketplace_store_id)->get();
+                (count($galleries) > 0) ? $store->store_gallery = $galleries : $store->store_gallery = [];
 
                 return response()->json(['success'=>$this->successStatus,'data' =>$store],$this->successStatus); 
             }
@@ -342,6 +347,90 @@ class StoreController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
         }
 
+    }
+
+    /*
+    * Delete Gallery
+    *
+    */
+    public function deleteGalleryImage(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'gallery_type' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+            
+            if($request->gallery_type == 1)
+            {
+                $validator = Validator::make($request->all(), [ 
+                    'marketplace_store_gallery_id' => 'required'
+                ]);
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+
+                $myStoreGallery = MarketplaceStoreGallery::where('marketplace_store_gallery_id', $request->marketplace_store_gallery_id)->first();
+                if(!empty($myStoreGallery))
+                {
+                    unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$myStoreGallery->attachment_url);
+                    MarketplaceStoreGallery::where('marketplace_store_gallery_id',$request->marketplace_store_gallery_id)->delete();
+
+                    return response()->json(['success' => $this->successStatus,
+                                            'message' => $this->translate('messages.'.'Deleted successfully','Deleted successfully')
+                                            ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "This gallery image is not valid";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+
+            }
+            elseif($request->gallery_type == 2)
+            {   
+                $validator = Validator::make($request->all(), [ 
+                    'marketplace_product_gallery_id' => 'required'
+                ]);
+
+                if ($validator->fails()) { 
+                    return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+                }
+
+                $myProductGallery = MarketplaceProductGallery::where('marketplace_product_gallery_id', $request->marketplace_product_gallery_id)->first();
+                if(!empty($myProductGallery))
+                {
+                    unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$myProductGallery->attachment_url);
+                    MarketplaceProductGallery::where('marketplace_product_gallery_id',$request->marketplace_product_gallery_id)->delete();
+                    
+                    return response()->json(['success' => $this->successStatus,
+                                            'message' => $this->translate('messages.'.'Deleted successfully','Deleted successfully')
+                                            ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "This gallery image is not valid";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+
+            }
+            else
+            {
+                $message = "This gallery type is not valid";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
     }
 
     

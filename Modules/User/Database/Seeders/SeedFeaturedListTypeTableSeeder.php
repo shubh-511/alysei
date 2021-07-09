@@ -18,11 +18,13 @@ class SeedFeaturedListTypeTableSeeder extends Seeder
         Model::unguard();
 
         $data = array(
-                        array("title" => "Product","slug"=>"product"),
-                        array("title" => "Recipe","slug"=>"recipie"), 
-                        array("title" => "Blog","slug"=>"Blog"), 
-                        array("title" => "Package","slug"=>"package"),
-                        array("title" => "Event","slug"=>"events")
+                        array("title" => "Featured Products","slug"=>"product","position"=>"featured"),
+                        array("title" => "Featured Menu","slug"=>"recipie","position"=>"featured"), 
+                        array("title" => "Featured","slug"=>"Blog","position"=>"featured"), 
+                        array("title" => "Featured Packages","slug"=>"package","position"=>"featured"),
+                        array("title" => "Featured Events","slug"=>"events","position"=>"tabs"),
+                        array("title" => "Featured Blogs","slug"=>"blogs","position"=>"tabs"),
+                        array("title" => "Featured Trips","slug"=>"trips","position"=>"tabs")
 
                     );
 

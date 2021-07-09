@@ -61,6 +61,8 @@ class CreateUsersTable extends Migration
             $table->enum('weekly_updates',['0','1'])->default('1');
 
             $table->text('address')->nullable();
+            $table->string('lattitude')->nullable();
+            $table->string('longitude')->nullable();
             $table->string('website')->nullable();
             $table->string('fb_link')->nullable();
             $table->longText('about')->nullable();
