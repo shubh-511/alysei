@@ -277,7 +277,18 @@ class ProductController extends CoreController
                 $product->product_price = $request->product_price;
                 $product->save();
 
-                if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
+                $existingGalleries = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->get();
+                if(count($existingGalleries) > 0)
+                {
+                    foreach($existingGalleries as $existingGallery)
+                    {
+                        unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$existingGallery->attachment_url);
+                        MarketplaceProductGallery::where('marketplace_product_gallery_id',$existingGallery->marketplace_product_gallery_id)->delete();
+                    }
+                }
+                
+
+                if(!empty($request->gallery_images) && count($request->gallery_images) > 1)
                 {
                     foreach($request->gallery_images as $images)
                     {

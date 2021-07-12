@@ -287,9 +287,7 @@ class StoreController extends CoreController
                 'phone' =>  'required',
                 //'location' => 'required|max:255',
                 'lattitude' => 'required|max:255',
-                'longitude' => 'required|max:255',
-                'logo_id' => 'required',
-                'banner_id' => 'required',
+                'longitude' => 'required|max:255'
             ]);
 
             if ($validator->fails()) { 
@@ -321,6 +319,17 @@ class StoreController extends CoreController
                     $store->banner_id = $this->uploadImage($request->file('banner_id'));    
                 }
                 $store->save();
+
+                $existingGalleries = MarketplaceStoreGallery::where('marketplace_store_id', $store->marketplace_store_id)->get();
+                if(count($existingGalleries) > 0)
+                {
+                    foreach($existingGalleries as $existingGallery)
+                    {
+                        unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$existingGallery->attachment_url);
+                        MarketplaceStoreGallery::where('marketplace_store_gallery_id',$existingGallery->marketplace_store_gallery_id)->delete();
+                    }
+                }
+                
 
                 $userDetail = User::where('user_id', $user->user_id)->update(['about' => $request->description, 'company_name' => $request->name, 'website' => $request->website, 'phone' => $request->phone, 'address' => $request->location]);
 
