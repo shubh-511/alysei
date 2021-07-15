@@ -45,8 +45,8 @@ class UserController extends Controller
     ***/
     public function list(Request $request)
     { 
-        $users = User::where('role_id','!=',1)->paginate(25);
-        return view('admin.user.list', compact('users'));
+        $users = User::where('role_id','!=',1)->orderBy('user_id', 'DESC')->paginate(25);
+        return view('user::admin.user.list', compact('users'));
     }
 
     /***
@@ -66,7 +66,36 @@ class UserController extends Controller
     public function edit(Request $request, $id)
     { 
         $user = User::where('user_id',$id)->first();
-        return view('admin.user.edit', compact('user'));
+        return view('user::admin.user.edit', compact('user'));
+    }
+
+    /***
+    update alysei progress status
+    ***/
+    public function updateProgressStatus(Request $request, $userId = '')
+    {
+        if($request->progress_level == 'alysei_review')
+        {
+            $user = User::where('user_id', $userId)->update(['alysei_review' => '1']);
+        }
+        elseif($request->progress_level == 'alysei_certification')
+        {
+            $user = User::where('user_id', $userId)->update(['alysei_certification' => '1']);
+        }
+        elseif($request->progress_level == 'alysei_recognition')
+        {
+            $user = User::where('user_id', $userId)->update(['alysei_recognition' => '1']);
+        }
+        elseif($request->progress_level == 'alysei_qualitymark')
+        {
+            $user = User::where('user_id', $userId)->update(['alysei_qualitymark' => '1']);
+        }
+        elseif($request->progress_level == 'level_empty')
+        {
+            return redirect('login/users/edit/'.$userId)->with('success','All steps has been completed');
+        }
+             
+        return redirect('login/users/edit/'.$userId)->with('success','Updated successfully');
     }
 
     /***

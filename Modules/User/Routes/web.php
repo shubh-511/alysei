@@ -32,6 +32,7 @@ Route::group(['prefix'=>'login','middleware'=>['web','isAdminLogin']], function(
 	Route::get('/users/edit/{id}', 'UserController@edit');
 	Route::post('/users/update/{id}', 'UserController@update');
 	Route::get('/users/show/{id}', 'UserController@show');
+	Route::post('/update-progress/{user_id}', 'UserController@updateProgressStatus');
 
 	Route::post('/user-status', 'UserController@userStatus');
 
