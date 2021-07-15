@@ -131,7 +131,16 @@ class SearchController extends CoreController
         if(!empty($request->state))
         {
             $isSearch = 1;
-            $hubsByState = Hub::where('state_id', $request->state)->first();
+            $hubs = explode(",", $request->state);
+            $hubsByStates = Hub::whereIn('state_id', $hubs)->get();
+            if(count($hubsByStates) > 0)
+            {
+                if($condition != '')
+                $condition .=" and hubs.state_id in(".$request->state.")";
+                else
+                $condition .="hubs.state_id in(".$request->state.")";
+            }
+            /*$hubsByState = Hub::where('state_id', $request->state)->first();
             if(!empty($hubsByState))
             {
                 if($condition != '')
@@ -139,7 +148,7 @@ class SearchController extends CoreController
                 else
                 $condition .="hubs.state_id = ".$hubsByState->state_id."";
                 array_push($hubsArray, $hubsByState->id);
-            }
+            }*/
             
         }
 
