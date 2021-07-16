@@ -551,6 +551,10 @@ trait ProfileStatusTrait
             {
                 $profilePercentage = "80";
             }
+            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && empty($user->phone) && !empty($user->about) && count($FeaturedListing) == 0 && (count($userSelectedHub) > 0))
+            {
+                $profilePercentage = "60";
+            }
             else
             {
                 $profilePercentage = "100";
