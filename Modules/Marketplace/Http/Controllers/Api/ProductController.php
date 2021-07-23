@@ -438,7 +438,7 @@ class ProductController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
             
-            $productDetail = MarketplaceProduct::with('labels')->where('marketplace_product_id', $request->marketplace_product_id)->first();
+            $productDetail = MarketplaceProduct::with('product_gallery')->with('labels')->where('marketplace_product_id', $request->marketplace_product_id)->first();
             if(!empty($productDetail))
             {
                 $options = DB::table('user_field_options')
@@ -456,10 +456,10 @@ class ProductController extends CoreController
                 $productDetail->is_favourite = 0;
                 $productDetail->store_detail = $storeName;
                                           
-                $galleries = MarketplaceProductGallery::where('marketplace_product_id', $productDetail->marketplace_product_id)->get();
-                (count($galleries) > 0) ? $productDetail->product_gallery = $galleries : $productDetail->product_gallery = [];
+                /*$galleries = MarketplaceProductGallery::where('marketplace_product_id', $productDetail->marketplace_product_id)->get();
+                (count($galleries) > 0) ? $productDetail->product_gallery = $galleries : $productDetail->product_gallery = [];*/
 
-                $relatedProducts = MarketplaceProduct::with('labels')->where('product_category_id', $productDetail->product_category_id)->get();
+                $relatedProducts = MarketplaceProduct::with('product_gallery')->with('labels')->where('product_category_id', $productDetail->product_category_id)->get();
 
                 $data = ['product_detail' => $productDetail, 'related_products' => $relatedProducts];
 
