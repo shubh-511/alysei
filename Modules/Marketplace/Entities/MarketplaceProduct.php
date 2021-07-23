@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\Marketplace\Entities\MarketplaceBrandLabel;
+use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class MarketplaceProduct extends Model
@@ -15,6 +16,11 @@ class MarketplaceProduct extends Model
     public function labels()
     {
         return $this->belongsTo(MarketplaceBrandLabel::class, 'brand_label_id','marketplace_brand_label_id');
+    }
+
+    public function product_gallery()
+    {
+        return $this->hasMany(MarketplaceProductGallery::class, 'marketplace_product_id','marketplace_product_id');
     }
 }
 

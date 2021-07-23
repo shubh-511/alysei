@@ -225,7 +225,7 @@ trait ProfileStatusTrait
             {
                 $profilePercentage = "80";
             }
-            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && !empty($user->about) && !empty($user->phone) && (count($userSelectedHub) == 0 || (count($userTempHub) == 0)))
+            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && !empty($user->about) && !empty($user->phone) && (count($userSelectedHub) == 0))
             {
                 //dd($userSelectedHub);
                 $profilePercentage = "80";

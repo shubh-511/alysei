@@ -1161,7 +1161,34 @@ class UserController extends CoreController
             $profilePercentage = $this->profileStatus($loggedInUser->user_id);
             User::where('user_id', $loggedInUser->user_id)->update(['profile_percentage' => $profilePercentage]);
 
+            if($loggedInUser->role_id == 3)
+            {
+                $color = "8EC9BB";
+            }
+            elseif($loggedInUser->role_id == 4 || $loggedInUser->role_id == 5 || $loggedInUser->role_id == 6) 
+            {
+                $color = "#A02C2D";
+            }
+            elseif($loggedInUser->role_id == 7) 
+            {
+                $color = "AB6393";
+            }
+            elseif($loggedInUser->role_id == 8) 
+            {
+                $color = "CA7E8D";
+            }
+            elseif($loggedInUser->role_id == 9) 
+            {
+                $color = "FDCF76";
+            }
+            elseif($loggedInUser->role_id == 10) 
+            {
+                $color = "9C8ADE";
+            }
+
+
             $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
+            $userData->profile_color = $color;
 
             $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
 
@@ -1373,6 +1400,32 @@ class UserController extends CoreController
             }
 
             $userData = User::select('user_id','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id','allow_message_from','who_can_view_age','who_can_view_profile','who_can_connect')->with('avatar_id','cover_id')->where('user_id', $request->visitor_profile_id)->first();
+            if($loggedInUser->role_id == 3)
+            {
+                $color = "8EC9BB";
+            }
+            elseif($loggedInUser->role_id == 4 || $loggedInUser->role_id == 5 || $loggedInUser->role_id == 6) 
+            {
+                $color = "#A02C2D";
+            }
+            elseif($loggedInUser->role_id == 7) 
+            {
+                $color = "AB6393";
+            }
+            elseif($loggedInUser->role_id == 8) 
+            {
+                $color = "CA7E8D";
+            }
+            elseif($loggedInUser->role_id == 9) 
+            {
+                $color = "FDCF76";
+            }
+            elseif($loggedInUser->role_id == 10) 
+            {
+                $color = "9C8ADE";
+            }
+
+            $userData->profile_color = $color;
 
             $isBlockUser = BlockList::where('user_id', $loggedInUser->user_id)->where('block_user_id', $request->visitor_profile_id)->first();
 

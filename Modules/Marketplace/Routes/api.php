@@ -37,5 +37,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('save/store', 'Api\StoreController@saveStoreDetails');
 	Route::post('save/product', 'Api\ProductController@saveProductDetails');
 	Route::post('delete/gallery/image', 'Api\StoreController@deleteGalleryImage');
+	Route::get('search/product', 'Api\ProductController@searchProduct');
+	Route::get('get/product/detail', 'Api\ProductController@getProductDetail');
+
 	
 });

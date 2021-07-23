@@ -163,7 +163,7 @@ class RegisterController extends CoreController
                         $userData['first_name'] = $inputData['first_name'];
                         $userData['last_name'] = $inputData['last_name'];
 
-                        $userData['name'] = ucwords(strtolower($inputData['first_name'])).' '.ucwords(strtolower($inputData['last_name']));
+                        //$userData['name'] = ucwords(strtolower($inputData['first_name'])).' '.ucwords(strtolower($inputData['last_name']));
                     }
 
                     if(array_key_exists('timezone',$input) && array_key_exists('locale',$input)

@@ -255,8 +255,10 @@ class StoreController extends CoreController
 
                 $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $myStore->marketplace_store_id)->get();
                 (count($galleries) > 0) ? $myStore->store_gallery = $galleries : $myStore->store_gallery = [];
+
+                $storeProducts = MarketplaceProduct::with('product_gallery')->where('marketplace_store_id', $myStore->marketplace_store_id)->get();
                 
-                return response()->json(['success'=>$this->successStatus,'data' =>$myStore],$this->successStatus); 
+                return response()->json(['success'=>$this->successStatus,'data' =>$myStore, 'store_products' => $storeProducts],$this->successStatus); 
             }
             else
             {
