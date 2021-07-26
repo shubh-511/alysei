@@ -11,6 +11,7 @@ use Modules\Marketplace\Entities\MarketplaceProduct;
 use Modules\Marketplace\Entities\MarketplaceFavourite;
 use App\Http\Controllers\CoreController;
 use Illuminate\Support\Facades\Auth; 
+use Validator;
 
 class RatingController extends CoreController
 {
