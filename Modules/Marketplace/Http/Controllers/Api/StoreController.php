@@ -8,6 +8,7 @@ use App\Attachment;
 use Modules\Marketplace\Entities\MarketplaceProduct;
 use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
+use Modules\Marketplace\Entities\MarketplaceRating;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User;
