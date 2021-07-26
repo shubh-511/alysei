@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Attachment;
 use Modules\Marketplace\Entities\MarketplaceProduct;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
+use Modules\Marketplace\Entities\MarketplaceRating;
 use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceProductCategory;
 use Modules\Marketplace\Entities\MarketplaceProductSubcategory;
