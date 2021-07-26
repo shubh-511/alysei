@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
+use Modules\User\Entities\User;
 
 class MarketplaceRating extends Model
 {
