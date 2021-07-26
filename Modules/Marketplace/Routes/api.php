@@ -44,7 +44,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('make/unfavourite/store/product', 'Api\FavouriteController@makeUnfavourite');
 
 	Route::post('do/review/store/product', 'Api\RatingController@doReview');
-	Route::post('get/all/reviews', 'Api\RatingController@getAllReviews');
+	Route::get('get/all/reviews', 'Api\RatingController@getAllReviews');
 
 	
 });
