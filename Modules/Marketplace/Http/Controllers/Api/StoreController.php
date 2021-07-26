@@ -253,6 +253,27 @@ class StoreController extends CoreController
                 $myStore->logo_id = $logoId->attachment_url;
                 $myStore->banner_id = $bannerId->attachment_url;
 
+
+                $avgRating = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->count();
+
+                $oneStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 1)->count();
+                $twoStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 2)->count();
+                $threeStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 3)->count();
+                $fourStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 4)->count();
+                $fiveStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 5)->count();
+
+                $productDetail->avg_rating = $avgRating;
+                $productDetail->total_reviews = $totalReviews;
+
+                $productDetail->total_one_star = $oneStar;
+                $productDetail->total_two_star = $twoStar;
+                $productDetail->total_three_star = $threeStar;
+                $productDetail->total_four_star = $fourStar;
+                $productDetail->total_five_star = $fiveStar;
+
+
+
                 $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $myStore->marketplace_store_id)->get();
                 (count($galleries) > 0) ? $myStore->store_gallery = $galleries : $myStore->store_gallery = [];
 

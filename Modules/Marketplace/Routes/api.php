@@ -40,5 +40,11 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('search/product', 'Api\ProductController@searchProduct');
 	Route::get('get/product/detail', 'Api\ProductController@getProductDetail');
 
+	Route::post('make/favourite/store/product', 'Api\FavouriteController@makeFavourite');
+	Route::post('make/unfavourite/store/product', 'Api\FavouriteController@makeUnfavourite');
+
+	Route::post('do/review/store/product', 'Api\RatingController@doReview');
+	Route::post('get/all/reviews', 'Api\RatingController@getAllReviews');
+
 	
 });

@@ -338,8 +338,11 @@ class ProductController extends CoreController
                     $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
                     (count($galleries) > 0) ? $myProductLists[$key]->product_gallery = $galleries : $myProductLists[$key]->product_gallery = [];
 
-                    $myProductLists[$key]->avg_rating = "0.0";
-                    $myProductLists[$key]->total_reviews = 0;
+                    $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
+                    $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
+
+                    $myProductLists[$key]->avg_rating = $avgRating;
+                    $myProductLists[$key]->total_reviews = $totalReviews;
                 }
                 return response()->json(['success'=>$this->successStatus, 'count' => $productCount, 'data' =>$myProductLists],$this->successStatus); 
             }
@@ -451,8 +454,24 @@ class ProductController extends CoreController
                 
                 $productDetail->store_logo = $logoId->attachment_url;
 
-                $productDetail->avg_rating = "0.0";
-                $productDetail->total_reviews = 0;
+                $avgRating = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->count();
+
+                $oneStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 1)->count();
+                $twoStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 2)->count();
+                $threeStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 3)->count();
+                $fourStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 4)->count();
+                $fiveStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 5)->count();
+
+                $productDetail->avg_rating = $avgRating;
+                $productDetail->total_reviews = $totalReviews;
+
+                $productDetail->total_one_star = $oneStar;
+                $productDetail->total_two_star = $twoStar;
+                $productDetail->total_three_star = $threeStar;
+                $productDetail->total_four_star = $fourStar;
+                $productDetail->total_five_star = $fiveStar;
+
                 $productDetail->is_favourite = 0;
                 $productDetail->store_detail = $storeName;
                                           
@@ -603,8 +622,12 @@ class ProductController extends CoreController
                 $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
                 (count($galleries) > 0) ? $productLists[$key]->product_gallery = $galleries : $productLists[$key]->product_gallery = [];
 
-                $productLists[$key]->avg_rating = "0.0";
-                $productLists[$key]->total_reviews = 0;
+                $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
+
+                $productLists[$key]->avg_rating = $avgRating;
+                $productLists[$key]->total_reviews = $totalReviews;
+
                 $productLists[$key]->store_name = $storeName->name;
             }
             return response()->json(['success' => $this->successStatus,
