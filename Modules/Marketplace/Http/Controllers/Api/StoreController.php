@@ -264,14 +264,14 @@ class StoreController extends CoreController
                 $fourStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 4)->count();
                 $fiveStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 5)->count();
 
-                $productDetail->avg_rating = $avgRating;
-                $productDetail->total_reviews = $totalReviews;
+                $myStore->avg_rating = $avgRating;
+                $myStore->total_reviews = $totalReviews;
 
-                $productDetail->total_one_star = $oneStar;
-                $productDetail->total_two_star = $twoStar;
-                $productDetail->total_three_star = $threeStar;
-                $productDetail->total_four_star = $fourStar;
-                $productDetail->total_five_star = $fiveStar;
+                $myStore->total_one_star = $oneStar;
+                $myStore->total_two_star = $twoStar;
+                $myStore->total_three_star = $threeStar;
+                $myStore->total_four_star = $fourStar;
+                $myStore->total_five_star = $fiveStar;
 
 
 
