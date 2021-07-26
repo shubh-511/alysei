@@ -7,7 +7,7 @@ use App\Attachment;
 
 class MarketplaceRating extends Model
 {
-    protected $table = 'marketplace_review_ratings'
+    protected $table = 'marketplace_review_ratings';
     protected $primaryKey = 'marketplace_review_rating_id';
     protected $fillable = [];
 
