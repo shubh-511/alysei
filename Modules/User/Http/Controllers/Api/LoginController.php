@@ -143,8 +143,25 @@ class LoginController extends CoreController
             
             if(!empty($userData))
             {
+                $alyseiReview = ($userData->alysei_review > 0) ? true : false;
+                $alyseiCertification = ($userData->alysei_certification > 0) ? true : false;
+                $alyseiRecognition = ($userData->alysei_recognition > 0) ? true : false;
+                $alyseiQuality = ($userData->alysei_qualitymark > 0) ? true : false;
+                
+               
+                $profileReview = ['title' => $this->translate('messages.'.'Review','Review'),'status' => $alyseiReview, 'description' => $this->translate('messages.'.'Your account is being reviewed by our staff','Your account is being reviewed by our staff')];
+
+                $profileCertified = ['title' => $this->translate('messages.'.'Alysei Certification','Alysei Certification'),'status' => $alyseiCertification, 'description' => $this->translate('messages.'.'You have been officially certified by our staff','You have been officially certified by our staff')];
+
+                $profileRecognised = ['title' => $this->translate('messages.'.'Recognition','Recognition'),'status' => $alyseiRecognition, 'description' => $this->translate('messages.'.'You have been recognised by our app','You have been recognised by our app')];
+
+                $profileQualityMarked = ['title' => $this->translate('messages.'.'Quality Mark','Quality Mark'),'status' => $alyseiQuality, 'description' => $this->translate('messages.'.'You will recieve an official quality mark on your profile','You will recieve an official quality mark on your profile')];
+
+                $dataProgress = [$profileReview, $profileCertified, $profileRecognised, $profileQualityMarked];
+               
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $userData,
+                                         'alysei_progress' => $dataProgress
                                         ], $this->successStatus);
             }
             else
@@ -158,4 +175,6 @@ class LoginController extends CoreController
         } 
         
     }
+
+
 }
