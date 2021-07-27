@@ -88,9 +88,9 @@ class SeedUserFieldsTableSeeder extends Seeder
                         array("title"=>"Longitude",'type'=>'hidden','name'=>'longitude','required'=>'yes','conditional'=>'no'),
 
 
-                        array("title"=>"Our Products",'type'=>'text','name'=>'our_product','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
+                        array("title"=>"Our Products",'type'=>'text','name'=>'our_product','required'=>'no','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
 
-                        array("title"=>"About",'type'=>'text','name'=>'about','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
+                        array("title"=>"About",'type'=>'text','name'=>'about','required'=>'no','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
 
                         array("title"=>"Our Menu",'type'=>'text','name'=>'our_menu','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false'),
 
