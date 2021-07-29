@@ -45,6 +45,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::post('do/review/store/product', 'Api\RatingController@doReview');
 	Route::get('get/all/reviews', 'Api\RatingController@getAllReviews');
+	Route::get('get/seller/profile/{storeid?}', 'Api\StoreController@getSellerProfile');
 
 	
 });

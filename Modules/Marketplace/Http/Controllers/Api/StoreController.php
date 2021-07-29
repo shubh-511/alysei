@@ -295,6 +295,69 @@ class StoreController extends CoreController
 
     }
 
+
+    /*
+     * Get store details
+     * @Params $request
+     */
+    public function getSellerProfile($storeId='')
+    {
+        try
+        {
+            $user = $this->user;
+
+            $myStore = MarketplaceStore::where('marketplace_store_id', $storeId)->first();
+            if(!empty($myStore))
+            {
+                $userDetail = User::select('company_name','about','phone','email','website','address','lattitude','longitude','state')->with('state:id,name')->where('user_id', $myStore->user_id)->first();
+                
+                $myStore->prefilled = $userDetail;
+                $logoId = Attachment::where('id', $myStore->logo_id)->first();
+                $bannerId = Attachment::where('id', $myStore->banner_id)->first();
+                $myStore->logo_id = $logoId->attachment_url;
+                $myStore->banner_id = $bannerId->attachment_url;
+
+
+                $avgRating = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->count();
+
+                $oneStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 1)->count();
+                $twoStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 2)->count();
+                $threeStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 3)->count();
+                $fourStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 4)->count();
+                $fiveStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 5)->count();
+
+                $myStore->avg_rating = $avgRating;
+                $myStore->total_reviews = $totalReviews;
+
+                $myStore->total_one_star = $oneStar;
+                $myStore->total_two_star = $twoStar;
+                $myStore->total_three_star = $threeStar;
+                $myStore->total_four_star = $fourStar;
+                $myStore->total_five_star = $fiveStar;
+
+
+
+                $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $myStore->marketplace_store_id)->get();
+                (count($galleries) > 0) ? $myStore->store_gallery = $galleries : $myStore->store_gallery = [];
+
+                $storeProducts = MarketplaceProduct::with('product_gallery')->where('marketplace_store_id', $myStore->marketplace_store_id)->get();
+                
+                return response()->json(['success'=>$this->successStatus,'data' =>$myStore, 'store_products' => $storeProducts],$this->successStatus); 
+            }
+            else
+            {
+                $message = "Store not availabel!";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+
+    }
+
     /*
      * Update Store Details
      * @Params $request

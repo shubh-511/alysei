@@ -221,6 +221,18 @@ class RegisterController extends CoreController
                                     }
                                     else
                                     {*/
+                                        if($key == 13)
+                                        {
+                                            $data['table_name'] = 'countries';    
+                                        }
+                                        if($key == 28)
+                                        {
+                                            $data['table_name'] = 'states';    
+                                        }
+                                        if($key == 29)
+                                        {
+                                            $data['table_name'] = 'cities';    
+                                        }
                                         $data['user_field_id'] = $key;
                                         $data['user_id'] = $user->user_id;
                                         $data['value'] = $value;
