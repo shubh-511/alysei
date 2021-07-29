@@ -38,6 +38,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('save/product', 'Api\ProductController@saveProductDetails');
 	Route::post('delete/gallery/image', 'Api\StoreController@deleteGalleryImage');
 	Route::get('search/product', 'Api\ProductController@searchProduct');
+	Route::get('recent/search/product', 'Api\ProductController@recentSearchProduct');
 	Route::get('get/product/detail', 'Api\ProductController@getProductDetail');
 
 	Route::post('make/favourite/store/product', 'Api\FavouriteController@makeFavourite');

@@ -11,6 +11,7 @@ use Modules\Marketplace\Entities\MarketplaceRating;
 use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceProductCategory;
 use Modules\Marketplace\Entities\MarketplaceProductSubcategory;
+use Modules\Marketplace\Entities\MarketplaceRecentSearch;
 use Modules\Marketplace\Entities\MarketplaceBrandLabel;
 use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
@@ -399,10 +400,10 @@ class ProductController extends CoreController
 
     }
 
-     /*
+    /*
      * Search Product
      * 
-     */
+    */
     public function searchProduct(Request $request)
     {
         try
@@ -416,8 +417,37 @@ class ProductController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
             
-            return $this->getSearchProductList($request);    
+            return $this->getSearchProductList($request, $user);    
                  
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get Recent Search Product
+     * 
+    */
+    public function recentSearchProduct()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $recentSearch = MarketplaceRecentSearch::where('user_id', $user->user_id)->orderBy('marketplace_recent_search_id', 'DESC')->get();
+            
+            if(count($recentSearch) > 0)
+            {
+                
+                return response()->json(['success'=>$this->successStatus, 'data' => $recentSearch],$this->successStatus); 
+            }
+            else
+            {
+                $message = "No recent search found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
         }
         catch(\Exception $e)
         {
@@ -507,7 +537,7 @@ class ProductController extends CoreController
     Search product list
     */
 
-    public function getSearchProductList($request)
+    public function getSearchProductList($request, $user)
     {
         $condition = '';
 
@@ -606,7 +636,12 @@ class ProductController extends CoreController
                      //->with('labels')
                      //->select(DB::raw('count(*) as user_count, status'))
                      ->where('title', 'LIKE', '%' . $request->keyword . '%')
-                     ->whereRaw(''.$condition.'')->get();   
+                     ->whereRaw(''.$condition.'')->get();  
+
+            $recentSearch = new MarketplaceRecentSearch; 
+            $recentSearch->user_id = $user->user_id;
+            $recentSearch->search_keyword = $request->keyword;
+            $recentSearch->save();
         }
         
         if(count($productLists) > 0)
