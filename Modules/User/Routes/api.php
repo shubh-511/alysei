@@ -91,7 +91,19 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	//events
 	Route::get('get/event/listing', 'Api\EventController@getEventListing');	
+	Route::post('create/event', 'Api\EventController@createEvent');
+	Route::get('edit/event/{eventid}', 'Api\EventController@editEvent');
+	Route::post('update/event', 'Api\EventController@updateEvent');
+	Route::post('delete/event', 'Api\EventController@deleteEvent');
 
+	//trips
+	Route::get('get/trip/listing', 'Api\TripController@getTripListing');	
+	Route::get('get/adventure/types', 'Api\TripController@getAdventureTypes');
+	Route::get('get/intensity/list', 'Api\TripController@getIntensityList');
+	Route::post('create/trip', 'Api\TripController@createTrip');
+	Route::get('edit/trip/{tripid}', 'Api\TripController@editTrip');
+	Route::post('update/trip', 'Api\TripController@updateTrip');
+	Route::post('delete/trip', 'Api\TripController@deleteTrip');	
 
 
 });

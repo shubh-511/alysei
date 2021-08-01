@@ -42,7 +42,7 @@ class EventController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $eventLists = Event::where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+            $eventLists = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
             if(count($eventLists) > 0)
             {
                 foreach($eventLists as $key => $eventList)
@@ -56,7 +56,7 @@ class EventController extends CoreController
             }
             else
             {
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."No blogs found","No blogs found")]], $this->exceptionStatus);       
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."No events found","No events found")]], $this->exceptionStatus);       
             }
         }
         catch(\Exception $e)
@@ -90,7 +90,7 @@ class EventController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $createBLog = new Blog;
+            $createBLog = new Event;
             $createBLog->user_id = $loggedInUser->user_id;
             $createBLog->event_name = $request->event_name;
             $createBLog->host_name = $request->host_name;
@@ -105,7 +105,7 @@ class EventController extends CoreController
             $createBLog->save();
 
             return response()->json(['success' => $this->successStatus,
-                                    'message' => $this->translate('messages.'."Blog created successfuly!","Blog created successfuly!")
+                                    'message' => $this->translate('messages.'."Event created successfuly!","Event created successfuly!")
                                     ], $this->successStatus);
         }
         catch(\Exception $e)
@@ -123,7 +123,7 @@ class EventController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $event = Event::where('event_id', $eventId)->where('status', '1')->first();
+            $event = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('event_id', $eventId)->where('status', '1')->first();
             if(!empty($event))
             {
                 return response()->json(['success' => $this->successStatus,
@@ -223,7 +223,7 @@ class EventController extends CoreController
             if(!empty($event))
             {
                 $this->deleteAttachment($event->image_id);
-                $isEventDeleted = Blog::where('event_id', $request->event_id)->delete();
+                $isEventDeleted = Event::where('event_id', $request->event_id)->delete();
                 if($isEventDeleted == 1)
                 {
                     return response()->json(['success' => $this->successStatus,

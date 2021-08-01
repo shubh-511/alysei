@@ -44,7 +44,7 @@ class TripController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $tripLists = Trip::where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+            $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
             if(count($tripLists) > 0)
             {
                 foreach($tripLists as $key => $tripList)
@@ -119,7 +119,7 @@ class TripController extends CoreController
             }
             else
             {
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."No adventure type found","No adventure type found")]], $this->exceptionStatus);       
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."No Intensity found","No Intensity found")]], $this->exceptionStatus);       
             }
         }
         catch(\Exception $e)
@@ -153,7 +153,7 @@ class TripController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $createTrip = new Event;
+            $createTrip = new Trip;
             $createTrip->user_id = $loggedInUser->user_id;
             $createTrip->trip_name = $request->trip_name;
             $createTrip->travel_agency = $request->travel_agency;
@@ -187,7 +187,7 @@ class TripController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $trip = Trip::where('trip_id', $tripId)->where('status', '1')->first();
+            $trip = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure')->where('trip_id', $tripId)->where('status', '1')->first();
             if(!empty($trip))
             {
                 return response()->json(['success' => $this->successStatus,
@@ -249,8 +249,7 @@ class TripController extends CoreController
                     $this->deleteAttachment($trip->image_id);
                     $trip->image_id = $this->uploadImage($request->file('image_id'));
                 }
-                    
-                }
+            
                 $trip->save();
 
                 return response()->json(['success' => $this->successStatus,

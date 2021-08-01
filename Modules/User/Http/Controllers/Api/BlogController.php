@@ -42,7 +42,7 @@ class BlogController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $blogLists = Blog::where('user_id', $loggedInUser->user_id)->get();
+            $blogLists = Blog::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->get();
             if(count($blogLists) > 0)
             {
                 foreach($blogLists as $key => $blogList)
@@ -96,6 +96,7 @@ class BlogController extends CoreController
             }
 
             $createBLog = new Blog;
+            $createBLog->user_id = $loggedInUser->user_id;
             $createBLog->title = $request->title;
             $createBLog->date = $request->date;
             $createBLog->time = $request->time;
@@ -130,7 +131,6 @@ class BlogController extends CoreController
                 'time' => 'required',  
                 'description' => 'required', 
                 'status' => 'required', 
-                'image_id' => 'required', 
             ]);
 
             if ($validator->fails()) { 
@@ -149,7 +149,6 @@ class BlogController extends CoreController
                 $createBLog->image_id = $this->uploadImage($request->file('image_id'));
             }
                 
-            }
             $createBLog->save();
 
             return response()->json(['success' => $this->successStatus,
