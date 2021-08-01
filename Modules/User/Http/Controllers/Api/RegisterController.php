@@ -12,6 +12,7 @@ use App\Attachment;
 use Modules\User\Entities\City;
 use Validator;
 use DB;
+use Kreait\Firebase\Factory;
 use Cache;
 use App\Events\Welcome;
 use App\Events\VerifyEmail;
@@ -21,6 +22,26 @@ class RegisterController extends CoreController
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
+
+    public function conn_firbase(){
+        
+        $factory = (new Factory)
+        ->withServiceAccount('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/storage/credentials/firebase_credential.json')->withDatabaseUri('https://alysei-a2f37-default-rtdb.firebaseio.com/');
+        $database = $factory->createDatabase();    
+        return $database;
+    }
+
+    public function addUserOrUpdateInFirebase($user_id, $name)
+    {
+        $data = $this->conn_firbase()->getReference('usertouser/users/'.$user_id)
+        ->update([
+        'user_id' => $user_id,
+        'name' => $name
+        ]);
+
+        return $data;
+
+    }
 
     /* 
         Get Registration Roles
@@ -258,12 +279,26 @@ class RegisterController extends CoreController
 
                             
                         }
+                        if(!empty($user->first_name) && !empty($user->last_name))
+                        {
+                            $userName = ucwords(strtolower($user->first_name).' '.strtolower($user->last_name));
+                        }
+                        elseif(!empty($user->company_name))
+                        {
+                            $userName = $user->company_name;
+                        }
+                        elseif(!empty($user->restaurant_name))
+                        {
+                            $userName = $user->restaurant_name;   
+                        }
 
                         if($input['role_id'] == 10)
                         {
                             //Send verify eMail OTP
                     
                             //event(new VerifyEmail($user->user_id));
+
+                            $this->addUserOrUpdateInFirebase($user->user_id, $userName);
                             return response()->json(['success' => $this->successStatus,
                                         'message' => 'OTP has been sent on your email ID',
                                         'data' => $user->only($this->userFieldsArray)                  
@@ -271,6 +306,7 @@ class RegisterController extends CoreController
                         }
                         else
                         {
+                            $this->addUserOrUpdateInFirebase($user->user_id, $userName);
                             $token =  $user->createToken('alysei')->accessToken; 
 
                             //Send Welcome Mail

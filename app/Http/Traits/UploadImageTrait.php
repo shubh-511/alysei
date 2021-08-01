@@ -197,4 +197,19 @@ trait UploadImageTrait
         
     }
 
+    /****
+    Upload Media using S3
+    ****/
+    public function uploadMediaUsingS3($img)
+    {
+        $folderPath = "public/uploads/".$date."/";
+        if ($request->hasFile('image')) 
+        {
+            $file = $request->file('image');
+            $name = time() . $file->getClientOriginalName();
+            $filePath = $folderPath.''. $name;
+            Storage::disk('s3')->put($filePath, file_get_contents($file));
+        }
+    }
+
 }
