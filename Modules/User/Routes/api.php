@@ -82,7 +82,16 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/visitor/profile', 'Api\UserController@getVisitorProfile');
 
-	Route::get('get/featured/tabs', 'Api\UserController@getFeaturedTabs');
+	//Route::get('get/featured/tabs', 'Api\UserController@getFeaturedTabs');
+	//Blogs
+	Route::get('get/blog/listing', 'Api\BlogController@getBlogListing');	
+	Route::post('create/blog', 'Api\BlogController@createBlog');	
+	Route::post('update/blog', 'Api\BlogController@updateBlog');	
+	Route::post('delete/blog', 'Api\BlogController@deleteBlog');
+
+	//events
+	Route::get('get/event/listing', 'Api\EventController@getEventListing');	
+
 
 
 });
