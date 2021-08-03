@@ -14,6 +14,9 @@ use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Validator;
 use Storage;
+use League\Flysystem\Filesystem;
+use Aws\S3\S3Client;
+use League\Flysystem\Filesystem\AwsS3v3\AwsS3Adapter;
 //use App\Events\UserRegisterEvent;
 
 trait UploadImageTrait
