@@ -46,6 +46,9 @@ use Illuminate\Http\Request;
 	Route::post('subscribe/unsubscribe/hub', 'Api\SearchController@subscribeOrUnsubscribeHub');	
 	/*********/
 
+	//upload media in chat
+	Route::post('upload/media', 'Api\ChatController@uploadMedia');	
+
 
 
 });

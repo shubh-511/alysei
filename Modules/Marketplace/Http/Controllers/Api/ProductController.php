@@ -361,6 +361,51 @@ class ProductController extends CoreController
 
     }
 
+    /*
+     * Get all product list
+     * 
+     */
+    public function getAllProductList()
+    {
+        try
+        {
+            $user = $this->user;
+            $productCount = MarketplaceProduct::with('labels')->count();
+            $myProductLists = MarketplaceProduct::with('labels')->paginate(10);
+            if(count($myProductLists))
+            {
+                foreach($myProductLists as $key => $myProductList)
+                {
+                    $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_option_id', $myProductList->product_category_id)
+                                ->first();
+                    $myProductLists[$key]->product_category_name = $options->option;
+                                              
+                    $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
+                    (count($galleries) > 0) ? $myProductLists[$key]->product_gallery = $galleries : $myProductLists[$key]->product_gallery = [];
+
+                    $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
+                    $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
+
+                    $myProductLists[$key]->avg_rating = $avgRating;
+                    $myProductLists[$key]->total_reviews = $totalReviews;
+                }
+                return response()->json(['success'=>$this->successStatus, 'count' => $productCount, 'data' =>$myProductLists],$this->successStatus); 
+            }
+            else
+            {
+                $message = "No products found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+
+    }
+
 
     /*
      * Delete product

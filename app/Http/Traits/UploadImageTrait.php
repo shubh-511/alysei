@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Validator;
+use Storage;
 //use App\Events\UserRegisterEvent;
 
 trait UploadImageTrait
@@ -202,14 +203,44 @@ trait UploadImageTrait
     ****/
     public function uploadMediaUsingS3($img)
     {
-        $folderPath = "public/uploads/".$date."/";
-        if ($request->hasFile('image')) 
-        {
-            $file = $request->file('image');
+        $status = [];
+        $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+        
+        $date = date("Y/m");
+        $target='uploads/'.$date;
+
+        $folderPath = "uploads/".$date."/";
+        
+            $file = $img;
+            $ext1=$file->getClientOriginalExtension();
             $name = time() . $file->getClientOriginalName();
             $filePath = $folderPath.''. $name;
-            Storage::disk('s3')->put($filePath, file_get_contents($file));
+            $url = Storage::disk('s3')->put($filePath, file_get_contents($file));
+
+            $status = [$url, $ext1];
+            return $status; 
+        
+
+
+        
+        /*if(!empty($img))
+        {
+            $headerImageName=$img->getClientOriginalName();
+            $ext1=$img->getClientOriginalExtension();
+            $temp1=explode(".",$headerImageName);
+            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
+            $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
+            $img->move($target,$newHeaderLogo);
         }
+        else
+        {
+            $headerTarget = '';
+        }
+
+        $status = [$headerTarget, $ext1];
+        return $status; */
+
+        
     }
 
 }
