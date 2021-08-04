@@ -8,6 +8,7 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\Role;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
+use Modules\User\Entities\DeviceToken;
 use App\Attachment;
 use Modules\User\Entities\City;
 use Validator;
@@ -26,14 +27,16 @@ class RegisterController extends CoreController
     public function conn_firbase(){
         
         $factory = (new Factory)
-        ->withServiceAccount('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/storage/credentials/firebase_credential.json')->withDatabaseUri('https://alysei-a2f37-default-rtdb.firebaseio.com/');
+        ->withServiceAccount('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/storage/credentials/firebase_credential.json')
+        //->withDatabaseUri('https://alysei-a2f37-default-rtdb.firebaseio.com/');
+        ->withDatabaseUri('https://alysei-add21-default-rtdb.firebaseio.com/');
         $database = $factory->createDatabase();    
         return $database;
     }
 
     public function addUserOrUpdateInFirebase($user_id, $name)
     {
-        $data = $this->conn_firbase()->getReference('usertouser/users/'.$user_id)
+        $data = $this->conn_firbase()->getReference('users/'.$user_id)
         ->update([
         'user_id' => $user_id,
         'name' => $name
@@ -135,6 +138,8 @@ class RegisterController extends CoreController
             $input = $request->all();
             $rules = [];
             $rules['role_id'] = 'required';
+            /*$rules['device_type'] = 'required';
+            $rules['device_token'] = 'required';*/
             $validator = Validator::make($input, $rules);
 
             if ($validator->fails()) { 
@@ -291,6 +296,12 @@ class RegisterController extends CoreController
                         {
                             $userName = $user->restaurant_name;   
                         }
+                        $deviceInfo = [];
+                        $deviceInfo['user_id'] = $user->user_id;
+                        $deviceInfo['device_type'] = $input['device_type'];
+                        $deviceInfo['device_token'] = $input['device_token'];
+
+                        //DeviceToken::create($deviceInfo);  
 
                         if($input['role_id'] == 10)
                         {

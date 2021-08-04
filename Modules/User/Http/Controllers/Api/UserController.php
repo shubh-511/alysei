@@ -620,7 +620,7 @@ class UserController extends CoreController
                 $inputData = $this->segregateInputData($input,$roleFields);
             }
 
-            if(!empty($rules)){
+            if(!empty($rules) || !empty($inputData)){
                 
                 $validator = Validator::make($inputData, $rules);
 

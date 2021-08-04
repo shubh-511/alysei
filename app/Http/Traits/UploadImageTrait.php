@@ -214,19 +214,18 @@ trait UploadImageTrait
 
         $folderPath = "uploads/".$date."/";
         
-            $file = $img;
-            $ext1=$file->getClientOriginalExtension();
-            $name = time() . $file->getClientOriginalName();
+            /*$ext1 = $img->getClientOriginalExtension();
+            $name = $img->getClientOriginalName();
             $filePath = $folderPath.''. $name;
-            $url = Storage::disk('s3')->put($filePath, file_get_contents($file));
+            $url = Storage::disk('s3')->put($filePath, file_get_contents($img));
 
             $status = [$url, $ext1];
-            return $status; 
+            return $status; */
         
 
 
         
-        /*if(!empty($img))
+        if(!empty($img))
         {
             $headerImageName=$img->getClientOriginalName();
             $ext1=$img->getClientOriginalExtension();
@@ -241,7 +240,7 @@ trait UploadImageTrait
         }
 
         $status = [$headerTarget, $ext1];
-        return $status; */
+        return $status; 
 
         
     }

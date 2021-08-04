@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\User\Entities\User; 
 use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\User\Entities\UserSelectedHub;
+use Modules\User\Entities\DeviceToken;
 use Modules\User\Entities\UserTempHub;
 use Validator;
 use DB;
@@ -41,7 +42,9 @@ class LoginController extends CoreController
             
             $validator = Validator::make($input, [ 
                 'name' => 'required', 
-                'password' => 'required'
+                'password' => 'required',
+                //'device_type' => 'required',
+                //'device_token' => 'required'
             ]);
 
             if ($validator->fails()) { 
@@ -86,8 +89,14 @@ class LoginController extends CoreController
                     $userData->is_hub_selected = $isHubSelected;
                     $userData->is_store_created = $isStoreCreated;
 
+                    /*$userToken = new DeviceToken;
+                    $userToken->user_id = $userData->user_id;
+                    $userToken->device_type = $request->device_type;
+                    $userToken->device_token = $request->device_token;
+                    $userToken->save();*/
+
                         Auth::user()->roles;
-                        $token =  $user->createToken('yss')->accessToken; 
+                        $token =  $user->createToken('alysei')->accessToken; 
 
                         return response()->json(['success' => $this->successStatus,
                                              //'data' => $user->only($this->userFieldsArray),
