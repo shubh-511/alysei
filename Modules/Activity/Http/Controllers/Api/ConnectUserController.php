@@ -7,7 +7,8 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
-use App\Http\Traits\UploadImageTrait;
+use Modules\User\Entities\DeviceToken; 
+use App\Http\Traits\NotificationTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\Follower;
 use Modules\Activity\Entities\Connection;
@@ -17,6 +18,7 @@ use Modules\Activity\Entities\ActivityAttachmentLink;
 use Modules\Activity\Entities\ConnectFollowPermission;
 use Modules\Activity\Entities\MapPermissionRole;
 use Carbon\Carbon;
+use App\Notification;
 use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -24,7 +26,7 @@ use Validator;
 
 class ConnectUserController extends CoreController
 {
-    use UploadImageTrait;
+    use NotificationTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -209,7 +211,7 @@ class ConnectUserController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $myRole = User::select('role_id')->where('user_id', $user->user_id)->first();
+            $myRole = User::where('user_id', $user->user_id)->first();
             $checkUser = User::where('user_id', $request->user_id)->first();
             if(!empty($checkUser))
             {
@@ -229,10 +231,33 @@ class ConnectUserController extends CoreController
                         $newConnection->reason_to_connect = $request->reason_to_connect;
                         $newConnection->save();
 
-                        /*if(!empty($request->user_field_option_id))
+                        if($myRole->role_id == 7 || $myRole->role_id == 10)
                         {
-                            
-                        }*/
+                            $name = ucwords(strtolower($myRole->first_name)) . ' ' . ucwords(strtolower($myRole->last_name));
+                        }
+                        else
+                        {
+                            $name = $myRole->company_name;
+                        }
+
+                        $title = $name . " sent you a connection request";
+
+                        $saveNotification = new Notification;
+                        $saveNotification->from = $myRole->user_id;
+                        $saveNotification->to = $request->user_id;
+                        $saveNotification->notification_type = 'connection_request';
+                        $saveNotification->title = $title;
+                        $saveNotification->redirect_to = 'user_screen';
+                        $saveNotification->redirect_to_id = $myRole->user_id;
+                        $saveNotification->save();
+
+                        $tokens = DeviceToken::where('user_id', $request->user_id)->get();
+                        if(count($tokens) > 0)
+                        {
+                            $collectedTokenArray = $tokens->pluck('device_token');
+                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                        }
+                        
 
                         $message = "Connection request has been sent!";
                         return response()->json(['success' => $this->successStatus,

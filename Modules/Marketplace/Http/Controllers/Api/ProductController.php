@@ -682,12 +682,12 @@ class ProductController extends CoreController
                      //->select(DB::raw('count(*) as user_count, status'))
                      ->where('title', 'LIKE', '%' . $request->keyword . '%')
                      ->whereRaw(''.$condition.'')->get();  
-
-            $recentSearch = new MarketplaceRecentSearch; 
-            $recentSearch->user_id = $user->user_id;
-            $recentSearch->search_keyword = $request->keyword;
-            $recentSearch->save();
         }
+
+        $recentSearch = new MarketplaceRecentSearch; 
+        $recentSearch->user_id = $user->user_id;
+        $recentSearch->search_keyword = $request->keyword;
+        $recentSearch->save();
         
         if(count($productLists) > 0)
         {

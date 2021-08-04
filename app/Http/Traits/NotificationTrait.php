@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\User; 
 use Carbon\Carbon;
 use App\Attachment;
+use App\Notification;
 use Modules\Activity\Entities\ActivityAttachment;
 use Modules\Activity\Entities\ActivityAttachmentLink;
 use Illuminate\Support\Facades\Auth; 
@@ -25,31 +26,21 @@ trait NotificationTrait
     /***
     Send Notification
     ***/
-    public function sendNotification($img)
+    public function sendNotification($token, $title, $redirectTo, $redirectToId)
     {
         $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
-        $jsonArray['result']=$booking_details;
-        $jsonArray['result']->title=$title;
+        $jsonArray['title'] = $title;
+        //$jsonArray['result']->title = $title;
+        $jsonArray['redirect_to'] = $redirectTo;
+        $jsonArray['redirect_to_id'] = $redirectToId;
         
-        $tok=array();
-        $notify=array();
-        if(!empty($tokens))
-        {
-            if(count($tokens)>0)
-            {
-                foreach($tokens as $token)
-                {
-                    array_push($tok,$token->device_token);
-                }
-            }
-        }
         $fcmNotification = [
-        	'to'        => $token, //single token
-            //'registration_ids' => $tok, //multple token array
+        	//'to'        => $token, //single token
+            'registration_ids' => $token, //multple token array
             'data' => $jsonArray
         ];
         $headers =[
-            'Authorization: key=AAAAKqjUV_0:APA91bHT0Ktkrx8ojjKPVuDtf3kdaKeiRZ7LwWo1X3wfJJOEDJ2lIGWiH-qGh3qs6uupkgOmKcrCiELPWFVywqIYJZzcNlZUGg-6SGsKF3quE31_mTzOfngwKQVcpYLDFlOc3-e7oTy_',//.$this->fcm_key_business_android,//AAAAu0eqOAg:APA91bGCcy1meCwMFJce7lxyiKg7UVckeacdWB7RAQWAHTpK3YW0OEECGIZlUXAzriK-Mld_aP7AfoCbxmx1N3CUZ8L0YgCmihffVAvtpfYQ4XXzKkklLhUEA6TV3Fnuu7GRKauvgHDd',
+            'Authorization: key=AAAAxEbwo_A:APA91bFW4-x78zNh5J8UDFnjYP1t0qCgUWcTLwLN2gZsKHBzy3lDwqih8l6SIcka92-WTEX1M36sQc63i_G8AzUpc_pZda5KxkEa9mNQKyJVCMrXCGYdep9kfM_nFe_iUKyumczMu5Tk',
             'Content-Type: application/json'
         ];
         
@@ -64,3 +55,5 @@ trait NotificationTrait
         curl_close($ch);
         return true;
     }
+
+}
