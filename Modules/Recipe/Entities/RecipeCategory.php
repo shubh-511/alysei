@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\User\Entities;
+namespace Modules\Recipe\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Modules\User\Entities\User;

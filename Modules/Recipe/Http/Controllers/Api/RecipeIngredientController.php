@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Activity\Http\Controllers\Api;
+namespace Modules\Recipe\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -49,24 +49,27 @@ class RecipeIngredientController extends CoreController
             $parentIngredients = RecipeIngredient::with('image_id')->where('parent', 0)->get();
             if(count($parentIngredients) > 0)
             {
+                $categoriesWithCount = [];
                 foreach($parentIngredients as $key => $parentIngredient)
                 {
-                    $parentIngredients[$key]->name = $this->translate('messages.'.$parentIngredient->name,$parentIngredient->name);
+                    $parentIngredients[$key]->title = $this->translate('messages.'.$parentIngredient->title,$parentIngredient->title);
 
-                    $childIngredients = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->parent)->get();
-                    $childIngredientCounts = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->parent)->count();
+                    $childIngredients = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->recipe_ingredient_id)->get();
+
+                    $childIngredientCounts = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->recipe_ingredient_id)->count();
                     foreach($childIngredients as $keys => $childIngredient)
                     {
-                        $childIngredients[$keys]->name = $this->translate('messages.'.$childIngredient->name,$childIngredient->name);    
+                        $childIngredients[$keys]->title = $this->translate('messages.'.$childIngredient->title,$childIngredient->title);    
                     }
                     $parentIngredients[$key]->ingredients = $childIngredients;
 
-                    $categoriesWithCount = 
+                    $categoriesWithCount[] = ['ingredient_types' => $parentIngredient->title, 'name' => $parentIngredient->name, 'count' => $childIngredientCounts];
                     
                 }
 
                 return response()->json(['success' => $this->successStatus,
                                         'count' =>  count($parentIngredients),
+                                        'types' => $categoriesWithCount,
                                         'data' => $parentIngredients,
                                     ], $this->successStatus);
             }

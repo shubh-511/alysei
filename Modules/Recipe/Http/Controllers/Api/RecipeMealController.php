@@ -9,14 +9,14 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\DeviceToken; 
 use App\Http\Traits\NotificationTrait;
-use Modules\Recipe\Entities\RecipeCategory; 
+use Modules\Recipe\Entities\RecipeMeal; 
 use App\Notification;
 use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
 
-class RecipeCategoryController extends CoreController
+class RecipeMealController extends CoreController
 {
     use NotificationTrait;
     public $successStatus = 200;
@@ -40,28 +40,28 @@ class RecipeCategoryController extends CoreController
      * Get recipie categories
      * 
      */
-    public function getRecipeCategories()
+    public function getRecipeMeals()
     {
         try
         {
             $user = $this->user;
 
-            $categories = RecipeCategory::with('image_id')->where('status', '1')->get();
-            if(count($categories) > 0)
+            $meals = RecipeMeal::with('image_id')->get();
+            if(count($meals) > 0)
             {
-                foreach($categories as $key => $category)
+                foreach($meals as $key => $meal)
                 {
-                    $categories[$key]->name = $this->translate('messages.'.$category->name,$category->name);
+                    $meals[$key]->name = $this->translate('messages.'.$meals->name,$meals->name);
                 }
 
                 return response()->json(['success' => $this->successStatus,
-                                        'count' =>  count($categories),
-                                        'data' => $categories,
+                                        'count' =>  count($meals),
+                                        'data' => $meals,
                                     ], $this->successStatus);
             }
             else
             {
-                $message = "No categories found";
+                $message = "No meals found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
         }

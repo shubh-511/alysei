@@ -9,14 +9,14 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\DeviceToken; 
 use App\Http\Traits\NotificationTrait;
-use Modules\Recipe\Entities\RecipeCategory; 
+use Modules\Recipe\Entities\RecipeRegion; 
 use App\Notification;
 use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
 
-class RecipeCategoryController extends CoreController
+class RecipeRegionController extends CoreController
 {
     use NotificationTrait;
     public $successStatus = 200;
@@ -40,28 +40,28 @@ class RecipeCategoryController extends CoreController
      * Get recipie categories
      * 
      */
-    public function getRecipeCategories()
+    public function getRecipeRegions()
     {
         try
         {
             $user = $this->user;
 
-            $categories = RecipeCategory::with('image_id')->where('status', '1')->get();
-            if(count($categories) > 0)
+            $regions = RecipeRegion::with('image_id')->get();
+            if(count($regions) > 0)
             {
-                foreach($categories as $key => $category)
+                foreach($regions as $key => $region)
                 {
-                    $categories[$key]->name = $this->translate('messages.'.$category->name,$category->name);
+                    $regions[$key]->name = $this->translate('messages.'.$region->name,$region->name);
                 }
 
                 return response()->json(['success' => $this->successStatus,
-                                        'count' =>  count($categories),
-                                        'data' => $categories,
+                                        'count' =>  count($regions),
+                                        'data' => $regions,
                                     ], $this->successStatus);
             }
             else
             {
-                $message = "No categories found";
+                $message = "No regions found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
         }

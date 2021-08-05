@@ -296,10 +296,10 @@ class RegisterController extends CoreController
                         {
                             $userName = $user->restaurant_name;   
                         }
-                        $deviceInfo = [];
+                        /*$deviceInfo = [];
                         $deviceInfo['user_id'] = $user->user_id;
                         $deviceInfo['device_type'] = $input['device_type'];
-                        $deviceInfo['device_token'] = $input['device_token'];
+                        $deviceInfo['device_token'] = $input['device_token'];*/
 
                         //DeviceToken::create($deviceInfo);  
 

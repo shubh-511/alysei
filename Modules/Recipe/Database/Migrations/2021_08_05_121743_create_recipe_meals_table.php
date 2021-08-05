@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRecipeIngredientsTable extends Migration
+class CreateRecipeMealsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,9 @@ class CreateRecipeIngredientsTable extends Migration
      */
     public function up()
     {
-        Schema::create('recipe_ingredients', function (Blueprint $table) {
-            $table->increments('recipe_ingredient_id');
-            $table->string('title');
+        Schema::create('recipe_meals', function (Blueprint $table) {
+            $table->increments('recipe_meal_id');
             $table->string('name');
-            $table->integer('image_id');
-            $table->integer('parent')->default(0)->comment('parent store self table id i.e., recipe_ingredient_id');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ class CreateRecipeIngredientsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('recipe_ingredients');
+        Schema::dropIfExists('recipe_meals');
     }
 }

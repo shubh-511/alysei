@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\User\Entities\User;
 use App\Attachment;
 
-class RecipeIngredient extends Model
+class RecipeTool extends Model
 {
-    protected $PrimaryKey = 'recipe_ingredient_id';
+    protected $PrimaryKey = 'recipe_tool_id';
 
     public function image_id()
     {
