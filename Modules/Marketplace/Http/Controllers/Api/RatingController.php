@@ -137,7 +137,7 @@ class RatingController extends CoreController
             if($request->type == 1)
             {
                 $getAllRatings = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '1')->where('id', $request->id)->get();
-                if(!empty($getAllRatings))
+                if(count($getAllRatings) > 0)
                 {
                         return response()->json(['success' => $this->successStatus,
                                                 'data' => $getAllRatings,
@@ -152,7 +152,7 @@ class RatingController extends CoreController
             elseif($request->type == 2)
             {
                 $getAllRatings = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '2')->where('id', $request->id)->get();
-                if(!empty($getAllRatings))
+                if(count($getAllRatings) > 0)
                 {
                         return response()->json(['success' => $this->successStatus,
                                                 'data' => $getAllRatings,

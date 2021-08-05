@@ -365,33 +365,51 @@ class ProductController extends CoreController
      * Get all product list
      * 
      */
-    public function getAllProductList()
+    public function getSearchProductListing(Request $request)
     {
         try
         {
             $user = $this->user;
-            $productCount = MarketplaceProduct::with('labels')->count();
-            $myProductLists = MarketplaceProduct::with('labels')->paginate(10);
-            if(count($myProductLists))
+            
+            $validator = Validator::make($request->all(), [ 
+                'keyword' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            return $this->applyFiltersToProductSearch($request);
+
+            $productLists = MarketplaceProduct::with('labels')->where('title', 'LIKE', '%' . $request->keyword . '%')->where('status', '1')->paginate(10);  
+
+            if(count($productLists) > 0)
             {
-                foreach($myProductLists as $key => $myProductList)
+
+                foreach($productLists as $key => $myProductList)
                 {
                     $options = DB::table('user_field_options')
                                 ->where('head', 0)->where('parent', 0)
                                 ->where('user_field_option_id', $myProductList->product_category_id)
                                 ->first();
-                    $myProductLists[$key]->product_category_name = $options->option;
+                    $productLists[$key]->product_category_name = $options->option;
+                    $storeName = MarketplaceStore::where('marketplace_store_id', $myProductList->marketplace_store_id)->first();
                                               
                     $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
-                    (count($galleries) > 0) ? $myProductLists[$key]->product_gallery = $galleries : $myProductLists[$key]->product_gallery = [];
+                    (count($galleries) > 0) ? $productLists[$key]->product_gallery = $galleries : $productLists[$key]->product_gallery = [];
 
                     $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
                     $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
 
-                    $myProductLists[$key]->avg_rating = $avgRating;
-                    $myProductLists[$key]->total_reviews = $totalReviews;
+                    $productLists[$key]->avg_rating = $avgRating;
+                    $productLists[$key]->total_reviews = $totalReviews;
+
+                    $productLists[$key]->store_name = $storeName->name;
                 }
-                return response()->json(['success'=>$this->successStatus, 'count' => $productCount, 'data' =>$myProductLists],$this->successStatus); 
+                return response()->json(['success' => $this->successStatus,
+                                            'count' => count($productLists),
+                                            'data' => $productLists,
+                                            ], $this->successStatus);
             }
             else
             {
@@ -404,6 +422,146 @@ class ProductController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
         }
 
+    }
+
+
+    /*
+    Apply filters
+    */
+    public function applyFiltersToProductSearch($request)
+    {
+        $condition = '';
+
+        if(isset($request->available_for_sample))
+        {
+            if($request->available_for_sample == 1)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.available_for_sample = 'Yes'";
+                else
+                $condition .="marketplace_products.available_for_sample = 'Yes'";
+            }
+            elseif($request->available_for_sample == 0)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.available_for_sample = 'No'";
+                else
+                $condition .="marketplace_products.available_for_sample = 'No'";
+            }
+            
+        }
+        if(!empty($request->category))
+        {
+            if($condition != '')
+                $condition .=" and marketplace_products.product_category_id in(".$request->category.")";
+            else
+                $condition .="marketplace_products.product_category_id in(".$request->category.")";
+        }
+        if(!empty($request->price_range))
+        {
+            if($condition != '')
+                $condition .=" and marketplace_products.product_price <= ".$request->price_range;
+            else
+                $condition .="marketplace_products.product_price <= ".$request->price_range;
+        }
+        
+        if(!empty($request->sort_by))
+        {
+            //1=popularity, 2=ratings, 3=price lowtohigh, 4=price hightolow, 5=new first
+            if($request->sort_by == 1)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.status = '1'";
+                else
+                $condition .="marketplace_products.status = '1'";
+                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->get();    
+            }
+            elseif($request->sort_by == 2)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.status = '1'";
+                else
+                $condition .="marketplace_products.status = '1'";
+                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->get();
+            }
+            elseif($request->sort_by == 3)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.status = '1' order by product_price ASC";
+                else
+                $condition .="marketplace_products.status = '1' order by product_price ASC";
+                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->orderBy('product_price', 'ASC')->get();
+            }
+            elseif($request->sort_by == 4)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.status = '1' order by product_price DESC";
+                else
+                $condition .="marketplace_products.status = '1' order by product_price DESC";
+                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->orderBy('product_price', 'DESC')->get();
+            }
+            elseif($request->sort_by == 5)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.status = '1' order by marketplace_product_id DESC";
+                else
+                $condition .="marketplace_products.status = '1' order by marketplace_product_id DESC";
+                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->orderBy('marketplace_product_id', 'DESC')->get();
+            }
+            else
+            {
+                $message = "No products found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+
+
+        if($condition == '')
+        {
+            $productLists = MarketplaceProduct::with('labels')->where('title', 'LIKE', '%' . $request->keyword . '%')->where('status', '1')->get();    
+        }
+        else
+        {
+            //$productLists = MarketplaceProduct::with('labels')->where('title', 'LIKE', '%' . $request->keyword . '%')->whereRaw(''.$condition.'')->get();    
+            $productLists = DB::table('marketplace_products')
+                     //->with('labels')
+                     //->select(DB::raw('count(*) as user_count, status'))
+                     ->where('title', 'LIKE', '%' . $request->keyword . '%')
+                     ->whereRaw(''.$condition.'')->get();  
+        }
+
+        if(count($productLists) > 0)
+        {
+            foreach($productLists as $key => $myProductList)
+            {
+                $options = DB::table('user_field_options')
+                            ->where('head', 0)->where('parent', 0)
+                            ->where('user_field_option_id', $myProductList->product_category_id)
+                            ->first();
+                $productLists[$key]->product_category_name = $options->option;
+                $storeName = MarketplaceStore::where('marketplace_store_id', $myProductList->marketplace_store_id)->first();
+                                          
+                $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
+                (count($galleries) > 0) ? $productLists[$key]->product_gallery = $galleries : $productLists[$key]->product_gallery = [];
+
+                $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
+
+                $productLists[$key]->avg_rating = $avgRating;
+                $productLists[$key]->total_reviews = $totalReviews;
+
+                $productLists[$key]->store_name = $storeName->name;
+            }
+            return response()->json(['success' => $this->successStatus,
+                                        'count' => count($productLists),
+                                        'data' => $productLists,
+                                        ], $this->successStatus);
+        }
+        else
+        {
+            $message = "No products found";
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
     }
 
 
@@ -581,108 +739,10 @@ class ProductController extends CoreController
     /*
     Search product list
     */
-
     public function getSearchProductList($request, $user)
     {
-        $condition = '';
-
-        if(isset($request->available_for_sample))
-        {
-            if($request->available_for_sample == 1)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.available_for_sample = 'Yes'";
-                else
-                $condition .="marketplace_products.available_for_sample = 'Yes'";
-            }
-            elseif($request->available_for_sample == 0)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.available_for_sample = 'No'";
-                else
-                $condition .="marketplace_products.available_for_sample = 'No'";
-            }
-            
-        }
-        if(!empty($request->category))
-        {
-            if($condition != '')
-                $condition .=" and marketplace_products.product_category_id in(".$request->category.")";
-            else
-                $condition .="marketplace_products.product_category_id in(".$request->category.")";
-        }
-        if(!empty($request->price_range))
-        {
-            if($condition != '')
-                $condition .=" and marketplace_products.product_price <= ".$request->price_range;
-            else
-                $condition .="marketplace_products.product_price <= ".$request->price_range;
-        }
         
-        if(!empty($request->sort_by))
-        {
-            //1=popularity, 2=ratings, 3=price lowtohigh, 4=price hightolow, 5=new first
-            if($request->sort_by == 1)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.status = '1'";
-                else
-                $condition .="marketplace_products.status = '1'";
-                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->get();    
-            }
-            elseif($request->sort_by == 2)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.status = '1'";
-                else
-                $condition .="marketplace_products.status = '1'";
-                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->get();
-            }
-            elseif($request->sort_by == 3)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.status = '1' order by product_price ASC";
-                else
-                $condition .="marketplace_products.status = '1' order by product_price ASC";
-                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->orderBy('product_price', 'ASC')->get();
-            }
-            elseif($request->sort_by == 4)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.status = '1' order by product_price DESC";
-                else
-                $condition .="marketplace_products.status = '1' order by product_price DESC";
-                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->orderBy('product_price', 'DESC')->get();
-            }
-            elseif($request->sort_by == 5)
-            {
-                if($condition != '')
-                $condition .=" and marketplace_products.status = '1' order by marketplace_product_id DESC";
-                else
-                $condition .="marketplace_products.status = '1' order by marketplace_product_id DESC";
-                //$productLists = MarketplaceProduct::with('labels')->where('status', '1')->orderBy('marketplace_product_id', 'DESC')->get();
-            }
-            else
-            {
-                $message = "No products found";
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-            }
-        }
-
-
-        if($condition == '')
-        {
-            $productLists = MarketplaceProduct::with('labels')->where('title', 'LIKE', '%' . $request->keyword . '%')->where('status', '1')->get();    
-        }
-        else
-        {
-            //$productLists = MarketplaceProduct::with('labels')->where('title', 'LIKE', '%' . $request->keyword . '%')->whereRaw(''.$condition.'')->get();    
-            $productLists = DB::table('marketplace_products')
-                     //->with('labels')
-                     //->select(DB::raw('count(*) as user_count, status'))
-                     ->where('title', 'LIKE', '%' . $request->keyword . '%')
-                     ->whereRaw(''.$condition.'')->get();  
-        }
+        $productLists = MarketplaceProduct::select('marketplace_product_id','title')->where('title', 'LIKE', '%' . $request->keyword . '%')->where('status', '1')->get();    
 
         $recentSearch = new MarketplaceRecentSearch; 
         $recentSearch->user_id = $user->user_id;
@@ -691,26 +751,6 @@ class ProductController extends CoreController
         
         if(count($productLists) > 0)
         {
-            foreach($productLists as $key => $myProductList)
-            {
-                $options = DB::table('user_field_options')
-                            ->where('head', 0)->where('parent', 0)
-                            ->where('user_field_option_id', $myProductList->product_category_id)
-                            ->first();
-                $productLists[$key]->product_category_name = $options->option;
-                $storeName = MarketplaceStore::where('marketplace_store_id', $myProductList->marketplace_store_id)->first();
-                                          
-                $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
-                (count($galleries) > 0) ? $productLists[$key]->product_gallery = $galleries : $productLists[$key]->product_gallery = [];
-
-                $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
-                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
-
-                $productLists[$key]->avg_rating = $avgRating;
-                $productLists[$key]->total_reviews = $totalReviews;
-
-                $productLists[$key]->store_name = $storeName->name;
-            }
             return response()->json(['success' => $this->successStatus,
                                         'count' => count($productLists),
                                         'data' => $productLists,
@@ -723,8 +763,5 @@ class ProductController extends CoreController
         }
         
     }
-
-    
-
     
 }
