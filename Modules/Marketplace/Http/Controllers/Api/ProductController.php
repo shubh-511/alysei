@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Attachment;
 use Modules\Marketplace\Entities\MarketplaceProduct;
+use Modules\Marketplace\Entities\MarketplaceFavourite;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Modules\Marketplace\Entities\MarketplaceRating;
 use Modules\Marketplace\Entities\MarketplaceStore;
@@ -697,6 +698,8 @@ class ProductController extends CoreController
                 $fourStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 4)->count();
                 $fiveStar = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->where('rating', 5)->count();
 
+                $isfavourite = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '2')->where('id', $productDetail->marketplace_product_id)->first();
+
                 $productDetail->avg_rating = $avgRating;
                 $productDetail->total_reviews = $totalReviews;
 
@@ -706,7 +709,7 @@ class ProductController extends CoreController
                 $productDetail->total_four_star = $fourStar;
                 $productDetail->total_five_star = $fiveStar;
 
-                $productDetail->is_favourite = 0;
+                $productDetail->is_favourite = (!empty($isfavourite)) ? 1 : 0;
                 $productDetail->store_detail = $storeName;
                                           
                 /*$galleries = MarketplaceProductGallery::where('marketplace_product_id', $productDetail->marketplace_product_id)->get();
@@ -742,7 +745,7 @@ class ProductController extends CoreController
     public function getSearchProductList($request, $user)
     {
         
-        $productLists = MarketplaceProduct::select('marketplace_product_id','title')->where('title', 'LIKE', '%' . $request->keyword . '%')->where('status', '1')->get();    
+        $productLists = MarketplaceProduct::select('marketplace_product_id','title','product_category_id')->where('title', 'LIKE', '%' . $request->keyword . '%')->where('status', '1')->get();    
 
         $recentSearch = new MarketplaceRecentSearch; 
         $recentSearch->user_id = $user->user_id;
@@ -751,6 +754,14 @@ class ProductController extends CoreController
         
         if(count($productLists) > 0)
         {
+            foreach($productLists as $key => $productList)
+            {
+                $options = DB::table('user_field_options')
+                            ->where('head', 0)->where('parent', 0)
+                            ->where('user_field_option_id', $productList->product_category_id)
+                            ->first();
+                $productLists[$key]->product_category_name = (!empty($options->option)) ? $options->option : "";
+            }
             return response()->json(['success' => $this->successStatus,
                                         'count' => count($productLists),
                                         'data' => $productLists,

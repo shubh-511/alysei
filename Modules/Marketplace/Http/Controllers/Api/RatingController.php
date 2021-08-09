@@ -90,7 +90,7 @@ class RatingController extends CoreController
                     $review = new MarketplaceRating;
                     $review->user_id = $user->user_id;
                     $review->id = $request->id;
-                    $review->type = '1';
+                    $review->type = '2';
                     $review->rating = $request->rating;
                     $review->review = $request->review;
                     $review->save();

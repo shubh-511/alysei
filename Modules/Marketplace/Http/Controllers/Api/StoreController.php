@@ -10,6 +10,7 @@ use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 use Modules\Marketplace\Entities\MarketplaceRating;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
+use Modules\Marketplace\Entities\MarketplaceFavourite;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User;
 use App\Http\Traits\UploadImageTrait;
@@ -264,6 +265,8 @@ class StoreController extends CoreController
                 $fourStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 4)->count();
                 $fiveStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 5)->count();
 
+                $isfavourite = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '1')->where('id', $myStore->marketplace_store_id)->first();
+
                 $myStore->avg_rating = $avgRating;
                 $myStore->total_reviews = $totalReviews;
 
@@ -272,6 +275,7 @@ class StoreController extends CoreController
                 $myStore->total_three_star = $threeStar;
                 $myStore->total_four_star = $fourStar;
                 $myStore->total_five_star = $fiveStar;
+                $myStore->is_favourite = (!empty($isfavourite)) ? 1 : 0;
 
 
 
@@ -327,6 +331,8 @@ class StoreController extends CoreController
                 $fourStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 4)->count();
                 $fiveStar = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->where('rating', 5)->count();
 
+                $isfavourite = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '1')->where('id', $myStore->marketplace_store_id)->first();
+
                 $myStore->avg_rating = $avgRating;
                 $myStore->total_reviews = $totalReviews;
 
@@ -335,6 +341,7 @@ class StoreController extends CoreController
                 $myStore->total_three_star = $threeStar;
                 $myStore->total_four_star = $fourStar;
                 $myStore->total_five_star = $fiveStar;
+                $myStore->is_favourite = (!empty($isfavourite)) ? 1 : 0;
 
 
 
