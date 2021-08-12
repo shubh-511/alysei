@@ -277,6 +277,27 @@ class StoreController extends CoreController
                 $myStore->total_five_star = $fiveStar;
                 $myStore->is_favourite = (!empty($isfavourite)) ? 1 : 0;
 
+                $arrayValues = array();
+                $fieldValues = DB::table('user_field_values')
+                            ->where('user_id', $user->user_id)
+                            ->where('user_field_id', 2)
+                            ->get();
+                if(count($fieldValues) > 0)
+                {
+                    foreach($fieldValues as $fieldValue)
+                    {
+                        $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_option_id', $fieldValue->value)
+                                ->first();
+                        
+                        //$arrayValues[] = $options->option;
+                        if(!empty($options->option))
+                        $arrayValues[] = $options->option;
+                    }
+                }
+                $myStore->total_category = count($arrayValues);
+
 
 
                 $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $myStore->marketplace_store_id)->get();
@@ -313,7 +334,7 @@ class StoreController extends CoreController
             $myStore = MarketplaceStore::where('marketplace_store_id', $storeId)->first();
             if(!empty($myStore))
             {
-                $userDetail = User::select('company_name','about','phone','email','website','address','lattitude','longitude','state')->with('state:id,name')->where('user_id', $myStore->user_id)->first();
+                $userDetail = User::select('company_name','about','phone','email','website','address','lattitude','longitude','state','avatar_id')->with('avatar_id')->with('state:id,name')->where('user_id', $myStore->user_id)->first();
                 
                 $myStore->prefilled = $userDetail;
                 $logoId = Attachment::where('id', $myStore->logo_id)->first();
@@ -342,6 +363,27 @@ class StoreController extends CoreController
                 $myStore->total_four_star = $fourStar;
                 $myStore->total_five_star = $fiveStar;
                 $myStore->is_favourite = (!empty($isfavourite)) ? 1 : 0;
+
+                $arrayValues = array();
+                $fieldValues = DB::table('user_field_values')
+                            ->where('user_id', $user->user_id)
+                            ->where('user_field_id', 2)
+                            ->get();
+                if(count($fieldValues) > 0)
+                {
+                    foreach($fieldValues as $fieldValue)
+                    {
+                        $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_option_id', $fieldValue->value)
+                                ->first();
+                        
+                        //$arrayValues[] = $options->option;
+                        if(!empty($options->option))
+                        $arrayValues[] = $options->option;
+                    }
+                }
+                $myStore->total_category = count($arrayValues);
 
 
 

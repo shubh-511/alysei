@@ -105,6 +105,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('update/trip', 'Api\TripController@updateTrip');
 	Route::post('delete/trip', 'Api\TripController@deleteTrip');	
 
+	Route::get('get/all/cousins', 'Api\UserController@getCousins');	
+
 
 });
 

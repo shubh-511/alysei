@@ -16,6 +16,8 @@ use Modules\Recipe\Entities\RecipeRegion;
 use Modules\Recipe\Entities\RecipeTool; 
 use Modules\Recipe\Entities\Recipe; 
 use Modules\Recipe\Entities\RecipeSavedCategory;
+use Modules\Recipe\Entities\RecipeCookingSkill;
+use Modules\Recipe\Entities\RecipeDiet;
 use Modules\Recipe\Entities\RecipeStep;
 use Modules\Recipe\Entities\RecipeSavedIngredient;
 use Modules\Recipe\Entities\RecipeSavedTool;
@@ -74,6 +76,41 @@ class RecipeController extends CoreController
             else
             {
                 $message = "No categories found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get recipie diets
+     * 
+     */
+    public function getRecipeDiets()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $diets = RecipeDiet::get();
+            if(count($diets) > 0)
+            {
+                foreach($diets as $key => $diet)
+                {
+                    $diets[$key]->name = $this->translate('messages.'.$diet->name,$diet->name);
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($diets),
+                                        'data' => $diets,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No recipe diets found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
         }
@@ -203,16 +240,59 @@ class RecipeController extends CoreController
     }
 
     /*
-     * Get recipie categories
+     * Get Cooking skills
      * 
      */
-    public function getRecipeRegions()
+    public function getCookingSkills()
     {
         try
         {
             $user = $this->user;
 
-            $regions = RecipeRegion::with('image_id')->get();
+            $skills = RecipeCookingSkill::with('image_id')->get();
+            if(count($skills) > 0)
+            {
+                foreach($skills as $key => $skill)
+                {
+                    $skills[$key]->name = $this->translate('messages.'.$skill->name,$skill->name);
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($skills),
+                                        'data' => $skills,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No cooking skills found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get recipie categories
+     * 
+     */
+    public function getRecipeRegions(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'cousin_id' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $regions = RecipeRegion::with('image_id')->where('cousin_id', $request->cousin_id)->get();
             if(count($regions) > 0)
             {
                 foreach($regions as $key => $region)
@@ -394,6 +474,270 @@ class RecipeController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
+
+    /*
+     * Get all my recipie
+     * 
+     */
+    public function getMyRecipes()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $myRecipes = Recipe::with('image_id')->where('user_id', $user->user_id)->orderBy('recipe_id', 'DESC')->get();
+            if(count($myRecipes) > 0)
+            {
+                foreach($myRecipes as $key => $myRecipe)
+                {
+                    $myRecipes[$key]->total_likes = 3;
+                    $myRecipes[$key]->avg_rating = 3;
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($myRecipes),
+                                        'data' => $myRecipes,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No regions found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Favourite/unfavourite recipe
+     * @Params $request
+     */
+    public function makeFavouriteOrUnfavourite(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'recipe_id' => 'required',
+                'favourite_or_unfavourite' => 'required', // 1 for favourite 0 for unfavourite
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $getRecipe = Recipe::where('recipe_id', $request->recipe_id)->first();
+            if(!empty($getRecipe))
+            {
+                if($request->favourite_or_unfavourite == 1)
+                {
+                    $isLikedActivityPost = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $request->recipe_id)->first();
+
+
+                    if(!empty($isLikedActivityPost))
+                    {
+                        $message = "You have already added this recipe in your favourite list";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+                    }
+                    else
+                    {
+                        $activityLike = new RecipeFavourite;
+                        $activityLike->user_id = $user->user_id;
+                        $activityLike->recipe_id = $request->recipe_id;
+                        $activityLike->save();
+
+                        $getRecipe->favourite_count = $getRecipe->favourite_count + 1;
+                        $getRecipe->save();
+
+                        $message = "You added this recipe in your favourite list";
+                        return response()->json(['success' => $this->successStatus,
+                                                 'total_favourite_count' => $getRecipe->like_count,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                    }
+                }
+                elseif($request->favourite_or_unfavourite == 0)
+                {
+                    $isLikedActivityPost = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $request->recipe_id)->first();
+                    if(!empty($isLikedActivityPost))
+                    {
+                        $isUnlikedActivityPost = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $request->recipe_id)->delete();
+                        if($isUnlikedActivityPost == 1)
+                        {
+                            $isLikedActivityPost->favourite_count = $isLikedActivityPost->favourite_count - 1;
+                            $isLikedActivityPost->save();
+
+                            $message = "You removed this recipe from your favourite list";
+                            return response()->json(['success' => $this->successStatus,
+                                                 'total_likes' => $isLikedActivityPost->favourite_count,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                        }
+                        else
+                        {
+                            $message = "You have to first add this recipe in your favourite list";
+                            return response()->json(['success' => $this->exceptionStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->exceptionStatus);
+                        }
+                    }
+                    else
+                    {
+                        $message = "You have not added this recipe in your favourite list";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                }
+                else
+                {
+                    $message = "Invalid favourite/unfavourite type";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            }
+            else
+            {
+                $message = "Invalid recipe id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+
+    /*
+     * Get my favourite recipie
+     * 
+     */
+    public function getMyFavouriteRecipes()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $myFavRecipes = RecipeFavourite::where('user_id', $user->user_id)->orderBy('recipe_favourite_id', 'DESC')->get();
+            if(count($myFavRecipes) > 0)
+            {
+                $myFavRecipesId = $myFavRecipes->pluck('recipe_id');
+                $myRecipes = Recipe::with('image_id')->whereIn('recipe_id', $myFavRecipesId)->orderBy('recipe_id', 'DESC')->get();
+
+                if(count($myRecipes) > 0)
+                {
+                    foreach($myRecipes as $key => $myRecipe)
+                    {
+                        $myRecipes[$key]->total_likes = 3;
+                        $myRecipes[$key]->avg_rating = 3;
+                    }
+                    return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($myRecipes),
+                                        'data' => $myRecipes,
+                                    ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "No recipes found";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }   
+            }
+            else
+            {
+                $message = "You have not liked any recipe";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Add ingredients
+     * 
+     */
+    public function addIngredient(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'title' => 'required',
+                'image_id' => 'required',
+                'category' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $newIngredient = new RecipeIngredient;
+            $newIngredient->image_id = $this->uploadImage($request->file('image_id'));
+            $newIngredient->title = $request->title;
+            $newIngredient->name = $request->title;
+            $newIngredient->parent = $request->category;
+            $newIngredient->save();
+
+           
+            $message = "ingredient added successfuly";
+            return response()->json(['success' => $this->successStatus,
+                                    'message' =>  $this->translate('messages.'.$message,$message),
+                                    'data' => $newIngredient,
+                                    ], $this->successStatus);
+                       
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Add ingredients
+     * 
+     */
+    public function addTool(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'title' => 'required',
+                'image_id' => 'required',
+                'category' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $newIngredient = new RecipeTool;
+            $newIngredient->image_id = $this->uploadImage($request->file('image_id'));
+            $newIngredient->title = $request->title;
+            $newIngredient->name = $request->title;
+            $newIngredient->parent = $request->category;
+            $newIngredient->save();
+
+           
+            $message = "Tool added successfuly";
+            return response()->json(['success' => $this->successStatus,
+                                    'message' =>  $this->translate('messages.'.$message,$message),
+                                    'data' => $newIngredient,
+                                    ], $this->successStatus);
+                       
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
 
     /*
      * Validate Data

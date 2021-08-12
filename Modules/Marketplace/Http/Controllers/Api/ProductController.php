@@ -43,14 +43,13 @@ class ProductController extends CoreController
      * Get Product Categories
      * 
      */
-    public function getProductCategories()
+    public function getProductCategories($allCategories='')
     {
         try
         {
             $user = $this->user;
 
-            $categories = MarketplaceProductCategory::where('status', '1')->get();
-            if(count($categories) > 0)
+            if($allCategories == '')
             {
                 $arrayValues = array();
                 $fieldValues = DB::table('user_field_values')
@@ -80,13 +79,31 @@ class ProductController extends CoreController
                     $message = "No product categories found";
                     return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
                 }
-
-                
             }
             else
             {
-                $message = "No product categories found";
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                $options = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', 0)
+                                ->where('user_field_id', 2)
+                                ->get();
+                if(count($options) > 0)
+                {
+                    foreach($options as $key => $option)
+                    {
+                        $arrayValues[] = ['marketplace_product_category_id'=>$option->user_field_option_id, 'name' => $option->option];    
+                    }
+                    return response()->json(['success' => $this->successStatus,
+                                    'count' => count($arrayValues),
+                                    'data' => $arrayValues,
+                                    ], $this->successStatus);
+                    
+                }   
+                else
+                {
+                    $message = "No product categories found";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);    
+                }             
+                
             }            
         }
         catch(\Exception $e)
@@ -393,7 +410,15 @@ class ProductController extends CoreController
                                 ->where('head', 0)->where('parent', 0)
                                 ->where('user_field_option_id', $myProductList->product_category_id)
                                 ->first();
-                    $productLists[$key]->product_category_name = $options->option;
+                    if(!empty($options))
+                    {
+                        $productLists[$key]->product_category_name = $options->option;
+                    }
+                    else
+                    {
+                        $productLists[$key]->product_category_name = '';
+                    }
+                
                     $storeName = MarketplaceStore::where('marketplace_store_id', $myProductList->marketplace_store_id)->first();
                                               
                     $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
@@ -458,12 +483,23 @@ class ProductController extends CoreController
             else
                 $condition .="marketplace_products.product_category_id in(".$request->category.")";
         }
-        if(!empty($request->price_range))
+        if(!empty($request->price_from))
         {
-            if($condition != '')
-                $condition .=" and marketplace_products.product_price <= ".$request->price_range;
+            if(!empty($request->price_to))
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.product_price BETWEEN ".$request->price_from." AND ".$request->price_to;
+                else
+                $condition .="marketplace_products.product_price BETWEEN ".$request->price_from." AND ".$request->price_to;    
+            }
             else
-                $condition .="marketplace_products.product_price <= ".$request->price_range;
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.product_price >= ".$request->price_from;
+                else
+                $condition .="marketplace_products.product_price >= ".$request->price_from;
+            }
+            
         }
         
         if(!empty($request->sort_by))
@@ -539,7 +575,15 @@ class ProductController extends CoreController
                             ->where('head', 0)->where('parent', 0)
                             ->where('user_field_option_id', $myProductList->product_category_id)
                             ->first();
-                $productLists[$key]->product_category_name = $options->option;
+
+                if(!empty($options))
+                {
+                    $productLists[$key]->product_category_name = $options->option;
+                }
+                else
+                {
+                    $productLists[$key]->product_category_name = '';
+                }            
                 $storeName = MarketplaceStore::where('marketplace_store_id', $myProductList->marketplace_store_id)->first();
                                           
                 $galleries = MarketplaceProductGallery::where('marketplace_product_id', $myProductList->marketplace_product_id)->get();
@@ -686,7 +730,7 @@ class ProductController extends CoreController
                 $productDetail->product_category_name = $options->option;
                 $storeName = MarketplaceStore::where('marketplace_store_id', $productDetail->marketplace_store_id)->first();
                 $logoId = Attachment::where('id', $storeName->logo_id)->first();
-                
+                $storeName->store_logo = $logoId->attachment_url;
                 $productDetail->store_logo = $logoId->attachment_url;
 
                 $avgRating = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->avg('rating');

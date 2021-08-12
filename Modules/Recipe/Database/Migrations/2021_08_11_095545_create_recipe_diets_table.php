@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRecipeRegionsTable extends Migration
+class CreateRecipeDietsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,9 @@ class CreateRecipeRegionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('recipe_regions', function (Blueprint $table) {
-            $table->increments('recipe_region_id');
-            $table->integer('cousin_id');
+        Schema::create('recipe_diets', function (Blueprint $table) {
+            $table->increments('recipe_diet_id');
             $table->string('name');
-            $table->integer('image_id');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ class CreateRecipeRegionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('recipe_regions');
+        Schema::dropIfExists('recipe_diets');
     }
 }

@@ -24,6 +24,7 @@ class CreateRecipesTable extends Migration
             $table->integer('serving');
             $table->integer('region_id');
             $table->integer('image_id');
+            $table->integer('favourite_count');
             $table->timestamps();
         });
     }

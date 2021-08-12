@@ -27,5 +27,15 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('get/recipe/courses', 'Api\RecipeController@getRecipeCourses');
 
     Route::post('create/recipe', 'Api\RecipeController@createRecipe');
+    Route::get('get/myrecipes', 'Api\RecipeController@getMyRecipes');
+    
+    Route::post('favourite/unfavourite/recipe', 'Api\RecipeController@makeFavouriteOrUnfavourite');
+    Route::get('get/my/favourite/recipes', 'Api\RecipeController@getMyFavouriteRecipes');
+
+    Route::post('add/ingredients', 'Api\RecipeController@addIngredient');
+    Route::post('add/tools', 'Api\RecipeController@addTool');
+
+    Route::get('get/cooking/skills', 'Api\RecipeController@getCookingSkills');
+    Route::get('get/diet/list', 'Api\RecipeController@getRecipeDiets');
 
 });

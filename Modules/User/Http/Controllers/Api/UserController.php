@@ -14,6 +14,7 @@ use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
 use Modules\User\Entities\UserSelectedHub;
 use Modules\User\Entities\UserTempHub;
+use Modules\User\Entities\Cousin;
 use Illuminate\Support\Facades\Auth; 
 use Modules\User\Entities\User; 
 use Modules\Marketplace\Entities\MarketplaceStore;
@@ -55,6 +56,42 @@ class UserController extends CoreController
         return response()->json(['success' => $this->successStatus,
                                  'user' => $this->user->only($this->userFieldsArray),
                                 ], $this->successStatus);  
+    }
+
+
+    /*
+     * Get Cousins
+     * 
+     */
+    public function getCousins()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $cousins = Cousin::with('attachment')->where('status', '1')->get();
+            if(count($cousins) > 0)
+            {
+                foreach($cousins as $key => $cousin)
+                {
+                    $cousins[$key]->name = $this->translate('messages.'.$cousin->name,$cousin->name);
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($cousins),
+                                        'data' => $cousins,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No cousins found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
     }
 
     /* 
