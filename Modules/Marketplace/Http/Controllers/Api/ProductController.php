@@ -761,6 +761,15 @@ class ProductController extends CoreController
 
                 $relatedProducts = MarketplaceProduct::with('product_gallery')->with('labels')->where('product_category_id', $productDetail->product_category_id)->get();
 
+                foreach($relatedProducts as $key => $relatedProduct)
+                {
+                    $avgRatingRelatedProduct = MarketplaceRating::where('type', '2')->where('id', $relatedProduct->marketplace_product_id)->avg('rating');
+                    $totalReviewsRelatedProducts = MarketplaceRating::where('type', '2')->where('id', $relatedProduct->marketplace_product_id)->count();
+
+                    $relatedProducts[$key]->avg_rating = number_format((float)$avgRatingRelatedProduct, 1, '.', '');
+                    $relatedProducts[$key]->total_reviews = $totalReviewsRelatedProducts;
+                }
+
                 $data = ['product_detail' => $productDetail, 'related_products' => $relatedProducts];
 
                 return response()->json(['success' => $this->successStatus,

@@ -15,6 +15,7 @@ use Modules\Recipe\Entities\RecipeMeal;
 use Modules\Recipe\Entities\RecipeRegion; 
 use Modules\Recipe\Entities\RecipeTool; 
 use Modules\Recipe\Entities\Recipe; 
+use Modules\Recipe\Entities\RecipeFavourite;
 use Modules\Recipe\Entities\RecipeSavedCategory;
 use Modules\Recipe\Entities\RecipeCookingSkill;
 use Modules\Recipe\Entities\RecipeDiet;
@@ -131,7 +132,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $courses = RecipeCourse::with('image_id')->get();
+            $courses = RecipeCourse::get();
             if(count($courses) > 0)
             {
                 foreach($courses as $key => $course)
@@ -215,12 +216,12 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $meals = RecipeMeal::with('image_id')->get();
+            $meals = RecipeMeal::get();
             if(count($meals) > 0)
             {
                 foreach($meals as $key => $meal)
                 {
-                    $meals[$key]->name = $this->translate('messages.'.$meals->name,$meals->name);
+                    $meals[$key]->name = $this->translate('messages.'.$meal->name,$meal->name);
                 }
 
                 return response()->json(['success' => $this->successStatus,
@@ -250,7 +251,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $skills = RecipeCookingSkill::with('image_id')->get();
+            $skills = RecipeCookingSkill::get();
             if(count($skills) > 0)
             {
                 foreach($skills as $key => $skill)
@@ -551,8 +552,8 @@ class RecipeController extends CoreController
                         $activityLike->recipe_id = $request->recipe_id;
                         $activityLike->save();
 
-                        $getRecipe->favourite_count = $getRecipe->favourite_count + 1;
-                        $getRecipe->save();
+                        /*$getRecipe->favourite_count = $getRecipe->favourite_count + 1;
+                        $getRecipe->save();*/
 
                         $message = "You added this recipe in your favourite list";
                         return response()->json(['success' => $this->successStatus,
@@ -569,8 +570,8 @@ class RecipeController extends CoreController
                         $isUnlikedActivityPost = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $request->recipe_id)->delete();
                         if($isUnlikedActivityPost == 1)
                         {
-                            $isLikedActivityPost->favourite_count = $isLikedActivityPost->favourite_count - 1;
-                            $isLikedActivityPost->save();
+                            /*$isLikedActivityPost->favourite_count = $isLikedActivityPost->favourite_count - 1;
+                            $isLikedActivityPost->save();*/
 
                             $message = "You removed this recipe from your favourite list";
                             return response()->json(['success' => $this->successStatus,
@@ -681,7 +682,7 @@ class RecipeController extends CoreController
             $newIngredient = new RecipeIngredient;
             $newIngredient->image_id = $this->uploadImage($request->file('image_id'));
             $newIngredient->title = $request->title;
-            $newIngredient->name = $request->title;
+            $newIngredient->name = strtolower(str_replace(' ', '_', $request->title));
             $newIngredient->parent = $request->category;
             $newIngredient->save();
 
@@ -721,7 +722,7 @@ class RecipeController extends CoreController
             $newIngredient = new RecipeTool;
             $newIngredient->image_id = $this->uploadImage($request->file('image_id'));
             $newIngredient->title = $request->title;
-            $newIngredient->name = $request->title;
+            $newIngredient->name = strtolower(str_replace(' ', '_', $request->title));
             $newIngredient->parent = $request->category;
             $newIngredient->save();
 
