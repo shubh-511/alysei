@@ -361,7 +361,7 @@ class ProductController extends CoreController
                     $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
                     $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
 
-                    $myProductLists[$key]->avg_rating = $avgRating;
+                    $myProductLists[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                     $myProductLists[$key]->total_reviews = $totalReviews;
                 }
                 return response()->json(['success'=>$this->successStatus, 'count' => $productCount, 'data' =>$myProductLists],$this->successStatus); 
@@ -427,7 +427,7 @@ class ProductController extends CoreController
                     $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
                     $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
 
-                    $productLists[$key]->avg_rating = $avgRating;
+                    $productLists[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                     $productLists[$key]->total_reviews = $totalReviews;
 
                     $productLists[$key]->store_name = $storeName->name;
@@ -592,7 +592,7 @@ class ProductController extends CoreController
                 $avgRating = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->avg('rating');
                 $totalReviews = MarketplaceRating::where('type', '2')->where('id', $myProductList->marketplace_product_id)->count();
 
-                $productLists[$key]->avg_rating = $avgRating;
+                $productLists[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $productLists[$key]->total_reviews = $totalReviews;
 
                 $productLists[$key]->store_name = $storeName->name;
@@ -744,7 +744,7 @@ class ProductController extends CoreController
 
                 $isfavourite = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '2')->where('id', $productDetail->marketplace_product_id)->first();
 
-                $productDetail->avg_rating = $avgRating;
+                $productDetail->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $productDetail->total_reviews = $totalReviews;
 
                 $productDetail->total_one_star = $oneStar;

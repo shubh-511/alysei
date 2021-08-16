@@ -12,6 +12,7 @@ use App\Http\Traits\UploadImageTrait;
 use Modules\User\Entities\Role;
 use Modules\Activity\Entities\CoreComment;
 use Carbon\Carbon;
+use App\Http\Traits\NotificationTrait;
 use DB;
 use Modules\Activity\Entities\ActivityLike;
 use Modules\Activity\Entities\ActivityAction;
@@ -25,6 +26,7 @@ use Validator;
 class SocketConnectionController extends CoreController
 {
     use UploadImageTrait;
+    use NotificationTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -145,6 +147,7 @@ class SocketConnectionController extends CoreController
             $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
             if(!empty($activityPost))
             {
+                $poster = User::where('user_id', $request->user_id)->first();
                 $activityActionType = ActivityActionType::where('activity_action_type_id', $activityPost->type)->first();
                 $actionType = $this->checkActionType($activityActionType->type);
                 if($actionType[1] > 0)
@@ -163,6 +166,35 @@ class SocketConnectionController extends CoreController
 
                     $activityPost->comment_count = $activityPost->comment_count + 1;
                     $activityPost->save();
+
+                    if($poster->role_id == 7 || $poster->role_id == 10)
+                    {
+                        $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
+                    }
+                    else
+                    {
+                        $name = $poster->company_name;
+                    }
+
+                    $title = $name . " commented on your post";
+
+                    $saveNotification = new Notification;
+                    $saveNotification->from = $poster->user_id;
+                    $saveNotification->to = $activityPost->subject_id;
+                    $saveNotification->notification_type = 'commented';
+                    $saveNotification->title = $this->translate('messages.'.$title,$title);
+                    $saveNotification->redirect_to = 'post_screen';
+                    $saveNotification->redirect_to_id = $request->post_id;
+                    $saveNotification->save();
+
+                    $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
+                    if(count($tokens) > 0)
+                    {
+                        $collectedTokenArray = $tokens->pluck('device_token');
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                    }
+
+
 
                     $message = "Your comment has been posted successfully";
                     return response()->json(['success' => $this->successStatus,
@@ -206,6 +238,7 @@ class SocketConnectionController extends CoreController
             $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->first();
             if(!empty($activityPost))
             {
+                $poster = User::where('user_id', $request->user_id)->first();
                 $activityComment = new CoreComment;
                 $activityComment->resource_type = "user";
                 $activityComment->resource_id = $request->post_id;
@@ -214,6 +247,33 @@ class SocketConnectionController extends CoreController
                 $activityComment->body = $request->reply;
                 $activityComment->parent_id = $request->comment_id;
                 $activityComment->save();
+
+                if($poster->role_id == 7 || $poster->role_id == 10)
+                {
+                    $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
+                }
+                else
+                {
+                    $name = $poster->company_name;
+                }
+
+                $title = $name . " replied on your post";
+
+                $saveNotification = new Notification;
+                $saveNotification->from = $poster->user_id;
+                $saveNotification->to = $activityPost->subject_id;
+                $saveNotification->notification_type = 'replied';
+                $saveNotification->title = $this->translate('messages.'.$title,$title);
+                $saveNotification->redirect_to = 'post_screen';
+                $saveNotification->redirect_to_id = $request->post_id;
+                $saveNotification->save();
+
+                $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
+                if(count($tokens) > 0)
+                {
+                    $collectedTokenArray = $tokens->pluck('device_token');
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                }
 
                 $message = "Your reply has been posted successfully";
                 return response()->json(['success' => $this->successStatus,
@@ -259,6 +319,7 @@ class SocketConnectionController extends CoreController
             {
                 if($request->like_or_unlike == 1)
                 {
+                    $poster = User::where('user_id', $request->user_id)->first();
                     $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
 
 
@@ -277,6 +338,34 @@ class SocketConnectionController extends CoreController
 
                         $activityPost->like_count = $activityPost->like_count + 1;
                         $activityPost->save();
+
+                        if($poster->role_id == 7 || $poster->role_id == 10)
+                        {
+                            $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
+                        }
+                        else
+                        {
+                            $name = $poster->company_name;
+                        }
+
+                        $title = $name . " liked your post";
+
+                        $saveNotification = new Notification;
+                        $saveNotification->from = $poster->user_id;
+                        $saveNotification->to = $activityPost->subject_id;
+                        $saveNotification->notification_type = 'liked';
+                        $saveNotification->title = $this->translate('messages.'.$title,$title);
+                        $saveNotification->redirect_to = 'post_screen';
+                        $saveNotification->redirect_to_id = $request->post_id;
+                        $saveNotification->save();
+
+                        $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
+                        if(count($tokens) > 0)
+                        {
+                            $collectedTokenArray = $tokens->pluck('device_token');
+                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                        }
+
 
                         $message = "You liked this post";
                         return response()->json(['success' => $this->successStatus,

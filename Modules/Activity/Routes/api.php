@@ -25,6 +25,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('delete/post', 'Api\ActivityController@deletePost');
 	Route::get('get/post/detail', 'Api\ActivityController@getPostDetails');
 	Route::get('get/products/for/connection', 'Api\ConnectUserController@getProductListToConnect');
+
+	Route::get('view/connection', 'Api\ConnectUserController@viewConnectionRequestOfProducer');
 	
 	
 	Route::post('delete/post/comment', 'Api\ActivityController@deletePostComment');

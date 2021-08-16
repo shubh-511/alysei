@@ -88,12 +88,16 @@ class LoginController extends CoreController
                     $userData = User::select('*','name as username')->with('roles','avatar_id','cover_id')->where('user_id', $user->user_id)->first();
                     $userData->is_hub_selected = $isHubSelected;
                     $userData->is_store_created = $isStoreCreated;
-
-                    /*$userToken = new DeviceToken;
-                    $userToken->user_id = $userData->user_id;
-                    $userToken->device_type = $request->device_type;
-                    $userToken->device_token = $request->device_token;
-                    $userToken->save();*/
+                    
+                    if(!empty($request->device_token))
+                    {
+                        $userToken = new DeviceToken;
+                        $userToken->user_id = $userData->user_id;
+                        $userToken->device_type = $request->device_type;
+                        $userToken->device_token = $request->device_token;
+                        $userToken->save();
+                    }
+                    /**/
 
                         Auth::user()->roles;
                         $token =  $user->createToken('alysei')->accessToken; 

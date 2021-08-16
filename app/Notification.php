@@ -13,8 +13,8 @@ class Notification extends Model
         return $this->belongsTo(User::class, 'from','user_id');
     }
 
-    public function to_user()
+    public function user()
     {
-        return $this->belongsTo(User::class, 'to','user_id');
+        return $this->belongsTo(User::class, 'from','user_id');
     }
 }

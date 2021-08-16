@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use App\Http\Traits\UploadImageTrait;
+use App\Http\Traits\NotificationTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\Follower;
 use Modules\Activity\Entities\ActivityLike;
@@ -24,6 +25,7 @@ use Validator;
 class FollowUserController extends CoreController
 {
     use UploadImageTrait;
+    use NotificationTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -77,6 +79,33 @@ class FollowUserController extends CoreController
                             $follower->user_id = $user->user_id;
                             $follower->follow_user_id = $request->follow_user_id;
                             $follower->save();
+
+                            if($user->role_id == 7 || $user->role_id == 10)
+                            {
+                                $name = ucwords(strtolower($user->first_name)) . ' ' . ucwords(strtolower($user->last_name));
+                            }
+                            else
+                            {
+                                $name = $user->company_name;
+                            }
+
+                            $title = $name . " started following you";
+
+                            $saveNotification = new Notification;
+                            $saveNotification->from = $user->user_id;
+                            $saveNotification->to = $request->follow_user_id;
+                            $saveNotification->notification_type = 'follow';
+                            $saveNotification->title = $this->translate('messages.'.$title,$title);
+                            $saveNotification->redirect_to = 'user_screen';
+                            $saveNotification->redirect_to_id = $user->user_id;
+                            $saveNotification->save();
+
+                            $tokens = DeviceToken::where('user_id', $request->follow_user_id)->get();
+                            if(count($tokens) > 0)
+                            {
+                                $collectedTokenArray = $tokens->pluck('device_token');
+                                $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                            }
 
                             $message = "You are now following this user";
                             return response()->json(['success' => $this->successStatus,

@@ -23,6 +23,7 @@ use Modules\Recipe\Entities\RecipeSavedIngredient;
 use Modules\Recipe\Entities\RecipeSavedTool;
 use Modules\Recipe\Entities\RecipeMapStepTool;
 use Modules\Recipe\Entities\RecipeMapStepIngredient;
+use Modules\Recipe\Entities\RecipeEnquery;
 use App\Notification;
 use DB;
 use Illuminate\Support\Facades\Auth; 

@@ -11,6 +11,7 @@ use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\CoreComment;
 use Modules\User\Entities\UserSelectedHub;
 use App\Attachment;
+use App\Http\Traits\NotificationTrait;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
 use Modules\Activity\Entities\ActivityLike;
@@ -25,6 +26,7 @@ use Validator;
 class ActivityController extends CoreController
 {
     use UploadImageTrait;
+    use NotificationTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
@@ -142,18 +144,6 @@ class ActivityController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-           /* $requestFields = $request->params;
-            
-            $requestedFields = $requestFields;
-            
-            $rules = $this->validateSharePostData($requestedFields);
-
-            $validator = Validator::make($requestedFields, $rules);
-
-            if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-            }*/
-
             $actionType = $this->checkActionType($request->action_type, 5);
             if($actionType[1] > 0)
             {
@@ -161,6 +151,7 @@ class ActivityController extends CoreController
             }
             else
             {
+                $activityPost = ActivityAction::where('activity_action_id', $request->shared_post_id)->first();
                 $activityActionType = ActivityActionType::where("type", $request->action_type)->first();
                 $activityAction = new ActivityAction;
                 $activityAction->type = $activityActionType->activity_action_type_id;
@@ -178,6 +169,34 @@ class ActivityController extends CoreController
             
             if($activityAction)
             {
+
+                if($user->role_id == 7 || $user->role_id == 10)
+                {
+                    $name = ucwords(strtolower($user->first_name)) . ' ' . ucwords(strtolower($user->last_name));
+                }
+                else
+                {
+                    $name = $user->company_name;
+                }
+
+                $title = $name . " shared your post";
+
+                $saveNotification = new Notification;
+                $saveNotification->from = $user->user_id;
+                $saveNotification->to = $activityPost->subject_id;
+                $saveNotification->notification_type = 'share_post';
+                $saveNotification->title = $this->translate('messages.'.$title,$title);
+                $saveNotification->redirect_to = 'post_screen';
+                $saveNotification->redirect_to_id = $request->shared_post_id;
+                $saveNotification->save();
+
+                $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
+                if(count($tokens) > 0)
+                {
+                    $collectedTokenArray = $tokens->pluck('device_token');
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                }
+
                 return response()->json(['success' => $this->successStatus,
                                          'message' => $this->translate('messages.'."Post shared successfuly!","Post shared successfuly!"),
                                         ], $this->successStatus);

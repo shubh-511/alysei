@@ -11,6 +11,7 @@ use Modules\User\Entities\DeviceToken;
 use App\Http\Traits\NotificationTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\Follower;
+use Modules\User\Entities\Certificate;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\ActivityActionType;
 use Modules\Activity\Entities\ActivityAttachment;
@@ -194,6 +195,74 @@ class ConnectUserController extends CoreController
     }
 
     /*
+     * View Connection Request
+     *
+     */
+    public function viewConnectionRequestOfProducer(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'connection_id' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $isConnectedUser = Connection::where('connection_id', $request->connection_id)->where('user_id', $user->user_id)->first();
+            if(!empty($isConnectedUser))
+            {
+                $user = User::where('user_id', $isConnectedUser->resource_id)->first();
+                $fieldOptions = DB::table('user_field_options')->where('parent','=',0)->where('head','=',0)->get();
+
+                $fieldOptions = $fieldOptions->pluck('user_field_option_id');
+
+                $userFieldValues = DB::table('user_field_values')->where('user_id', $isConnectedUser->resource_id)->where('user_field_id', 2)->whereIn('value', $fieldOptions)->get();
+
+                $userFieldValues = $userFieldValues->pluck('value');
+
+                $fieldOptions = DB::table('user_field_options')->whereIn('user_field_option_id',$userFieldValues)->get();
+
+
+
+                foreach($fieldOptions as $key => $fieldOption)
+                {
+                    $userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $isConnectedUser->resource_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                    
+                    $fieldOptions[$key]->photo_of_label = (!empty($userCertificates->photo_of_label))?($this->getCertificatesById($userCertificates->photo_of_label)):"";
+
+                    $fieldOptions[$key]->fce_sid_certification = (!empty($userCertificates->fce_sid_certification))?($this->getCertificatesById($userCertificates->fce_sid_certification)):"";
+
+                    $fieldOptions[$key]->phytosanitary_certificate = (!empty($userCertificates->phytosanitary_certificate))?($this->getCertificatesById($userCertificates->phytosanitary_certificate)):"";
+
+                    $fieldOptions[$key]->packaging_for_usa = (!empty($userCertificates->packaging_for_usa))?($this->getCertificatesById($userCertificates->packaging_for_usa)):"";
+
+                    $fieldOptions[$key]->food_safety_plan = (!empty($userCertificates->food_safety_plan))?($this->getCertificatesById($userCertificates->food_safety_plan)):"";
+
+                    $fieldOptions[$key]->animal_helath_asl_certificate = (!empty($userCertificates->animal_helath_asl_certificate))?($this->getCertificatesById($userCertificates->animal_helath_asl_certificate)):"";
+                    
+                }
+                return response()->json(['success' => $this->successStatus, 
+                                         'certificates' => $fieldOptions
+                                        ], $this->successStatus);
+            }
+            else
+            {
+                $message = "Invalid connection id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Send Connection Request
      * @Params $request
      */
@@ -245,8 +314,8 @@ class ConnectUserController extends CoreController
                         $saveNotification = new Notification;
                         $saveNotification->from = $myRole->user_id;
                         $saveNotification->to = $request->user_id;
-                        $saveNotification->notification_type = 'connection_request';
-                        $saveNotification->title = $title;
+                        $saveNotification->notification_type = 'connections';
+                        $saveNotification->title = $this->translate('messages.'.$title,$title);
                         $saveNotification->redirect_to = 'user_screen';
                         $saveNotification->redirect_to_id = $myRole->user_id;
                         $saveNotification->save();
@@ -448,6 +517,34 @@ class ConnectUserController extends CoreController
                     $checkConnectionId->save();
 
                     $message = "Connection request accepted!";
+
+                    if($user->role_id == 7 || $user->role_id == 10)
+                    {
+                        $name = ucwords(strtolower($user->first_name)) . ' ' . ucwords(strtolower($user->last_name));
+                    }
+                    else
+                    {
+                        $name = $user->company_name;
+                    }
+
+                    $title = $name . " accepted your connection request";
+
+                    $saveNotification = new Notification;
+                    $saveNotification->from = $user->user_id;
+                    $saveNotification->to = $checkConnectionId->resource_id;
+                    $saveNotification->notification_type = 'connections';
+                    $saveNotification->title = $this->translate('messages.'.$title,$title);
+                    $saveNotification->redirect_to = 'user_screen';
+                    $saveNotification->redirect_to_id = $user->user_id;
+                    $saveNotification->save();
+
+                    $tokens = DeviceToken::where('user_id', $checkConnectionId->resource_id)->get();
+                    if(count($tokens) > 0)
+                    {
+                        $collectedTokenArray = $tokens->pluck('device_token');
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                    }
+
                 }
                 elseif($request->accept_or_reject == 2)
                 {

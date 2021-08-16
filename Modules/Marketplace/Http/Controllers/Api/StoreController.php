@@ -267,7 +267,7 @@ class StoreController extends CoreController
 
                 $isfavourite = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '1')->where('id', $myStore->marketplace_store_id)->first();
 
-                $myStore->avg_rating = $avgRating;
+                $myStore->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $myStore->total_reviews = $totalReviews;
 
                 $myStore->total_one_star = $oneStar;
@@ -354,7 +354,7 @@ class StoreController extends CoreController
 
                 $isfavourite = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '1')->where('id', $myStore->marketplace_store_id)->first();
 
-                $myStore->avg_rating = $avgRating;
+                $myStore->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $myStore->total_reviews = $totalReviews;
 
                 $myStore->total_one_star = $oneStar;

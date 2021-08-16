@@ -50,5 +50,9 @@ use Illuminate\Http\Request;
 	Route::post('upload/media', 'Api\ChatController@uploadMedia');	
 
 
+	Route::get('get/all/notifications', 'Api\NotificationController@getAllNotifications');
+
+
+
 
 });

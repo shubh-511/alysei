@@ -296,12 +296,17 @@ class RegisterController extends CoreController
                         {
                             $userName = $user->restaurant_name;   
                         }
-                        /*$deviceInfo = [];
-                        $deviceInfo['user_id'] = $user->user_id;
-                        $deviceInfo['device_type'] = $input['device_type'];
-                        $deviceInfo['device_token'] = $input['device_token'];*/
 
-                        //DeviceToken::create($deviceInfo);  
+                        if(isset($input['device_token']) && !empty($input['device_token']))
+                        {
+                            $deviceInfo = [];
+                            $deviceInfo['user_id'] = $user->user_id;
+                            $deviceInfo['device_type'] = $input['device_type'];
+                            $deviceInfo['device_token'] = $input['device_token'];
+
+                            DeviceToken::create($deviceInfo);
+                        }
+                          
 
                         if($input['role_id'] == 10)
                         {
