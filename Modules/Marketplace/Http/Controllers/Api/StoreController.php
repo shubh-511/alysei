@@ -391,6 +391,15 @@ class StoreController extends CoreController
                 (count($galleries) > 0) ? $myStore->store_gallery = $galleries : $myStore->store_gallery = [];
 
                 $storeProducts = MarketplaceProduct::with('product_gallery')->where('marketplace_store_id', $myStore->marketplace_store_id)->get();
+
+                foreach($storeProducts as $key => $storeProduct)
+                {
+                    $avgRatingStoreProducts = MarketplaceRating::where('type', '1')->where('id', $storeProduct->marketplace_store_id)->avg('rating');
+                    $totalReviewsStoreProducts = MarketplaceRating::where('type', '1')->where('id', $storeProduct->marketplace_store_id)->count();
+
+                    $storeProducts[$key]->avg_rating = number_format((float)$avgRatingStoreProducts, 1, '.', '');
+                    $storeProducts[$key]->total_reviews = $totalReviewsStoreProducts;
+                }
                 
                 return response()->json(['success'=>$this->successStatus,'data' =>$myStore, 'store_products' => $storeProducts],$this->successStatus); 
             }

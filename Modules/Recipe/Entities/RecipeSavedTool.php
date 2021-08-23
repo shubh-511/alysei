@@ -10,9 +10,9 @@ class RecipeSavedTool extends Model
 {
     protected $PrimaryKey = 'recipe_saved_tool_id';
 
-    public function image_id()
+    public function tool()
     {
-        return $this->belongsTo(Attachment::class, 'image_id','id');
+        return $this->belongsTo(RecipeTool::class, 'tool_id','recipe_tool_id');
     }
    
 

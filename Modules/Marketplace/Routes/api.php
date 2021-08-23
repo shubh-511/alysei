@@ -48,6 +48,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/all/reviews', 'Api\RatingController@getAllReviews');
 	Route::get('get/seller/profile/{storeid?}', 'Api\StoreController@getSellerProfile');
 	Route::get('get/search/product/listing', 'Api\ProductController@getSearchProductListing');
+	Route::post('save/product/enquery', 'Api\ProductController@saveProductEnquery');
+	Route::get('get/enqueries/{tab?}', 'Api\ProductController@getProductEnquery');
 
 	
 });

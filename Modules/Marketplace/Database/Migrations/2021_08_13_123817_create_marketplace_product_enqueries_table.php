@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRecipeEnqueriesTable extends Migration
+class CreateMarketplaceProductEnqueriesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class CreateRecipeEnqueriesTable extends Migration
      */
     public function up()
     {
-        Schema::create('recipe_enqueries', function (Blueprint $table) {
-            $table->increments('recipe_enquery_id');
+        Schema::create('marketplace_product_enqueries', function (Blueprint $table) {
+            $table->increments('marketplace_product_enquery_id');
             $table->integer('user_id');
             $table->integer('product_id');
             $table->string('name');

@@ -14,6 +14,7 @@ use Modules\Marketplace\Entities\MarketplaceProductCategory;
 use Modules\Marketplace\Entities\MarketplaceProductSubcategory;
 use Modules\Marketplace\Entities\MarketplaceRecentSearch;
 use Modules\Marketplace\Entities\MarketplaceBrandLabel;
+use Modules\Marketplace\Entities\MarketplaceProductEnquery;
 use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
 use Illuminate\Support\Facades\Auth; 
@@ -731,6 +732,29 @@ class ProductController extends CoreController
                 $storeName = MarketplaceStore::where('marketplace_store_id', $productDetail->marketplace_store_id)->first();
                 $logoId = Attachment::where('id', $storeName->logo_id)->first();
                 $storeName->store_logo = $logoId->attachment_url;
+
+
+                $avgRatingStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->avg('rating');
+                $totalReviewsStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->count();
+
+                $oneStarStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->where('rating', 1)->count();
+                $twoStarStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->where('rating', 2)->count();
+                $threeStarStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->where('rating', 3)->count();
+                $fourStarStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->where('rating', 4)->count();
+                $fiveStarStore = MarketplaceRating::where('type', '1')->where('id', $storeName->marketplace_store_id)->where('rating', 5)->count();
+
+                $isfavouriteStore = MarketplaceFavourite::where('user_id', $user->user_id)->where('favourite_type', '1')->where('id', $storeName->marketplace_store_id)->first();
+
+                $storeName->avg_rating = number_format((float)$avgRatingStore, 1, '.', '');
+                $storeName->total_reviews = $totalReviewsStore;
+
+                $storeName->total_one_star = $oneStarStore;
+                $storeName->total_two_star = $twoStarStore;
+                $storeName->total_three_star = $threeStarStore;
+                $storeName->total_four_star = $fourStarStore;
+                $storeName->total_five_star = $fiveStarStore;
+                $storeName->is_favourite = (!empty($isfavouriteStore)) ? 1 : 0;
+
                 $productDetail->store_logo = $logoId->attachment_url;
 
                 $avgRating = MarketplaceRating::where('type', '2')->where('id', $productDetail->marketplace_product_id)->avg('rating');
@@ -825,6 +849,80 @@ class ProductController extends CoreController
             $message = "No products found";
             return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
         }
+        
+    }
+
+    /*
+     * Save Product Enquery
+     * @Params $request
+     */
+    public function saveProductEnquery(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'product_id' => 'required',
+                'name' => 'required',
+                'email' => 'required|email',
+                'phone' => 'required',
+                'message' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $product = new MarketplaceProductEnquery;
+            $product->user_id = $user->user_id;
+            $product->product_id = $request->product_id;
+            $product->name = $request->name;
+            $product->email = $request->email;
+            $product->phone = $request->phone;
+            $product->message = $request->message;
+            $product->save();
+
+            $message = "Your enquery has been saved successfully";
+            return response()->json(['success'=>$this->successStatus,
+                                    'message' => $this->translate('messages.'.$message,$message),
+                                    'data' =>$product,
+                                    ],$this->successStatus); 
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+    }
+
+    /*
+    Get product enqueries
+    */
+    public function getProductEnquery($tab)
+    {
+        if($tab == 1)
+        {
+            $enquery = MarketplaceProductEnquery::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('status', '0')->get();        
+        }
+        elseif($tab == 2)
+        {
+            $enquery = MarketplaceProductEnquery::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('status', '1')->get();    
+        }
+        elseif($tab == 3)
+        {
+            $enquery = MarketplaceProductEnquery::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('status', '2')->get();    
+        }
+        else
+        {
+            $message = "Invalid tab";
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+        
+       
+        return response()->json(['success' => $this->successStatus,
+                                'count' => count($enquery),
+                                'data' => $enquery,
+                                ], $this->successStatus);
         
     }
     

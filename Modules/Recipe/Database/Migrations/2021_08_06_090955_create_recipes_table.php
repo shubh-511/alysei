@@ -22,7 +22,11 @@ class CreateRecipesTable extends Migration
             $table->integer('hours')->comment('preparation time');
             $table->integer('minutes')->comment('preparation time');
             $table->integer('serving');
+            $table->integer('cousin_id');
             $table->integer('region_id');
+            $table->integer('diet_id');
+            $table->integer('intolerance_id');
+            $table->integer('cooking_skill_id');
             $table->integer('image_id');
             $table->integer('favourite_count');
             $table->timestamps();

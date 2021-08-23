@@ -38,4 +38,15 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('get/cooking/skills', 'Api\RecipeController@getCookingSkills');
     Route::get('get/diet/list', 'Api\RecipeController@getRecipeDiets');
 
+    Route::get('get/recipe/detail/{id}', 'Api\RecipeController@getRecipeDetail');
+    Route::get('get/food/intolerance', 'Api\RecipeController@getFoodIntolerance');
+
+    Route::post('do/review', 'Api\RecipeController@doReview');
+    Route::get('get/reviews', 'Api\RecipeController@getReviews');
+    Route::get('get/home/screen', 'Api\RecipeController@getHomeScreen');
+    Route::get('filter/recipe', 'Api\RecipeController@filterRecipe');
+
+    Route::post('save/preference', 'Api\RecipeController@savePreferences');
+    Route::get('get/saved/preferences', 'Api\RecipeController@getPreferences');
+
 });

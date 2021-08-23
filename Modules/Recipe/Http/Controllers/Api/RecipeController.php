@@ -25,6 +25,16 @@ use Modules\Recipe\Entities\RecipeSavedTool;
 use Modules\Recipe\Entities\RecipeMapStepTool;
 use Modules\Recipe\Entities\RecipeMapStepIngredient;
 use Modules\Recipe\Entities\RecipeEnquery;
+use Modules\Recipe\Entities\RecipeFoodIntolerance;
+use Modules\Recipe\Entities\RecipeReviewRating;
+use Modules\Recipe\Entities\Preference;
+use Modules\Recipe\Entities\PreferenceMapCousin;
+use Modules\User\Entities\Cousin;
+use Modules\Recipe\Entities\PreferenceMapIntolerance;
+use Modules\Recipe\Entities\PreferenceMapDiet;
+use Modules\Recipe\Entities\PreferenceMapIngredient;
+use Modules\Recipe\Entities\PreferenceMapCookingSkill;
+use Modules\Recipe\Entities\PreferenceMapUser;
 use App\Notification;
 use DB;
 use Illuminate\Support\Facades\Auth; 
@@ -51,6 +61,40 @@ class RecipeController extends CoreController
         });
     }
 
+    /*
+     * Get recipie food intolerance
+     * 
+     */
+    public function getFoodIntolerance()
+    {
+        try
+        {
+            $user = $this->user;
+
+            $tolerances = RecipeFoodIntolerance::get();
+            if(count($tolerances) > 0)
+            {
+                foreach($tolerances as $key => $tolerance)
+                {
+                    $tolerances[$key]->name = $this->translate('messages.'.$tolerance->name,$tolerance->name);
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($tolerances),
+                                        'data' => $tolerances,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No food tolerance found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
 
     /*
      * Get recipie categories
@@ -344,9 +388,9 @@ class RecipeController extends CoreController
                     {
                         $childTools[$keys]->title = $this->translate('messages.'.$childTool->title,$childTool->title);    
                     }
-                    $parentTools[$key]->ingredients = $childTools;
+                    $parentTools[$key]->tools = $childTools;
 
-                    $categoriesWithCount[] = ['ingredient_types' => $parentTool->title, 'name' => $parentTool->name, 'count' => $childIngredientCounts];
+                    $categoriesWithCount[] = ['tool_types' => $parentTool->title, 'name' => $parentTool->name, 'count' => $childIngredientCounts];
                     
                 }
 
@@ -396,6 +440,10 @@ class RecipeController extends CoreController
             $recipe->hours = $requestedFields['hours'];
             $recipe->minutes = $requestedFields['minutes'];
             $recipe->serving = $requestedFields['serving'];
+            $recipe->cousin_id = $requestedFields['cousin_id'];
+            $recipe->diet_id = $requestedFields['diet_id'];
+            $recipe->intolerance_id = $requestedFields['intolerance_id'];
+            $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
             //$recipe->image_id = $this->uploadImage($request->file($requestedFields['image_id']));
             $recipe->image_id = 1;
@@ -478,6 +526,108 @@ class RecipeController extends CoreController
     }
 
     /*
+     * Get recipie detail
+     * 
+     */
+    public function getRecipeDetail($recipeId)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $myRecipes = Recipe::with('image','meal','region')->where('recipe_id', $recipeId)->first();
+            if(!empty($myRecipes))
+            {
+                $recipeUsedIngredients = RecipeSavedIngredient::with('ingredient','ingredient.image_id')->where('recipe_id', $recipeId)->get();
+                $recipeUsedTools = RecipeSavedTool::with('tool','tool.image_id')->where('recipe_id', $recipeId)->get();
+
+                $recipeUsedSteps = RecipeStep::where('recipe_id', $recipeId)->get();
+                if(count($recipeUsedSteps) > 0)
+                {
+                    $arrayValues = [];
+                    $arrayValuesTools = [];
+                    foreach($recipeUsedSteps as $key => $recipeUsedStep)
+                    {
+                        //for saved ingredients for the steps
+                        $mapIngredients = RecipeMapStepIngredient::where('recipe_id', $recipeId)->where('recipe_step_id', $recipeUsedStep->recipe_step_id)->get(); 
+                        //return $mapIngredients;
+                        if(count($mapIngredients) > 0)
+                        {
+                            foreach($mapIngredients as $mapIngredient)
+                            {
+                                array_push($arrayValues, $mapIngredient->recipe_saved_ingredient_id);
+                            }
+                            //$arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id');
+                            foreach($recipeUsedIngredients as $keyIng => $recipeUsedIngredient)
+                            {
+                                if(in_array($recipeUsedIngredient->ingredient_id, $arrayValues))
+                                    $recipeUsedIngredients[$keyIng]->is_selected = true;
+                                else
+                                    $recipeUsedIngredients[$keyIng]->is_selected = false;
+
+                            }
+                        }
+                        else
+                        {
+                            foreach($recipeUsedIngredients as $keyIng => $recipeUsedIngredient)
+                            {
+                                $recipeUsedIngredients[$keyIng]->is_selected = false;
+                            }
+                        }                   
+                        
+                        $recipeUsedSteps[$key]->step_ingredients = $recipeUsedIngredients;
+
+                        //for saved tools for the steps
+                        $mapTools = RecipeMapStepTool::where('recipe_id', $recipeId)->where('recipe_step_id', $recipeUsedStep->recipe_step_id)->get(); 
+                        //return $mapIngredients;
+                        if(count($mapTools) > 0)
+                        {
+                            foreach($mapTools as $mapTool)
+                            {
+                                array_push($arrayValuesTools, $mapTool->recipe_saved_tool_id);
+                            }
+                            //$arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id');
+                            foreach($recipeUsedTools as $keyTool => $recipeUsedTool)
+                            {
+                                if(in_array($recipeUsedIngredient->tool_id, $arrayValuesTools))
+                                    $recipeUsedTools[$keyTool]->is_selected = true;
+                                else
+                                    $recipeUsedTools[$keyTool]->is_selected = false;
+
+                            }
+                        }
+                        else
+                        {
+                            foreach($recipeUsedTools as $keyTool => $recipeUsedTool)
+                            {
+                                $recipeUsedTools[$keyTool]->is_selected = false;
+                            }
+                        }
+
+                        $recipeUsedSteps[$key]->step_tools = $recipeUsedTools;
+                    }
+                }
+                
+                return response()->json(['success' => $this->successStatus,
+                                         'recipe' => $myRecipes,
+                                         'used_ingredients' => $recipeUsedIngredients,
+                                         'used_tools' => $recipeUsedTools,
+                                         'steps' => $recipeUsedSteps
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No recipe found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Get all my recipie
      * 
      */
@@ -487,7 +637,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $myRecipes = Recipe::with('image_id')->where('user_id', $user->user_id)->orderBy('recipe_id', 'DESC')->get();
+            $myRecipes = Recipe::with('image')->where('user_id', $user->user_id)->orderBy('recipe_id', 'DESC')->get();
             if(count($myRecipes) > 0)
             {
                 foreach($myRecipes as $key => $myRecipe)
@@ -628,7 +778,7 @@ class RecipeController extends CoreController
             if(count($myFavRecipes) > 0)
             {
                 $myFavRecipesId = $myFavRecipes->pluck('recipe_id');
-                $myRecipes = Recipe::with('image_id')->whereIn('recipe_id', $myFavRecipesId)->orderBy('recipe_id', 'DESC')->get();
+                $myRecipes = Recipe::with('image')->whereIn('recipe_id', $myFavRecipesId)->orderBy('recipe_id', 'DESC')->get();
 
                 if(count($myRecipes) > 0)
                 {
@@ -740,6 +890,526 @@ class RecipeController extends CoreController
         }
     }
 
+    /*
+     * Make a Review on recipe
+     * @Params $request
+     */
+    public function doReview(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'recipe_id' => 'required',
+                'rating' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $isRated = RecipeReviewRating::where('user_id', $user->user_id)->where('recipe_id', $request->recipe_id)->first();
+            if(!empty($isRated))
+            {
+                $message = "You have already done a review on this recipe";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            else
+            {
+                $review = new RecipeReviewRating;
+                $review->user_id = $user->user_id;
+                $review->recipe_id = $request->recipe_id;
+                $review->rating = $request->rating;
+                $review->review = $request->review;
+                $review->save();
+
+                $message = "Your rating has been done";
+                return response()->json(['success' => $this->successStatus,
+                                            'message' => $this->translate('messages.'.$message,$message),
+                                            'data' => $review,
+                                         ], $this->successStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * get all ratings
+     * @Params $request
+     */
+    public function getReviews(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'recipe_id'   => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $getAllRatings = RecipeReviewRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $request->recipe_id)->orderBy('recipe_review_rating_id', 'DESC')->get();
+            if(count($getAllRatings) > 0)
+            {
+                    return response()->json(['success' => $this->successStatus,
+                                            'data' => $getAllRatings,
+                                         ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No review found on this recipe";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Save preferences
+     * @Params $request
+     */
+    public function savePreferences(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            if(!empty($request->params))
+            {
+                foreach($request->params as $key => $preferences)
+                {
+                    /*$newPreference = new Preference;
+                    $newPreference->user_id = $user->user_id;
+                    $newPreference->preference = $preferences['preference'];
+                    $newPreference->save();*/
+                    $newPreference = new PreferenceMapUser;
+                    $newPreference->user_id = $user->user_id;
+                    $newPreference->preference = $preferences['preference'];
+                    $newPreference->save();
+                        
+                    if($preferences['preference'] == 1)
+                    {
+                        foreach($preferences['id'] as $preferenceId)
+                        {
+                            $mapPreference = new PreferenceMapCousin;
+                            $mapPreference->preference_id = $newPreference->id;
+                            $mapPreference->cousin_id = $preferenceId;
+                            $mapPreference->save();
+                        }
+                        
+                    }
+                    elseif($preferences['preference'] == 2)
+                    {
+                        foreach($preferences['id'] as $preferenceId)
+                        {
+                            $mapPreference = new PreferenceMapIntolerance;
+                            $mapPreference->preference_id = $newPreference->id;
+                            $mapPreference->intolerance_id = $preferenceId;
+                            $mapPreference->save();
+                        }
+                        
+                    } 
+                    elseif($preferences['preference'] == 3)
+                    {
+                        foreach($preferences['id'] as $preferenceId)
+                        {
+                            $mapPreference = new PreferenceMapDiet;
+                            $mapPreference->preference_id = $newPreference->id;
+                            $mapPreference->diet_id = $preferenceId;
+                            $mapPreference->save();
+                        }
+                        
+                    }  
+                    elseif($preferences['preference'] == 4)
+                    {
+                        foreach($preferences['id'] as $preferenceId)
+                        {
+                            $mapPreference = new PreferenceMapIngredient;
+                            $mapPreference->preference_id = $newPreference->id;
+                            $mapPreference->ingredient_id = $preferenceId;
+                            $mapPreference->save();
+                        }
+                        
+                    }    
+                    elseif($preferences['preference'] == 5)
+                    {
+                        foreach($preferences['id'] as $preferenceId)
+                        {
+                            $mapPreference = new PreferenceMapCookingSkill;
+                            $mapPreference->preference_id = $newPreference->id;
+                            $mapPreference->cooking_skill_id = $preferenceId;
+                            $mapPreference->save();
+                        }
+                        
+                    }  
+                    
+                } 
+            }
+            $message = "Preferences has been saved successfully";
+            return response()->json(['success' => $this->successStatus,
+                                    'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * get Saved preferences
+     * @Params $request
+     */
+    public function getPreferences(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            
+            $allPreferences = Preference::get();
+            
+            if(count($allPreferences) > 0)
+            {
+                //return $allPreferences;
+                foreach($allPreferences as $key => $allPreference)
+                {
+                    if($allPreference->preference_id == 1)
+                    {
+                        $cousins = Cousin::where('status', 1)->get();
+
+                        $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
+                        $arrayValues1 = [];
+                        foreach($cousins as $keys => $cousin)
+                        {
+                            if(!empty($myPreferences) && $myPreferences->user_id == $user->user_id)
+                            {
+                                $cousinsPreference = PreferenceMapCousin::where('preference_id', $myPreferences->id)->get();
+                                foreach($cousinsPreference as $cousinsPref)
+                                {
+                                    array_push($arrayValues1, $cousinsPref->cousin_id);
+                                }
+                                //$cousinsPreference = $cousinsPreference->pluck('cousin_id');
+                                if(in_array($cousin->cousin_id, $arrayValues1))
+                                    $cousins[$keys]->is_selected = true;
+                                else
+                                    $cousins[$keys]->is_selected = false;
+                            }
+                            else
+                            {
+                                $cousins[$keys]->is_selected = false;
+                            }
+                        }
+
+                        $allPreferences[$key]->maps = $cousins;
+                    }
+                    elseif($allPreference->preference_id == 2)
+                    {
+                        $intolerances = RecipeFoodIntolerance::get();
+
+                        $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
+                        $arrayValues2 = [];
+                        foreach($intolerances as $keys => $intolerance)
+                        {
+                            if(!empty($myPreferences) && $myPreferences->user_id == $user->user_id)
+                            {
+                                $intolerancePreference = PreferenceMapIntolerance::where('preference_id', $myPreferences->id)->get();
+                                foreach($intolerancePreference as $intolerancePref)
+                                {
+                                    array_push($arrayValues2, $intolerancePref->intolerance_id);
+                                }
+                                if(in_array($intolerance->recipe_food_intolerance_id, $arrayValues2))
+                                    $intolerances[$keys]->is_selected = true;
+                                else
+                                    $intolerances[$keys]->is_selected = false;
+                            }
+                            else
+                            {
+                                $intolerances[$keys]->is_selected = false;
+                            }
+                        }
+
+                        $allPreferences[$key]->maps = $intolerances;
+                    }
+                    elseif($allPreference->preference_id == 3)
+                    {
+                        $diets = RecipeDiet::get();
+
+                        $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
+
+                        $arrayValues3 = [];
+                        foreach($diets as $keys => $diet)
+                        {
+                            if(!empty($myPreferences) && $myPreferences->user_id == $user->user_id)
+                            {
+                                $dietPreference = PreferenceMapDiet::where('preference_id', $myPreferences->id)->get();
+                                foreach($dietPreference as $dietPref)
+                                {
+                                    array_push($arrayValues3, $dietPref->diet_id);
+                                }
+                                if(in_array($diet->recipe_diet_id, $arrayValues3))
+                                    $diets[$keys]->is_selected = true;
+                                else
+                                    $diets[$keys]->is_selected = false;
+                            }
+                            else
+                            {
+                                $diets[$keys]->is_selected = false;
+                            }
+                        }
+
+                        $allPreferences[$key]->maps = $diets;
+                    }
+                    elseif($allPreference->preference_id == 4)
+                    {
+                        $ingredients = RecipeIngredient::get();
+
+                        $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
+
+                        $arrayValues4 = [];
+                        foreach($ingredients as $keys => $ingredient)
+                        {
+                            if(!empty($myPreferences) && $myPreferences->user_id == $user->user_id)
+                            {
+                                $ingredientPreference = PreferenceMapIngredient::where('preference_id', $myPreferences->id)->get();
+                                foreach($ingredientPreference as $ingredientPref)
+                                {
+                                    array_push($arrayValues4, $ingredientPref->ingredient_id);
+                                }
+                                if(in_array($ingredient->recipe_ingredient_id, $arrayValues4))
+                                    $ingredients[$keys]->is_selected = true;
+                                else
+                                    $ingredients[$keys]->is_selected = false;
+                            }
+                            else
+                            {
+                                $ingredients[$keys]->is_selected = false;
+                            }
+                        }
+
+                        $allPreferences[$key]->maps = $ingredients;
+                    }
+                    elseif($allPreference->preference_id == 5)
+                    {
+                        $cookingSkills = RecipeCookingSkill::get();
+
+                        $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
+
+                        $arrayValues5 = [];
+                        foreach($cookingSkills as $keys => $cookingSkill)
+                        {
+                            if(!empty($myPreferences) && $myPreferences->user_id == $user->user_id)
+                            {
+                                $cookingPreference = PreferenceMapCookingSkill::where('preference_id', $myPreferences->id)->get();
+                                foreach($cookingPreference as $cookingPref)
+                                {
+                                    array_push($arrayValues5, $cookingPref->cooking_skill_id);
+                                }
+                                if(in_array($cookingSkill->recipe_cooking_skill_id, $arrayValues5))
+                                    $cookingSkills[$keys]->is_selected = true;
+                                else
+                                    $cookingSkills[$keys]->is_selected = false;
+                            }
+                            else
+                            {
+                                $cookingSkills[$keys]->is_selected = false;
+                            }
+                        }
+
+                        $allPreferences[$key]->maps = $cookingSkills;
+                    } 
+                                      
+                }
+            }
+            
+            $message = "Preferences has been saved successfully";
+            return response()->json(['success' => $this->successStatus,
+                                    'data' => $allPreferences,
+                                    ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Get home for recipie
+     * 
+     */
+    public function getHomeScreen()
+    {
+        try
+        {
+            $user = $this->user;
+            $recipeArray = array();
+            $quickRecipeArray = array();
+            $categories = RecipeCategory::with('image_id')->where('status', '1')->get();
+            
+            foreach($categories as $key => $category)
+            {
+                $categories[$key]->name = $this->translate('messages.'.$category->name,$category->name);
+            }
+
+            $parentIngredients = RecipeIngredient::with('image_id')->where('parent', 0)->get();
+            if(count($parentIngredients) > 0)
+            {
+                foreach($parentIngredients as $key => $parentIngredient)
+                {
+                    $parentIngredients[$key]->title = $this->translate('messages.'.$parentIngredient->title,$parentIngredient->title);
+
+                    $childIngredients = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->recipe_ingredient_id)->get();
+
+                    $childIngredientCounts = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->recipe_ingredient_id)->count();
+                    foreach($childIngredients as $keys => $childIngredient)
+                    {
+                        $childIngredients[$keys]->title = $this->translate('messages.'.$childIngredient->title,$childIngredient->title);    
+                    }
+                    $parentIngredients[$key]->ingredients = $childIngredients;
+                    
+                }
+            }
+
+            $regions = RecipeRegion::with('image_id')->get();
+            
+            foreach($regions as $key => $region)
+            {
+                $regions[$key]->name = $this->translate('messages.'.$region->name,$region->name);
+            }
+
+            //trending
+
+            $favouriteRecipes = DB::select(DB::raw("select recipe_id from recipe_favourites GROUP BY recipe_id ORDER BY count(*) DESC LIMIT 8"));
+            foreach($favouriteRecipes as $favouriteRecipe)
+            {
+                array_push($recipeArray, $favouriteRecipe->recipe_id);
+            }
+
+            $myRecipes = Recipe::with('image')->whereIn('recipe_id', $recipeArray)->orderBy('recipe_id', 'DESC')->get();
+
+            //quick easy
+            $easyRecipes = DB::select(DB::raw("select recipe_id from `recipe_steps` GROUP BY recipe_id ORDER BY count(recipe_step_id) ASC LIMIT 8"));
+            foreach($easyRecipes as $easyRecipe)
+            {
+                array_push($quickRecipeArray, $easyRecipe->recipe_id);
+            }
+
+            $quickEasyRecipes = Recipe::with('image')->whereIn('recipe_id', $quickRecipeArray)->orderBy('recipe_id', 'DESC')->get();
+
+
+
+            $data = ['ingredients' => $parentIngredients, 'categories' => $categories, 'regions' => $regions, 'trending_recipes' => $myRecipes, 'quick_easy' => $quickEasyRecipes];
+
+
+            return response()->json(['success' => $this->successStatus,
+                                    'data' => $data,
+                                ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * filter recipe
+     * @Params $request
+     */
+    public function filterRecipe(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $recipeArray = array();
+            $condition = '';
+            $isSearch = 0;
+            
+            if(!empty($request->cook_time))
+            {
+                $isSearch = 1;
+                if($request->cook_time == 1 || $request->cook_time == 2)
+                {
+                    if($condition != '')
+                    $condition .=" and recipes.hours = ".$request->cook_time;
+                    else
+                    $condition .="recipes.hours = ".$request->cook_time;
+                }
+                else
+                {
+                    if($condition != '')
+                    $condition .=" and recipes.minutes = ".$request->cook_time;
+                    else
+                    $condition .="recipes.minutes = ".$request->cook_time;
+                }
+            }
+            if(!empty($request->no_of_ingredients))
+            {
+                $isSearch = 1;
+                $ingredientArray = array();
+                $recipeByIngredients = DB::select(DB::raw("select `recipe_id` from `recipe_saved_ingredients` group by recipe_id having count(ingredient_id) < ".$request->no_of_ingredients));
+                if(count($recipeByIngredients) > 0)
+                {
+                    foreach($recipeByIngredients as $recipeByIngredient)
+                    {
+                        array_push($ingredientArray, $recipeByIngredient->recipe_id);
+                    }
+                    $ingredientValues = join(",", $ingredientArray);
+
+                    if($condition != '')
+                    $condition .=" and recipes.recipe_id in(".$ingredientValues.")";
+                    else
+                    $condition .="recipes.recipe_id in(".$ingredientValues.")";
+                }
+            }
+            if(!empty($request->meal_type))
+            {
+                $isSearch = 1;
+                
+                if($condition != '')
+                $condition .=" and recipes.meal_id = ".$request->meal_type;
+                else
+                $condition .="recipes.meal_id = ".$request->meal_type;
+                
+            }
+            if(!empty($request->cousin_id))
+            {
+                $isSearch = 1;
+                
+                if($condition != '')
+                $condition .=" and recipes.cousin_id = ".$request->cousin_id;
+                else
+                $condition .="recipes.cousin_id = ".$request->cousin_id;
+                
+            }
+
+            
+            if($condition != '')
+            {
+                $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->paginate(10);    
+                return response()->json(['success' => $this->successStatus,
+                                        'data' => $recipes
+                                ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No recipe found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
 
     /*
      * Validate Data
@@ -770,7 +1440,23 @@ class RecipeController extends CoreController
             {
                 $rules[$key] = 'required';
             }
+            elseif($key == 'cousin_id')
+            {
+                $rules[$key] = 'required';
+            }
             elseif($key == 'region_id')
+            {
+                $rules[$key] = 'required';
+            }
+            elseif($key == 'intolerance_id')
+            {
+                $rules[$key] = 'required';
+            }
+            elseif($key == 'diet_id')
+            {
+                $rules[$key] = 'required';
+            }
+            elseif($key == 'cooking_skill_id')
             {
                 $rules[$key] = 'required';
             }
