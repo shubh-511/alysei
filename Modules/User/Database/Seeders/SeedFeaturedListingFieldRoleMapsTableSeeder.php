@@ -29,38 +29,45 @@ class SeedFeaturedListingFieldRoleMapsTableSeeder extends Seeder
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>2,'role_id'=>3,'order'=>2),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>3,'role_id'=>3,'order'=>3),
                         //array("featured_listing_type_id"=>1,"featured_listing_field_id"=>10,'role_id'=>3,'order'=>4),
+                        array("featured_listing_type_id"=>1,"featured_listing_field_id"=>8,'role_id'=>3,'order'=>4),
 
                         //Importers
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>1,'role_id'=>4,'order'=>1),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>2,'role_id'=>4,'order'=>2),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>3,'role_id'=>4,'order'=>3),
+                        array("featured_listing_type_id"=>1,"featured_listing_field_id"=>8,'role_id'=>4,'order'=>4),
                         //array("featured_listing_type_id"=>1,"featured_listing_field_id"=>10,'role_id'=>4,'order'=>4),
 
                         //Distributors
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>1,'role_id'=>5,'order'=>1),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>2,'role_id'=>5,'order'=>2),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>3,'role_id'=>5,'order'=>3),
+                        array("featured_listing_type_id"=>1,"featured_listing_field_id"=>8,'role_id'=>5,'order'=>4),
                         //array("featured_listing_type_id"=>1,"featured_listing_field_id"=>10,'role_id'=>5,'order'=>4),
 
                         //Importers & Distributors
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>1,'role_id'=>6,'order'=>1),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>2,'role_id'=>6,'order'=>2),
                         array("featured_listing_type_id"=>1,"featured_listing_field_id"=>3,'role_id'=>6,'order'=>3),
+                        array("featured_listing_type_id"=>1,"featured_listing_field_id"=>8,'role_id'=>6,'order'=>4),
                         //array("featured_listing_type_id"=>1,"featured_listing_field_id"=>10,'role_id'=>6,'order'=>4),
 
                         //Voice Of Expert
                         array("featured_listing_type_id"=>3,"featured_listing_field_id"=>1,'role_id'=>7,'order'=>1),
                         array("featured_listing_type_id"=>3,"featured_listing_field_id"=>2,'role_id'=>7,'order'=>2),
                         array("featured_listing_type_id"=>3,"featured_listing_field_id"=>3,'role_id'=>7,'order'=>3),
+                        array("featured_listing_type_id"=>3,"featured_listing_field_id"=>8,'role_id'=>7,'order'=>4),
 
                         array("featured_listing_type_id"=>6,"featured_listing_field_id"=>1,'role_id'=>7,'order'=>1),
                         array("featured_listing_type_id"=>6,"featured_listing_field_id"=>2,'role_id'=>7,'order'=>2),
                         array("featured_listing_type_id"=>6,"featured_listing_field_id"=>8,'role_id'=>7,'order'=>3),
+                        array("featured_listing_type_id"=>6,"featured_listing_field_id"=>8,'role_id'=>7,'order'=>4),
 
                         //Travel Agencies
                         array("featured_listing_type_id"=>4,"featured_listing_field_id"=>1,'role_id'=>8,'order'=>1),
                         array("featured_listing_type_id"=>4,"featured_listing_field_id"=>2,'role_id'=>8,'order'=>2),
                         array("featured_listing_type_id"=>4,"featured_listing_field_id"=>3,'role_id'=>8,'order'=>3),
+                        array("featured_listing_type_id"=>4,"featured_listing_field_id"=>8,'role_id'=>8,'order'=>4),
                         
                         array("featured_listing_type_id"=>7,"featured_listing_field_id"=>11,'role_id'=>8,'order'=>1),
                         array("featured_listing_type_id"=>7,"featured_listing_field_id"=>12,'role_id'=>8,'order'=>2),
@@ -69,12 +76,14 @@ class SeedFeaturedListingFieldRoleMapsTableSeeder extends Seeder
                         array("featured_listing_type_id"=>7,"featured_listing_field_id"=>15,'role_id'=>8,'order'=>5),
                         array("featured_listing_type_id"=>7,"featured_listing_field_id"=>16,'role_id'=>8,'order'=>6),
                         array("featured_listing_type_id"=>7,"featured_listing_field_id"=>1,'role_id'=>8,'order'=>7),
+                        array("featured_listing_type_id"=>7,"featured_listing_field_id"=>8,'role_id'=>8,'order'=>8),
                         
 
                         //Restaurants
                         array("featured_listing_type_id"=>2,"featured_listing_field_id"=>1,'role_id'=>9,'order'=>1),
                         array("featured_listing_type_id"=>2,"featured_listing_field_id"=>2,'role_id'=>9,'order'=>2),
                         array("featured_listing_type_id"=>2,"featured_listing_field_id"=>3,'role_id'=>9,'order'=>3),
+                        array("featured_listing_type_id"=>2,"featured_listing_field_id"=>8,'role_id'=>9,'order'=>4),
                         
                         array("featured_listing_type_id"=>5,"featured_listing_field_id"=>17,'role_id'=>9,'order'=>1),
                         array("featured_listing_type_id"=>5,"featured_listing_field_id"=>10,'role_id'=>9,'order'=>2),
@@ -82,6 +91,7 @@ class SeedFeaturedListingFieldRoleMapsTableSeeder extends Seeder
                         array("featured_listing_type_id"=>5,"featured_listing_field_id"=>6,'role_id'=>9,'order'=>4),
                         array("featured_listing_type_id"=>5,"featured_listing_field_id"=>7,'role_id'=>9,'order'=>5),
                         array("featured_listing_type_id"=>5,"featured_listing_field_id"=>1,'role_id'=>9,'order'=>6),
+                        array("featured_listing_type_id"=>5,"featured_listing_field_id"=>8,'role_id'=>9,'order'=>7),
 
                         //Restaurants
                         /*array("featured_listing_type_id"=>5,"featured_listing_field_id"=>1,'role_id'=>9,'order'=>1),
