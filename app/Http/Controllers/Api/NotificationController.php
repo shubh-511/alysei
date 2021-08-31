@@ -18,6 +18,7 @@ use Modules\Activity\Entities\ConnectFollowPermission;
 use Modules\Activity\Entities\MapPermissionRole;
 use Modules\User\Entities\Role;
 use App\Notification;
+use App\Attachment;
 use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -57,6 +58,11 @@ class NotificationController extends CoreController
             $notificationData = Notification::with('user:user_id,name,email,company_name,role_id,avatar_id')->where('to', $user->user_id)->orderBy('notification_id', 'DESC')->paginate(10);
             if(count($notificationData) > 0)
             {
+                foreach($notificationData as $key => $notification)
+                {
+                    $attachment = Attachment::where('id', $notification->user->avatar_id)->first();
+                    $notificationData[$key]->user->avatar_image = $attachment->attachment_url;
+                }
                 return response()->json(['success' => $this->successStatus,
                                 'data' => $notificationData,
                                 ], $this->successStatus);

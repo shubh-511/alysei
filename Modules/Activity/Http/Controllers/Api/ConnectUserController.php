@@ -173,7 +173,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $followings = Follower::with('user:user_id,name,email')->with('follow_user:user_id,name,email')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $followings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,')->with('follow_user:user_id,name,email,company_name,first_name,last_name,')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($followings) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -360,15 +360,27 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')
-            ->where('is_approved', '1')
-            //->where('user_id', $user->user_id)
-            ->orWhere(function ($query) use ($user) {
-                $query->where('resource_id', $user->user_id)
-                ->where('user_id', $user->user_id);
-            })
+            $requests = Connection::
+            //with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')
+            where('is_approved', '1')
+            ->where('resource_id', $user->user_id)
+            ->orWhere('user_id', $user->user_id)
             ->orderBy('connection_id', 'DESC')
             ->get();
+            foreach($requests as $key => $request)
+            {
+                if($request->user_id == $user->user_id)
+                {
+                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->resource_id)->first();
+                    $requests[$key]->user = $user;
+                }
+                else
+                {
+                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->user_id)->first();
+                    $requests[$key]->user = $user;
+                }
+
+            }
 
             if(count($requests) > 0)
             {
@@ -397,7 +409,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
+            $requests = Connection::with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
             if(count($requests) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -470,7 +482,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $requests = Connection::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
+            $requests = Connection::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
             if(count($requests) > 0)
             {
                 return response()->json(['success' => $this->successStatus,

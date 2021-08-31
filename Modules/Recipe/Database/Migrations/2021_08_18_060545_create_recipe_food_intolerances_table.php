@@ -16,6 +16,7 @@ class CreateRecipeFoodIntolerancesTable extends Migration
         Schema::create('recipe_food_intolerances', function (Blueprint $table) {
             $table->increments('recipe_food_intolerance_id');
             $table->string('name');
+            $table->integer('image_id');
             $table->timestamps();
         });
     }

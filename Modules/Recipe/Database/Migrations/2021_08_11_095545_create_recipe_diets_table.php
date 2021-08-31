@@ -16,6 +16,7 @@ class CreateRecipeDietsTable extends Migration
         Schema::create('recipe_diets', function (Blueprint $table) {
             $table->increments('recipe_diet_id');
             $table->string('name');
+            $table->integer('image_id');
             $table->timestamps();
         });
     }

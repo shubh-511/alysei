@@ -16,6 +16,7 @@ class CreateRecipeCookingSkillsTable extends Migration
         Schema::create('recipe_cooking_skills', function (Blueprint $table) {
             $table->increments('recipe_cooking_skill_id');
             $table->string('name');
+            $table->integer('image_id');
             $table->timestamps();
         });
     }

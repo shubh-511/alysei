@@ -29,6 +29,11 @@ class Recipe extends Model
     {
         return $this->belongsTo(RecipeRegion::class, 'region_id','recipe_region_id');
     }
+
+    public function ingredients()
+    {
+        return $this->hasMany(RecipeSavedIngredient::class, 'recipe_id','recipe_id');
+    }
    
 
     

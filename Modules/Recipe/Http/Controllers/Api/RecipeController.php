@@ -36,6 +36,7 @@ use Modules\Recipe\Entities\PreferenceMapIngredient;
 use Modules\Recipe\Entities\PreferenceMapCookingSkill;
 use Modules\Recipe\Entities\PreferenceMapUser;
 use App\Notification;
+use App\Attachment;
 use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -445,8 +446,10 @@ class RecipeController extends CoreController
             $recipe->intolerance_id = $requestedFields['intolerance_id'];
             $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
-            //$recipe->image_id = $this->uploadImage($request->file($requestedFields['image_id']));
-            $recipe->image_id = 1;
+            $recipe->image_id = $this->createImage($requestedFields['image_id']);
+            //return $recipe->image_id;
+            //$this->uploadImage($request->file($requestedFields['image_id']));
+            $recipe->status = '1';
             $recipe->save();
 
             
@@ -523,6 +526,164 @@ class RecipeController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
+    }
+
+    /*
+     * Create recipe
+     * 
+     */
+    public function saveInDraftRecipe(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $requestedFields = $request->params;
+            $rules = $this->validateData($requestedFields);
+            
+            $validator = Validator::make($requestedFields, $rules);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            //recipe detail
+            $recipe = new Recipe;
+            $recipe->user_id = $user->user_id;
+            $recipe->name = $requestedFields['name'];
+            $recipe->meal_id = $requestedFields['meal_id'];
+            $recipe->course_id = $requestedFields['course_id'];
+            $recipe->hours = $requestedFields['hours'];
+            $recipe->minutes = $requestedFields['minutes'];
+            $recipe->serving = $requestedFields['serving'];
+            $recipe->cousin_id = $requestedFields['cousin_id'];
+            $recipe->diet_id = $requestedFields['diet_id'];
+            $recipe->intolerance_id = $requestedFields['intolerance_id'];
+            $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
+            $recipe->region_id = $requestedFields['region_id'];
+            $recipe->image_id = $this->createImage($requestedFields['image_id']);
+            //return $recipe->image_id;
+            //$this->uploadImage($request->file($requestedFields['image_id']));
+            $recipe->status = '0';
+            $recipe->save();
+
+            
+
+            //save category
+            if(count($requestedFields['save_categories']) > 0)
+            {
+                foreach($requestedFields['save_categories'] as $savedCategory)
+                {
+                    $categories = new RecipeSavedCategory;
+                    $categories->recipe_id = $recipe->id;
+                    $categories->category_id = $savedCategory;
+                    $categories->save();
+                }
+            }
+
+            if(count($requestedFields['saved_ingredients']) > 0)
+            {
+                //save ingredients
+                foreach($requestedFields['saved_ingredients'] as $savedIngredients)
+                {
+                    $savedIng = new RecipeSavedIngredient;
+                    $savedIng->recipe_id = $recipe->id;
+                    $savedIng->ingredient_id = $savedIngredients['ingredient_id'];
+                    $savedIng->quantity = $savedIngredients['quantity'];
+                    $savedIng->unit = $savedIngredients['unit'];
+                    $savedIng->save();
+                }       
+            }
+            
+            
+
+            if(count($requestedFields['saved_tools']) > 0)
+            {
+                //save tools
+                foreach($requestedFields['saved_tools'] as $savedTools)
+                {
+                    $savedTool = new RecipeSavedTool;
+                    $savedTool->recipe_id = $recipe->id;
+                    $savedTool->tool_id = $savedTools['tool_id'];
+                    $savedTool->quantity = $savedTools['quantity'];
+                    $savedTool->unit = $savedTools['unit'];
+                    $savedTool->save();
+                }    
+            }
+            
+            
+
+            if(count($requestedFields['recipe_steps']) > 0)
+            {
+                //steps
+                foreach($requestedFields['recipe_steps'] as $key => $recipeStep)
+                {
+                    $step = new RecipeStep;
+                    $step->recipe_id = $recipe->id;
+                    $step->title = $recipeStep['title'];
+                    $step->description = $recipeStep['description'];
+                    $step->save();
+
+                    if(count($recipeStep['ingredients']) > 0)
+                    {
+                        foreach($recipeStep['ingredients'] as $recipeStepsIngredient)
+                        {
+                            $mapIngredientSteps = new RecipeMapStepIngredient;
+                            $mapIngredientSteps->recipe_id = $recipe->id;
+                            $mapIngredientSteps->recipe_step_id = $step->id;
+                            $mapIngredientSteps->recipe_saved_ingredient_id = $recipeStepsIngredient;
+                            $mapIngredientSteps->save();
+                        }    
+                    }   
+                    
+                    if(count($recipeStep['tools']) > 0)
+                    {
+                        foreach($recipeStep['tools'] as $recipeStepstool)
+                        {
+                            $mapIngredientSteps = new RecipeMapStepTool;
+                            $mapIngredientSteps->recipe_id = $recipe->id;
+                            $mapIngredientSteps->recipe_step_id = $step->id;
+                            $mapIngredientSteps->recipe_saved_tool_id = $recipeStepstool;
+                            $mapIngredientSteps->save();
+                        }
+                    }
+                }
+            }
+            
+            $message = "Your recipe has been saved successfully";
+            return response()->json(['success' => $this->successStatus,
+                                        'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);       
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /** 
+     * Create Image From Base64 string
+     * 
+     * Pamameters $img
+     */ 
+    public function createImage($img)
+    {
+        $folderPath = "/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/public/uploads/";
+        $image_parts = explode(";base64,", $img);
+        $image_type_aux = explode("image/", $image_parts[0]);
+        $image_type = $image_type_aux[1];
+        $image_base64 = base64_decode($image_parts[1]);
+        
+        $uniqueName = uniqid() . '.'.$image_type;
+        $file = $folderPath .''. $uniqueName;
+
+        file_put_contents($file, $image_base64);
+
+        $attachment = new Attachment;
+        $attachment->attachment_url = 'public/uploads/'.$uniqueName;
+        $attachment->attachment_type = $image_type;
+        $attachment->save();
+        return $attachment->id;
     }
 
     /*
@@ -987,10 +1148,6 @@ class RecipeController extends CoreController
             {
                 foreach($request->params as $key => $preferences)
                 {
-                    /*$newPreference = new Preference;
-                    $newPreference->user_id = $user->user_id;
-                    $newPreference->preference = $preferences['preference'];
-                    $newPreference->save();*/
                     $newPreference = new PreferenceMapUser;
                     $newPreference->user_id = $user->user_id;
                     $newPreference->preference = $preferences['preference'];
@@ -1230,7 +1387,6 @@ class RecipeController extends CoreController
                 }
             }
             
-            $message = "Preferences has been saved successfully";
             return response()->json(['success' => $this->successStatus,
                                     'data' => $allPreferences,
                                     ], $this->successStatus);
@@ -1312,6 +1468,62 @@ class RecipeController extends CoreController
             return response()->json(['success' => $this->successStatus,
                                     'data' => $data,
                                 ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Search Recipe
+     * @Params $request
+     */
+    public function searchRecipe(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'keyword'   => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->paginate(10);    
+            
+            if(!empty($request->cook_time))
+            {
+                $isSearch = 1;
+                if($request->cook_time == 1 || $request->cook_time == 2)
+                {
+                    if($condition != '')
+                    $condition .=" and recipes.hours = ".$request->cook_time;
+                    else
+                    $condition .="recipes.hours = ".$request->cook_time;
+                }
+                else
+                {
+                    if($condition != '')
+                    $condition .=" and recipes.minutes = ".$request->cook_time;
+                    else
+                    $condition .="recipes.minutes = ".$request->cook_time;
+                }
+            }
+            if($condition != '')
+            {
+                $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->paginate(10);    
+                return response()->json(['success' => $this->successStatus,
+                                        'data' => $recipes
+                                ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No recipe found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
         }
         catch(\Exception $e)
         {

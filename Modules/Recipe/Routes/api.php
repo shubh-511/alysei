@@ -48,5 +48,6 @@ Route::group(['middleware' => 'auth:api'], function(){
 
     Route::post('save/preference', 'Api\RecipeController@savePreferences');
     Route::get('get/saved/preferences', 'Api\RecipeController@getPreferences');
+    Route::post('save/in/draft/recipe', 'Api\RecipeController@saveInDraftRecipe');
 
 });

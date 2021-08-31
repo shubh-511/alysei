@@ -29,6 +29,7 @@ class CreateRecipesTable extends Migration
             $table->integer('cooking_skill_id');
             $table->integer('image_id');
             $table->integer('favourite_count');
+            $table->enum('status',['1=published','0=draft'])->default('0');
             $table->timestamps();
         });
     }
