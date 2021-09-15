@@ -38,13 +38,21 @@ class TripController extends CoreController
     /***
     Get trip listing
     ***/
-    public function getTripListing()
+    public function getTripListing(Request $request)
     {
         try
         {
             $loggedInUser = $this->user;
             
-            $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+            if(!empty($request->visitor_profile_id))
+            {
+                $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
+            }
+            else
+            {
+                $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+            }
+            
             if(count($tripLists) > 0)
             {
                 foreach($tripLists as $key => $tripList)
@@ -139,6 +147,7 @@ class TripController extends CoreController
             $validator = Validator::make($request->all(), [ 
                 'trip_name' => 'required', 
                 'travel_agency' => 'required',
+                'country' => 'required',
                 'region' => 'required',
                 'adventure_type' => 'required',
                 'duration' => 'required',  
@@ -157,6 +166,7 @@ class TripController extends CoreController
             $createTrip->user_id = $loggedInUser->user_id;
             $createTrip->trip_name = $request->trip_name;
             $createTrip->travel_agency = $request->travel_agency;
+            $createTrip->country = $request->country;
             $createTrip->region = $request->region;
             $createTrip->adventure_type = $request->adventure_type;
             $createTrip->duration = $request->duration;
@@ -187,7 +197,7 @@ class TripController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $trip = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure')->where('trip_id', $tripId)->where('status', '1')->first();
+            $trip = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('trip_id', $tripId)->where('status', '1')->first();
             if(!empty($trip))
             {
                 return response()->json(['success' => $this->successStatus,
@@ -218,6 +228,7 @@ class TripController extends CoreController
                 'trip_id'   =>  'required',
                 'trip_name' => 'required', 
                 'travel_agency' => 'required',
+                'country' => 'required',
                 'region' => 'required',
                 'adventure_type' => 'required',
                 'duration' => 'required',  
@@ -236,6 +247,7 @@ class TripController extends CoreController
             {
                 $trip->trip_name = $request->trip_name;
                 $trip->travel_agency = $request->travel_agency;
+                $trip->country = $request->country;
                 $trip->region = $request->region;
                 $trip->adventure_type = $request->adventure_type;
                 $trip->intensity = $request->intensity;

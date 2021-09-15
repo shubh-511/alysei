@@ -298,6 +298,14 @@ class StoreController extends CoreController
                 }
                 $myStore->total_category = count($arrayValues);
 
+                $getLatestReview = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '1')->where('id', $myStore->marketplace_store_id)->orderBy('marketplace_review_rating_id', 'DESC')->first();
+
+                
+                $getLatestReviewCounts = MarketplaceRating::where('type', '1')->where('id', $myStore->marketplace_store_id)->count();
+
+                $myStore->latest_review = $getLatestReview;
+                if(!empty($getLatestReview))
+                $myStore->latest_review->review_count = $getLatestReviewCounts;
 
 
                 $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $myStore->marketplace_store_id)->get();
@@ -385,6 +393,10 @@ class StoreController extends CoreController
                 }
                 $myStore->total_category = count($arrayValues);
 
+                $getLatestReview = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '1')->where('id', $myStore->marketplace_store_id)->orderBy('marketplace_review_rating_id', 'DESC')->first();
+
+                $myStore->latest_review = $getLatestReview;
+
 
 
                 $galleries = MarketplaceStoreGallery::where('marketplace_store_id', $myStore->marketplace_store_id)->get();
@@ -466,19 +478,19 @@ class StoreController extends CoreController
                 $store->save();
 
                 $existingGalleries = MarketplaceStoreGallery::where('marketplace_store_id', $store->marketplace_store_id)->get();
-                if(count($existingGalleries) > 0)
+                /*if(count($existingGalleries) > 0)
                 {
                     foreach($existingGalleries as $existingGallery)
                     {
                         unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$existingGallery->attachment_url);
                         MarketplaceStoreGallery::where('marketplace_store_gallery_id',$existingGallery->marketplace_store_gallery_id)->delete();
                     }
-                }
+                }*/
                 
 
-                $userDetail = User::where('user_id', $user->user_id)->update(['about' => $request->description, 'company_name' => $request->name, 'website' => $request->website, 'phone' => $request->phone, 'address' => $request->location]);
+                //$userDetail = User::where('user_id', $user->user_id)->update(['about' => $request->description, 'company_name' => $request->name, 'website' => $request->website, 'phone' => $request->phone, 'address' => $request->location]);
 
-                if(!empty($request->gallery_images) && count($request->gallery_images) > 1)
+                if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
                 {
                     foreach($request->gallery_images as $images)
                     {

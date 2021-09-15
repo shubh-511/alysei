@@ -10,6 +10,11 @@ class RecipeDiet extends Model
 {
     protected $PrimaryKey = 'recipe_diet_id';
 
+    public function image_id()
+    {
+        return $this->belongsTo(Attachment::class, 'image_id','id');
+    }
+
     
     
 }

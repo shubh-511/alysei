@@ -300,17 +300,17 @@ class ProductController extends CoreController
                 $product->save();
 
                 $existingGalleries = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->get();
-                if(count($existingGalleries) > 0)
+                /*if(count($existingGalleries) > 0)
                 {
                     foreach($existingGalleries as $existingGallery)
                     {
                         unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$existingGallery->attachment_url);
                         MarketplaceProductGallery::where('marketplace_product_gallery_id',$existingGallery->marketplace_product_gallery_id)->delete();
                     }
-                }
+                }*/
                 
 
-                if(!empty($request->gallery_images) && count($request->gallery_images) > 1)
+                if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
                 {
                     foreach($request->gallery_images as $images)
                     {
@@ -779,6 +779,13 @@ class ProductController extends CoreController
 
                 $productDetail->is_favourite = (!empty($isfavourite)) ? 1 : 0;
                 $productDetail->store_detail = $storeName;
+
+                $getLatestReview = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '2')->where('id', $request->marketplace_product_id)->orderBy('marketplace_review_rating_id', 'DESC')->first();
+                $getLatestReviewCounts = MarketplaceRating::where('type', '2')->where('id', $request->marketplace_product_id)->count();
+
+                $productDetail->latest_review = $getLatestReview;
+                if(!empty($getLatestReview))
+                $productDetail->latest_review->review_count = $getLatestReviewCounts;
                                           
                 /*$galleries = MarketplaceProductGallery::where('marketplace_product_id', $productDetail->marketplace_product_id)->get();
                 (count($galleries) > 0) ? $productDetail->product_gallery = $galleries : $productDetail->product_gallery = [];*/

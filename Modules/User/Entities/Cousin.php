@@ -9,10 +9,10 @@ class Cousin extends Model
 {
     protected $primaryKey = 'cousin_id';
 
-    /*public function user()
+    public function image_id()
     {
-        return $this->belongsTo(User::class, 'user_id','user_id');
-    }*/
+        return $this->belongsTo(Attachment::class, 'image_id','id');
+    }
 
     public function attachment()
     {

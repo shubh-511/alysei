@@ -15,8 +15,8 @@ class CreateRecipeSavedCategoriesTable extends Migration
     {
         Schema::create('recipe_saved_categories', function (Blueprint $table) {
             $table->increments('recipe_saved_category_id');
-            $table->integer('recipe_id');
-            $table->integer('category_id');
+            $table->integer('recipe_id')->nullable();
+            $table->integer('category_id')->nullable();
             $table->timestamps();
         });
     }

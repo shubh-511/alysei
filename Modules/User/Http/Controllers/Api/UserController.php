@@ -69,7 +69,7 @@ class UserController extends CoreController
         {
             $user = $this->user;
 
-            $cousins = Cousin::with('attachment')->where('status', '1')->get();
+            $cousins = Cousin::with('image_id')->where('status', '1')->get();
             if(count($cousins) > 0)
             {
                 foreach($cousins as $key => $cousin)
@@ -547,7 +547,8 @@ class UserController extends CoreController
             }
             
             //END
-            $data = ['step_1'=>$steps,'products' => $products];
+            $userDataImage = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
+            $data = ['step_1'=>$steps,'products' => $products,'profile_data' => $userDataImage];
 
             /*************************/
             if(!empty($getFieldsForTab))
@@ -1069,6 +1070,36 @@ class UserController extends CoreController
 
             if($loggedInUser->role_id != 10)
             {
+                if($loggedInUser->role_id == 3 || $loggedInUser->role_id == 4 || $loggedInUser->role_id == 5 || $loggedInUser->role_id == 6)
+                {
+                    $fieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $loggedInUser->user_id)
+                                    ->where('user_field_id', 35)
+                                    ->first();
+                    $status = (!empty($fieldValue->value)) ? true : false;     
+                    $about = "Our Products";    
+                }
+                elseif($loggedInUser->role_id == 8)
+                {
+                    $fieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $loggedInUser->user_id)
+                                    ->where('user_field_id', 38)
+                                    ->first();
+                    $status = (!empty($fieldValue->value)) ? true : false; 
+                    $about = "Our Tours";
+                }
+                else
+                {
+                    $fieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $loggedInUser->user_id)
+                                    ->where('user_field_id', 37)
+                                    ->first();
+                    $status = (!empty($fieldValue->value)) ? true : false; 
+                    $about = "Our Menu";
+                }
+                
+                $aboutUs = ['title' => $about,'status' => $status, 'redirect_to' => 'edit_profile'];
+
                 $fieldsType = $this->getFeaturedType($this->user->role_id);
                 $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing'];
 
@@ -1097,7 +1128,7 @@ class UserController extends CoreController
             }
             else
             {
-                $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo, $dataFeaturedListing];
+                $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $aboutUs, $dataContactInfo, $dataFeaturedListing];
             }
 
             
@@ -1230,7 +1261,12 @@ class UserController extends CoreController
             $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
 
             $postCount = ActivityAction::where('subject_id', $loggedInUser->user_id)->count();
-            $connectionsCount = Connection::where('is_approved', '1')->where('resource_id', $loggedInUser->user_id)->orWhere('user_id', $loggedInUser->user_id)->count();
+            $connectionsCount = Connection::where('is_approved', '1')
+
+            ->Where(function ($query) use ($loggedInUser) {
+                $query->where('resource_id', $loggedInUser->user_id)
+                  ->orWhere('user_id', $loggedInUser->user_id);
+            })->count();
             $followerCount = Follower::where('follow_user_id', $loggedInUser->user_id)->count();
 
 

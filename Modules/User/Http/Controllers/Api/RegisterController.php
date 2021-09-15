@@ -12,6 +12,7 @@ use Modules\User\Entities\DeviceToken;
 use App\Attachment;
 use Modules\User\Entities\City;
 use Validator;
+use Str;
 use DB;
 use Kreait\Firebase\Factory;
 use Cache;
@@ -127,6 +128,22 @@ class RegisterController extends CoreController
 
     }
 
+    public function generate_unique_username($name)
+    {
+        $new_username   = $name;
+
+        $query = \DB::table("users")->select('count(id) as user_count')
+        ->where("name",'LIKE',"'%'".$new_username."'%'")
+        ->get();
+        $count = $query->user_count;
+
+        if(!empty($count)) {
+            $new_username = $new_username . $count;
+        }
+
+        return $new_username;
+    }
+
     /*
      * Register 
      * @params $request 
@@ -217,6 +234,34 @@ class RegisterController extends CoreController
                         $userData['state'] = $inputData['state'];
                         
                     }
+
+                    if(!empty($inputData['first_name']) && !empty($inputData['last_name']))
+                    {
+                        $userName = ucwords(strtolower($inputData['first_name']).' '.strtolower($inputData['first_name']));
+                    }
+                    elseif(!empty($inputData['company_name']))
+                    {
+                        $userName = $inputData['company_name'];
+                    }
+                    elseif(!empty($inputData['restaurant_name']))
+                    {
+                        $userName = $inputData['restaurant_name'];   
+                    }
+
+                    $new_username = strtolower(str_replace(' ', '_', $userName));
+                    
+                    $query = DB::table('users')->select(DB::raw('count(user_id) as user_count'))->where('name','LIKE','%'.$userName.'%')->first();
+                    
+                    $count = $query->user_count;
+
+                    if(!empty($count)) {
+                        $new_username = $new_username . $count;
+                    }
+                    else
+                    {
+                        $new_username;
+                    }
+                    $userData['name'] = $new_username;
 
                     $user = User::create($userData); 
                     

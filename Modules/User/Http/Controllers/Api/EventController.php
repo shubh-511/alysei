@@ -36,13 +36,21 @@ class EventController extends CoreController
     /***
     Get blog listing
     ***/
-    public function getEventListing()
+    public function getEventListing(Request $request)
     {
         try
         {
             $loggedInUser = $this->user;
+            if(!empty($request->visitor_profile_id))
+            {
+                $eventLists = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
+            }
+            else
+            {
+                $eventLists = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+            }
             
-            $eventLists = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+            
             if(count($eventLists) > 0)
             {
                 foreach($eventLists as $key => $eventList)

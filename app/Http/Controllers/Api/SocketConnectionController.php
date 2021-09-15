@@ -10,9 +10,12 @@ use Modules\User\Entities\User;
 use App\SocketConnection;
 use App\Http\Traits\UploadImageTrait;
 use Modules\User\Entities\Role;
+use Modules\User\Entities\DeviceToken;
 use Modules\Activity\Entities\CoreComment;
 use Carbon\Carbon;
 use App\Http\Traits\NotificationTrait;
+use Kreait\Firebase\Factory;
+use App\Notification;
 use DB;
 use Modules\Activity\Entities\ActivityLike;
 use Modules\Activity\Entities\ActivityAction;
@@ -42,6 +45,34 @@ class SocketConnectionController extends CoreController
             return $next($request);
         });
     }*/
+
+    public function conn_firbase(){
+        
+        $factory = (new Factory)
+        ->withServiceAccount('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/storage/credentials/firebase_credential.json')
+        //->withDatabaseUri('https://alysei-a2f37-default-rtdb.firebaseio.com/');
+        ->withDatabaseUri('https://alysei-add21-default-rtdb.firebaseio.com/');
+        $database = $factory->createDatabase();    
+        return $database;
+    }
+
+    public function likeUnlikeInFirebase($id, $userId, $postId)
+    {
+        $data = $this->conn_firbase()->getReference('like_unlike_post/'.$id)
+        ->update([
+        'id' => $id,
+        'user_id' => $userId,
+        'post_id' => $postId
+        ]);
+
+        return $data;
+
+    }
+
+    public function removeLikes($id)
+    {
+        $data = $this->conn_firbase()->getReference('like_unlike_post/'.$id)->remove();
+    }
 
 
     /*
@@ -339,6 +370,8 @@ class SocketConnectionController extends CoreController
                         $activityPost->like_count = $activityPost->like_count + 1;
                         $activityPost->save();
 
+                        $this->likeUnlikeInFirebase($activityLike->activity_like_id, $request->user_id, $request->post_id);
+
                         if($poster->role_id == 7 || $poster->role_id == 10)
                         {
                             $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
@@ -379,11 +412,14 @@ class SocketConnectionController extends CoreController
                     $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
                     if(!empty($isLikedActivityPost))
                     {
+                        $this->removeLikes($isLikedActivityPost->activity_like_id);
                         $isUnlikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->delete();
                         if($isUnlikedActivityPost == 1)
                         {
                             $activityPost->like_count = $activityPost->like_count - 1;
                             $activityPost->save();
+
+                            
 
                             $message = "You unliked this post";
                             return response()->json(['success' => $this->successStatus,

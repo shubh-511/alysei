@@ -16,20 +16,20 @@ class CreateRecipesTable extends Migration
         Schema::create('recipes', function (Blueprint $table) {
             $table->increments('recipe_id');
             $table->integer('user_id');
-            $table->string('name');
-            $table->integer('meal_id');
-            $table->integer('course_id');
-            $table->integer('hours')->comment('preparation time');
-            $table->integer('minutes')->comment('preparation time');
-            $table->integer('serving');
-            $table->integer('cousin_id');
-            $table->integer('region_id');
-            $table->integer('diet_id');
-            $table->integer('intolerance_id');
-            $table->integer('cooking_skill_id');
-            $table->integer('image_id');
+            $table->string('name')->nullable();
+            $table->integer('meal_id')->nullable();
+            $table->integer('course_id')->nullable();
+            $table->integer('hours')->comment('preparation time')->nullable();
+            $table->integer('minutes')->comment('preparation time')->nullable();
+            $table->integer('serving')->nullable();
+            $table->integer('cousin_id')->nullable();
+            $table->integer('region_id')->nullable();
+            $table->integer('diet_id')->nullable();
+            $table->integer('intolerance_id')->nullable();
+            $table->integer('cooking_skill_id')->nullable();
+            $table->integer('image_id')->nullable();
             $table->integer('favourite_count');
-            $table->enum('status',['1=published','0=draft'])->default('0');
+            $table->enum('status',['0','1'])->default('0')->comment("1=published','0=draft");
             $table->timestamps();
         });
     }

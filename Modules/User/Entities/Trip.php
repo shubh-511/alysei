@@ -29,5 +29,15 @@ class Trip extends Model
         return $this->belongsTo(AdventureType::class, 'adventure_type','adventure_type_id');
     }
 
+    public function region()
+    {
+        return $this->belongsTo(State::class, 'region','id');
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country','id');
+    }
+
     
 }

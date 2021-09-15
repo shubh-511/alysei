@@ -18,6 +18,7 @@ class CreateTripsTable extends Migration
             $table->integer('user_id');
             $table->string('trip_name');
             $table->string('travel_agency');
+            $table->integer('country');
             $table->integer('region');
             $table->integer('adventure_type');
             $table->string('duration');

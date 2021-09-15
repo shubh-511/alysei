@@ -15,10 +15,10 @@ class CreateRecipeSavedToolsTable extends Migration
     {
         Schema::create('recipe_saved_tools', function (Blueprint $table) {
             $table->increments('recipe_saved_tool_id');
-            $table->integer('recipe_id');
-            $table->integer('tool_id');
-            $table->string('quantity');
-            $table->string('unit');
+            $table->integer('recipe_id')->nullable();
+            $table->integer('tool_id')->nullable();
+            $table->string('quantity')->nullable();
+            $table->string('unit')->nullable();
             $table->timestamps();
         });
     }

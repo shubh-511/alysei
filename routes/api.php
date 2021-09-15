@@ -52,6 +52,9 @@ use Illuminate\Http\Request;
 
 	Route::get('get/all/notifications', 'Api\NotificationController@getAllNotifications');
 
+	
+	Route::post('send/message/notification', 'Api\NotificationController@sendNewMessageNotification');	
+
 
 
 

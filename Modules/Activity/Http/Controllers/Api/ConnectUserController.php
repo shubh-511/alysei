@@ -144,7 +144,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $myFollowers = Follower::with('user:user_id,name,email')->with('follow_user:user_id,name,email')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $myFollowers = Follower::with('user:user_id,name,email,role_id,first_name,last_name.avatar_id','user.avatar_id')->with('follow_user:user_id,name,email,role_id,first_name,last_name,avatar_id','follow_user.avatar_id')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($myFollowers) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -173,7 +173,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $followings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,')->with('follow_user:user_id,name,email,company_name,first_name,last_name,')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $followings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,avatar_id','user.avatar_id')->with('follow_user:user_id,name,email,company_name,first_name,last_name,avatar_id','follow_user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($followings) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -215,7 +215,9 @@ class ConnectUserController extends CoreController
             $isConnectedUser = Connection::where('connection_id', $request->connection_id)->where('user_id', $user->user_id)->first();
             if(!empty($isConnectedUser))
             {
-                $user = User::where('user_id', $isConnectedUser->resource_id)->first();
+                $userData = User::select('user_id','role_id','company_name','first_name','last_name','about','restaurant_name','vat_no','fda_no','avatar_id')->with('avatar_id')->where('user_id', $isConnectedUser->resource_id)->first();
+                $userData->reason_to_connect = $isConnectedUser->reason_to_connect;
+
                 $fieldOptions = DB::table('user_field_options')->where('parent','=',0)->where('head','=',0)->get();
 
                 $fieldOptions = $fieldOptions->pluck('user_field_option_id');
@@ -226,7 +228,7 @@ class ConnectUserController extends CoreController
 
                 $fieldOptions = DB::table('user_field_options')->whereIn('user_field_option_id',$userFieldValues)->get();
 
-
+                
 
                 foreach($fieldOptions as $key => $fieldOption)
                 {
@@ -245,8 +247,9 @@ class ConnectUserController extends CoreController
                     $fieldOptions[$key]->animal_helath_asl_certificate = (!empty($userCertificates->animal_helath_asl_certificate))?($this->getCertificatesById($userCertificates->animal_helath_asl_certificate)):"";
                     
                 }
+                $data = ['user_data' => $userData, 'about_member' => $this->getAboutMember($userData->role_id, $userData->user_id), 'certificates' => $fieldOptions];
                 return response()->json(['success' => $this->successStatus, 
-                                         'certificates' => $fieldOptions
+                                         'data' => $data
                                         ], $this->successStatus);
             }
             else
@@ -262,6 +265,72 @@ class ConnectUserController extends CoreController
         }
     }
 
+
+    public function getAboutMember($role_id, $user_id)
+    {
+        $roleFields = DB::table('user_field_map_roles')->select('user_fields.title','user_fields.user_field_id','user_fields.type')
+                          ->join('user_fields', 'user_fields.user_field_id', '=', 'user_field_map_roles.user_field_id')
+                          ->where("role_id","=",$role_id)
+                          ->where("display_on_dashboard","=",'true')
+                          //->where("conditional","=",'no')
+                          ->orderBy("edit_profile_field_order","asc")
+                          ->get();
+
+
+            if($roleFields){
+                foreach ($roleFields as $key => $value) {
+                    $radioFieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->first();
+                    
+                            
+                    $roleFields[$key]->title = $this->translate('messages.'.$value->title,$value->title);
+                    if($roleFields[$key]->type == 'radio')
+                    {
+                        if(($radioFieldValue->value == 'Yes' || $radioFieldValue->value == '621' || $radioFieldValue->value == '623' || $radioFieldValue->value == '625'))
+                            $roleFields[$key]->value = 'Yes';
+                        else
+                            $roleFields[$key]->value = 'No';
+                    }
+                    elseif($roleFields[$key]->type !='text' && $roleFields[$key]->type !='email')
+                    {
+                        $arrayValues = array();
+                        $fieldValues = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->get();
+                        if(count($fieldValues) > 0)
+                        {
+                            foreach($fieldValues as $fieldValue)
+                            {
+                                $options = DB::table('user_field_options')
+                                        ->where('head', 0)->where('parent', 0)
+                                        ->where('user_field_option_id', $fieldValue->value)
+                                        ->first();
+                                if(!empty($options->option))
+                                $arrayValues[] = $options->option;
+                                
+                            }
+                        }
+                        $roleFields[$key]->value = join(", ", $arrayValues);
+                        
+                    }
+                    else
+                    {
+                        $fieldValue = DB::table('user_field_values')
+                                    ->where('user_id', $user_id)
+                                    ->where('user_field_id', $value->user_field_id)
+                                    ->first();
+                        $roleFields[$key]->value = $fieldValue->value??'';
+                    }
+                    
+
+                }
+            }
+            return $roleFields;
+    }
+
     /*
      * Send Connection Request
      * @Params $request
@@ -273,7 +342,7 @@ class ConnectUserController extends CoreController
             $user = $this->user;
             $validator = Validator::make($request->all(), [ 
                 'user_id' => 'required', 
-                'reason_to_connect' =>  'required'
+                //'reason_to_connect' =>  'required'
             ]);
 
             if ($validator->fails()) { 
@@ -360,11 +429,15 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $requests = Connection::
-            //with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')
-            where('is_approved', '1')
-            ->where('resource_id', $user->user_id)
-            ->orWhere('user_id', $user->user_id)
+            $requests = Connection::where('is_approved', '1')
+
+            ->Where(function ($query) use ($user) {
+                $query->where('resource_id', $user->user_id)
+                  ->orWhere('user_id', $user->user_id);
+            })
+
+            //->where('resource_id', $user->user_id)
+            //->orWhere('user_id', $user->user_id)
             ->orderBy('connection_id', 'DESC')
             ->get();
             foreach($requests as $key => $request)

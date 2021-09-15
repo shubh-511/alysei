@@ -15,9 +15,9 @@ class CreateRecipeMapStepsIngredientsTable extends Migration
     {
         Schema::create('recipe_map_steps_ingredients', function (Blueprint $table) {
             $table->increments('recipe_map_steps_ingredient_id');
-            $table->integer('recipe_id');
-            $table->integer('recipe_step_id');
-            $table->integer('recipe_saved_ingredient_id');
+            $table->integer('recipe_id')->nullable();
+            $table->integer('recipe_step_id')->nullable();
+            $table->integer('recipe_saved_ingredient_id')->nullable();
             $table->timestamps();
         });
     }

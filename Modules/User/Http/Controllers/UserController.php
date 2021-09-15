@@ -4,14 +4,19 @@ namespace Modules\User\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
+use App\Notification;
+use Modules\User\Entities\DeviceToken; 
+use App\Http\Traits\NotificationTrait;
 //use App\Events\UserRegisterEvent;
 
-class UserController extends Controller
+class UserController extends CoreController
 {
+    use NotificationTrait;
     /**
      * Create a new controller instance.
      *
@@ -76,23 +81,45 @@ class UserController extends Controller
     {
         if($request->progress_level == 'alysei_review')
         {
+            $title = "Your profile has been reviwed from admin";
             $user = User::where('user_id', $userId)->update(['alysei_review' => '1']);
         }
         elseif($request->progress_level == 'alysei_certification')
         {
+            $title = "Your profile is certified from admin";
             $user = User::where('user_id', $userId)->update(['alysei_certification' => '1']);
         }
         elseif($request->progress_level == 'alysei_recognition')
         {
+            $title = "Your profile has been recognised from admin";
             $user = User::where('user_id', $userId)->update(['alysei_recognition' => '1']);
         }
         elseif($request->progress_level == 'alysei_qualitymark')
         {
+            $title = "Your profile has been marked as qualitymark";
             $user = User::where('user_id', $userId)->update(['alysei_qualitymark' => '1']);
         }
         elseif($request->progress_level == 'level_empty')
         {
             return redirect('login/users/edit/'.$userId)->with('success','All steps has been completed');
+        }
+
+        $admin = User::where('role_id', '1')->first();
+
+        $saveNotification = new Notification;
+        $saveNotification->from = $admin->user_id;
+        $saveNotification->to = $userId;
+        $saveNotification->notification_type = 'progress';
+        $saveNotification->title = $this->translate('messages.'.$title,$title);
+        $saveNotification->redirect_to = 'membership_progress';
+        $saveNotification->redirect_to_id = 0;
+        $saveNotification->save();
+
+        $tokens = DeviceToken::where('user_id', $userId)->get();
+        if(count($tokens) > 0)
+        {
+            $collectedTokenArray = $tokens->pluck('device_token');
+            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
         }
              
         return redirect('login/users/edit/'.$userId)->with('success','Updated successfully');

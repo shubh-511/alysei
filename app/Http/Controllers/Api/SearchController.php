@@ -752,7 +752,7 @@ class SearchController extends CoreController
                 $defaultHubs = UserSelectedHub::whereIn('hub_id', $myHubs)->get();
                 $defaultHubsUser = $defaultHubs->pluck('user_id');
 
-                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')
+                $users = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')
                 ->with('avatar_id')
                 ->whereIn('user_id', $defaultHubsUser)
                 ->where('user_id', '!=' , $myId)
@@ -762,7 +762,7 @@ class SearchController extends CoreController
             }
             else
             {
-                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')
+                $users = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')
                 ->with('avatar_id')
                 ->where('user_id', '!=' , $myId)
                 ->where('role_id', $roleId)
@@ -779,7 +779,7 @@ class SearchController extends CoreController
             }
             else
             {
-                $users = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')
+                $users = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')
                 ->with('avatar_id')
                 ->where('role_id', $roleId)
                 ->where('user_id', '!=' , $myId)
@@ -809,7 +809,7 @@ class SearchController extends CoreController
     */
     public function searchGlobalUsers($keyWord)
     {
-        $users = User::select('user_id','role_id','name','email','company_name','restaurant_name','avatar_id')->with('avatar_id')
+        $users = User::select('user_id','role_id','name','email','first_name','last_name','company_name','restaurant_name','avatar_id')->with('avatar_id')
         ->where('email', 'LIKE', '%' . $keyWord . '%')
         ->paginate(10);
 

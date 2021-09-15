@@ -36,13 +36,21 @@ class BlogController extends CoreController
     /***
     Get blog listing
     ***/
-    public function getBlogListing()
+    public function getBlogListing(Request $request)
     {
         try
         {
             $loggedInUser = $this->user;
             
-            $blogLists = Blog::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->get();
+            if(!empty($request->visitor_profile_id))
+            {
+                $blogLists = Blog::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $$request->visitor_profile_id)->get();
+            }
+            else
+            {
+                $blogLists = Blog::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->get();    
+            }
+            
             if(count($blogLists) > 0)
             {
                 foreach($blogLists as $key => $blogList)

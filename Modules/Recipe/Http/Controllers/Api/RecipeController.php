@@ -72,7 +72,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $tolerances = RecipeFoodIntolerance::get();
+            $tolerances = RecipeFoodIntolerance::with('image_id')->get();
             if(count($tolerances) > 0)
             {
                 foreach($tolerances as $key => $tolerance)
@@ -142,7 +142,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $diets = RecipeDiet::get();
+            $diets = RecipeDiet::with('image_id')->get();
             if(count($diets) > 0)
             {
                 foreach($diets as $key => $diet)
@@ -252,6 +252,50 @@ class RecipeController extends CoreController
     }
 
     /*
+     * Search ingredients
+     * 
+     */
+    public function searchIngredients(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'keyword' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $ingredients = RecipeIngredient::with('image_id')->where('parent','!=', 0)->where('title','LIKE','%'.$request->keyword.'%')->get();
+            if(count($ingredients) > 0)
+            {
+                $categoriesWithCount = [];
+                foreach($ingredients as $key => $ingredient)
+                {
+                    $ingredients[$key]->title = $this->translate('messages.'.$ingredient->title, $ingredient->title);
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($ingredients),
+                                        'data' => $ingredients,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No ingredients found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Get recipie meals
      * 
      */
@@ -296,7 +340,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $skills = RecipeCookingSkill::get();
+            $skills = RecipeCookingSkill::with('image_id')->get();
             if(count($skills) > 0)
             {
                 foreach($skills as $key => $skill)
@@ -452,23 +496,20 @@ class RecipeController extends CoreController
             $recipe->status = '1';
             $recipe->save();
 
-            
-
             //save category
-            foreach($requestedFields['save_categories'] as $savedCategory)
+            /*foreach($requestedFields['save_categories'] as $savedCategory)
             {
                 $categories = new RecipeSavedCategory;
                 $categories->recipe_id = $recipe->id;
                 $categories->category_id = $savedCategory;
                 $categories->save();
-            }
-            
+            }*/
 
             //save ingredients
             foreach($requestedFields['saved_ingredients'] as $savedIngredients)
             {
                 $savedIng = new RecipeSavedIngredient;
-                $savedIng->recipe_id = $recipe->id;
+                $savedIng->recipe_id = $recipe->recipe_id;
                 $savedIng->ingredient_id = $savedIngredients['ingredient_id'];
                 $savedIng->quantity = $savedIngredients['quantity'];
                 $savedIng->unit = $savedIngredients['unit'];
@@ -480,10 +521,10 @@ class RecipeController extends CoreController
             foreach($requestedFields['saved_tools'] as $savedTools)
             {
                 $savedTool = new RecipeSavedTool;
-                $savedTool->recipe_id = $recipe->id;
+                $savedTool->recipe_id = $recipe->recipe_id;
                 $savedTool->tool_id = $savedTools['tool_id'];
-                $savedTool->quantity = $savedTools['quantity'];
-                $savedTool->unit = $savedTools['unit'];
+                //$savedTool->quantity = $savedTools['quantity'];
+                //$savedTool->unit = $savedTools['unit'];
                 $savedTool->save();
             }
             
@@ -492,7 +533,7 @@ class RecipeController extends CoreController
             foreach($requestedFields['recipe_steps'] as $key => $recipeStep)
             {
                 $step = new RecipeStep;
-                $step->recipe_id = $recipe->id;
+                $step->recipe_id = $recipe->recipe_id;
                 $step->title = $recipeStep['title'];
                 $step->description = $recipeStep['description'];
                 $step->save();
@@ -500,7 +541,7 @@ class RecipeController extends CoreController
                 foreach($recipeStep['ingredients'] as $recipeStepsIngredient)
                 {
                     $mapIngredientSteps = new RecipeMapStepIngredient;
-                    $mapIngredientSteps->recipe_id = $recipe->id;
+                    $mapIngredientSteps->recipe_id = $recipe->recipe_id;
                     $mapIngredientSteps->recipe_step_id = $step->id;
                     $mapIngredientSteps->recipe_saved_ingredient_id = $recipeStepsIngredient;
                     $mapIngredientSteps->save();
@@ -509,7 +550,7 @@ class RecipeController extends CoreController
                 foreach($recipeStep['tools'] as $recipeStepstool)
                 {
                     $mapIngredientSteps = new RecipeMapStepTool;
-                    $mapIngredientSteps->recipe_id = $recipe->id;
+                    $mapIngredientSteps->recipe_id = $recipe->recipe_id;
                     $mapIngredientSteps->recipe_step_id = $step->id;
                     $mapIngredientSteps->recipe_saved_tool_id = $recipeStepstool;
                     $mapIngredientSteps->save();
@@ -532,7 +573,7 @@ class RecipeController extends CoreController
      * Create recipe
      * 
      */
-    public function saveInDraftRecipe(Request $request)
+    public function updateRecipe(Request $request, $recipeId)
     {
         try
         {
@@ -547,8 +588,132 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
+            RecipeSavedIngredient::where('recipe_id', $recipeId)->delete();
+            RecipeSavedTool::where('recipe_id', $recipeId)->delete();
+            RecipeStep::where('recipe_id', $recipeId)->delete();
+            RecipeMapStepIngredient::where('recipe_id', $recipeId)->delete();
+            RecipeMapStepTool::where('recipe_id', $recipeId)->delete();
+
             //recipe detail
-            $recipe = new Recipe;
+            $recipe = Recipe::where('recipe_id', $recipeId)->first();
+            $recipe->name = $requestedFields['name'];
+            $recipe->meal_id = $requestedFields['meal_id'];
+            $recipe->course_id = $requestedFields['course_id'];
+            $recipe->hours = $requestedFields['hours'];
+            $recipe->minutes = $requestedFields['minutes'];
+            $recipe->serving = $requestedFields['serving'];
+            $recipe->cousin_id = $requestedFields['cousin_id'];
+            $recipe->diet_id = $requestedFields['diet_id'];
+            $recipe->intolerance_id = $requestedFields['intolerance_id'];
+            $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
+            $recipe->region_id = $requestedFields['region_id'];
+            if(!empty($requestedFields['image_id']))
+            $recipe->image_id = $this->createImage($requestedFields['image_id']);
+            //$this->uploadImage($request->file($requestedFields['image_id']));
+            $recipe->save();
+
+            //save category
+            /*foreach($requestedFields['save_categories'] as $savedCategory)
+            {
+                $categories = new RecipeSavedCategory;
+                $categories->recipe_id = $recipe->id;
+                $categories->category_id = $savedCategory;
+                $categories->save();
+            }*/
+            
+            //save ingredients
+            foreach($requestedFields['saved_ingredients'] as $savedIngredients)
+            {
+                $savedIng = new RecipeSavedIngredient;
+                $savedIng->recipe_id = $recipe->recipe_id;
+                $savedIng->ingredient_id = $savedIngredients['ingredient_id'];
+                $savedIng->quantity = $savedIngredients['quantity'];
+                $savedIng->unit = $savedIngredients['unit'];
+                $savedIng->save();
+            }
+            
+
+            //save tools
+            foreach($requestedFields['saved_tools'] as $savedTools)
+            {
+                $savedTool = new RecipeSavedTool;
+                $savedTool->recipe_id = $recipe->recipe_id;
+                $savedTool->tool_id = $savedTools['tool_id'];
+                //$savedTool->quantity = $savedTools['quantity'];
+                //$savedTool->unit = $savedTools['unit'];
+                $savedTool->save();
+            }
+            
+
+            //steps
+            foreach($requestedFields['recipe_steps'] as $key => $recipeStep)
+            {
+                $step = new RecipeStep;
+                $step->recipe_id = $recipe->recipe_id;
+                $step->title = $recipeStep['title'];
+                $step->description = $recipeStep['description'];
+                $step->save();
+
+                foreach($recipeStep['ingredients'] as $recipeStepsIngredient)
+                {
+                    $mapIngredientSteps = new RecipeMapStepIngredient;
+                    $mapIngredientSteps->recipe_id = $recipe->recipe_id;
+                    $mapIngredientSteps->recipe_step_id = $step->id;
+                    $mapIngredientSteps->recipe_saved_ingredient_id = $recipeStepsIngredient;
+                    $mapIngredientSteps->save();
+                }
+
+                foreach($recipeStep['tools'] as $recipeStepstool)
+                {
+                    $mapIngredientSteps = new RecipeMapStepTool;
+                    $mapIngredientSteps->recipe_id = $recipe->recipe_id;
+                    $mapIngredientSteps->recipe_step_id = $step->id;
+                    $mapIngredientSteps->recipe_saved_tool_id = $recipeStepstool;
+                    $mapIngredientSteps->save();
+                }
+                
+
+            }
+            $message = "Your recipe has been updated successfully";
+            return response()->json(['success' => $this->successStatus,
+                                        'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);       
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Create recipe
+     * 
+     */
+    public function saveOrUpdateRecipeInDraft(Request $request, $recipeId = '')
+    {
+        try
+        {
+            $user = $this->user;
+
+            $requestedFields = $request->params;
+            $rules = $this->validateData($requestedFields);
+            
+            if($recipeId > 0)
+            {
+                RecipeSavedIngredient::where('recipe_id', $recipeId)->delete();
+                RecipeSavedTool::where('recipe_id', $recipeId)->delete();
+                RecipeStep::where('recipe_id', $recipeId)->delete();
+                RecipeMapStepIngredient::where('recipe_id', $recipeId)->delete();
+                RecipeMapStepTool::where('recipe_id', $recipeId)->delete();
+                $recipe = Recipe::where('recipe_id', $recipeId)->first();
+            }
+            else
+            {
+                $recipe = new Recipe;
+            }
+
+            //recipe detail
+            
             $recipe->user_id = $user->user_id;
             $recipe->name = $requestedFields['name'];
             $recipe->meal_id = $requestedFields['meal_id'];
@@ -561,6 +726,7 @@ class RecipeController extends CoreController
             $recipe->intolerance_id = $requestedFields['intolerance_id'];
             $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
+            if(!empty($requestedFields['image_id']))
             $recipe->image_id = $this->createImage($requestedFields['image_id']);
             //return $recipe->image_id;
             //$this->uploadImage($request->file($requestedFields['image_id']));
@@ -570,7 +736,7 @@ class RecipeController extends CoreController
             
 
             //save category
-            if(count($requestedFields['save_categories']) > 0)
+            /*if(count($requestedFields['save_categories']) > 0)
             {
                 foreach($requestedFields['save_categories'] as $savedCategory)
                 {
@@ -579,7 +745,7 @@ class RecipeController extends CoreController
                     $categories->category_id = $savedCategory;
                     $categories->save();
                 }
-            }
+            }*/
 
             if(count($requestedFields['saved_ingredients']) > 0)
             {
@@ -587,7 +753,7 @@ class RecipeController extends CoreController
                 foreach($requestedFields['saved_ingredients'] as $savedIngredients)
                 {
                     $savedIng = new RecipeSavedIngredient;
-                    $savedIng->recipe_id = $recipe->id;
+                    $savedIng->recipe_id = $recipe->recipe_id;
                     $savedIng->ingredient_id = $savedIngredients['ingredient_id'];
                     $savedIng->quantity = $savedIngredients['quantity'];
                     $savedIng->unit = $savedIngredients['unit'];
@@ -603,10 +769,10 @@ class RecipeController extends CoreController
                 foreach($requestedFields['saved_tools'] as $savedTools)
                 {
                     $savedTool = new RecipeSavedTool;
-                    $savedTool->recipe_id = $recipe->id;
+                    $savedTool->recipe_id = $recipe->recipe_id;
                     $savedTool->tool_id = $savedTools['tool_id'];
-                    $savedTool->quantity = $savedTools['quantity'];
-                    $savedTool->unit = $savedTools['unit'];
+                    //$savedTool->quantity = $savedTools['quantity'];
+                    //$savedTool->unit = $savedTools['unit'];
                     $savedTool->save();
                 }    
             }
@@ -619,7 +785,7 @@ class RecipeController extends CoreController
                 foreach($requestedFields['recipe_steps'] as $key => $recipeStep)
                 {
                     $step = new RecipeStep;
-                    $step->recipe_id = $recipe->id;
+                    $step->recipe_id = $recipe->recipe_id;
                     $step->title = $recipeStep['title'];
                     $step->description = $recipeStep['description'];
                     $step->save();
@@ -629,7 +795,7 @@ class RecipeController extends CoreController
                         foreach($recipeStep['ingredients'] as $recipeStepsIngredient)
                         {
                             $mapIngredientSteps = new RecipeMapStepIngredient;
-                            $mapIngredientSteps->recipe_id = $recipe->id;
+                            $mapIngredientSteps->recipe_id = $recipe->recipe_id;
                             $mapIngredientSteps->recipe_step_id = $step->id;
                             $mapIngredientSteps->recipe_saved_ingredient_id = $recipeStepsIngredient;
                             $mapIngredientSteps->save();
@@ -641,7 +807,7 @@ class RecipeController extends CoreController
                         foreach($recipeStep['tools'] as $recipeStepstool)
                         {
                             $mapIngredientSteps = new RecipeMapStepTool;
-                            $mapIngredientSteps->recipe_id = $recipe->id;
+                            $mapIngredientSteps->recipe_id = $recipe->recipe_id;
                             $mapIngredientSteps->recipe_step_id = $step->id;
                             $mapIngredientSteps->recipe_saved_tool_id = $recipeStepstool;
                             $mapIngredientSteps->save();
@@ -750,7 +916,7 @@ class RecipeController extends CoreController
                             //$arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id');
                             foreach($recipeUsedTools as $keyTool => $recipeUsedTool)
                             {
-                                if(in_array($recipeUsedIngredient->tool_id, $arrayValuesTools))
+                                if(in_array($recipeUsedTool->tool_id, $arrayValuesTools))
                                     $recipeUsedTools[$keyTool]->is_selected = true;
                                 else
                                     $recipeUsedTools[$keyTool]->is_selected = false;
@@ -798,7 +964,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $myRecipes = Recipe::with('image')->where('user_id', $user->user_id)->orderBy('recipe_id', 'DESC')->get();
+            $myRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->where('user_id', $user->user_id)->orderBy('recipe_id', 'DESC')->get();
             if(count($myRecipes) > 0)
             {
                 foreach($myRecipes as $key => $myRecipe)
@@ -939,7 +1105,7 @@ class RecipeController extends CoreController
             if(count($myFavRecipes) > 0)
             {
                 $myFavRecipesId = $myFavRecipes->pluck('recipe_id');
-                $myRecipes = Recipe::with('image')->whereIn('recipe_id', $myFavRecipesId)->orderBy('recipe_id', 'DESC')->get();
+                $myRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->whereIn('recipe_id', $myFavRecipesId)->orderBy('recipe_id', 'DESC')->get();
 
                 if(count($myRecipes) > 0)
                 {
@@ -1146,6 +1312,16 @@ class RecipeController extends CoreController
             $user = $this->user;
             if(!empty($request->params))
             {
+                $getPreferences = PreferenceMapUser::where('user_id', $user->user_id)->get();
+                if(count($getPreferences) > 0)
+                {
+                    PreferenceMapUser::where('user_id', $user->user_id)->delete();
+                    PreferenceMapCousin::where('user_id', $user->user_id)->delete();
+                    PreferenceMapIntolerance::where('user_id', $user->user_id)->delete();
+                    PreferenceMapDiet::where('user_id', $user->user_id)->delete();
+                    PreferenceMapIngredient::where('user_id', $user->user_id)->delete();
+                    PreferenceMapCookingSkill::where('user_id', $user->user_id)->delete();
+                }
                 foreach($request->params as $key => $preferences)
                 {
                     $newPreference = new PreferenceMapUser;
@@ -1158,6 +1334,7 @@ class RecipeController extends CoreController
                         foreach($preferences['id'] as $preferenceId)
                         {
                             $mapPreference = new PreferenceMapCousin;
+                            $mapPreference->user_id = $user->user_id;
                             $mapPreference->preference_id = $newPreference->id;
                             $mapPreference->cousin_id = $preferenceId;
                             $mapPreference->save();
@@ -1169,6 +1346,7 @@ class RecipeController extends CoreController
                         foreach($preferences['id'] as $preferenceId)
                         {
                             $mapPreference = new PreferenceMapIntolerance;
+                            $mapPreference->user_id = $user->user_id;
                             $mapPreference->preference_id = $newPreference->id;
                             $mapPreference->intolerance_id = $preferenceId;
                             $mapPreference->save();
@@ -1180,6 +1358,7 @@ class RecipeController extends CoreController
                         foreach($preferences['id'] as $preferenceId)
                         {
                             $mapPreference = new PreferenceMapDiet;
+                            $mapPreference->user_id = $user->user_id;
                             $mapPreference->preference_id = $newPreference->id;
                             $mapPreference->diet_id = $preferenceId;
                             $mapPreference->save();
@@ -1191,6 +1370,7 @@ class RecipeController extends CoreController
                         foreach($preferences['id'] as $preferenceId)
                         {
                             $mapPreference = new PreferenceMapIngredient;
+                            $mapPreference->user_id = $user->user_id;
                             $mapPreference->preference_id = $newPreference->id;
                             $mapPreference->ingredient_id = $preferenceId;
                             $mapPreference->save();
@@ -1202,6 +1382,7 @@ class RecipeController extends CoreController
                         foreach($preferences['id'] as $preferenceId)
                         {
                             $mapPreference = new PreferenceMapCookingSkill;
+                            $mapPreference->user_id = $user->user_id;
                             $mapPreference->preference_id = $newPreference->id;
                             $mapPreference->cooking_skill_id = $preferenceId;
                             $mapPreference->save();
@@ -1241,7 +1422,7 @@ class RecipeController extends CoreController
                 {
                     if($allPreference->preference_id == 1)
                     {
-                        $cousins = Cousin::where('status', 1)->get();
+                        $cousins = Cousin::with('image_id')->where('status', 1)->get();
 
                         $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
                         $arrayValues1 = [];
@@ -1270,7 +1451,7 @@ class RecipeController extends CoreController
                     }
                     elseif($allPreference->preference_id == 2)
                     {
-                        $intolerances = RecipeFoodIntolerance::get();
+                        $intolerances = RecipeFoodIntolerance::with('image_id')->get();
 
                         $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
                         $arrayValues2 = [];
@@ -1298,7 +1479,7 @@ class RecipeController extends CoreController
                     }
                     elseif($allPreference->preference_id == 3)
                     {
-                        $diets = RecipeDiet::get();
+                        $diets = RecipeDiet::with('image_id')->get();
 
                         $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
 
@@ -1327,7 +1508,7 @@ class RecipeController extends CoreController
                     }
                     elseif($allPreference->preference_id == 4)
                     {
-                        $ingredients = RecipeIngredient::get();
+                        $ingredients = RecipeIngredient::with('image_id')->get();
 
                         $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
 
@@ -1356,7 +1537,7 @@ class RecipeController extends CoreController
                     }
                     elseif($allPreference->preference_id == 5)
                     {
-                        $cookingSkills = RecipeCookingSkill::get();
+                        $cookingSkills = RecipeCookingSkill::with('image_id')->get();
 
                         $myPreferences = PreferenceMapUser::where('user_id', $user->user_id)->where('preference', $allPreference->preference_id)->first();
 
@@ -1397,6 +1578,7 @@ class RecipeController extends CoreController
         }
     }
 
+    
     /*
      * Get home for recipie
      * 
@@ -1415,22 +1597,12 @@ class RecipeController extends CoreController
                 $categories[$key]->name = $this->translate('messages.'.$category->name,$category->name);
             }
 
-            $parentIngredients = RecipeIngredient::with('image_id')->where('parent', 0)->get();
+            $parentIngredients = RecipeIngredient::with('image_id')->where('parent','!=', 0)->get();
             if(count($parentIngredients) > 0)
             {
                 foreach($parentIngredients as $key => $parentIngredient)
                 {
-                    $parentIngredients[$key]->title = $this->translate('messages.'.$parentIngredient->title,$parentIngredient->title);
-
-                    $childIngredients = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->recipe_ingredient_id)->get();
-
-                    $childIngredientCounts = RecipeIngredient::with('image_id')->where('parent', $parentIngredient->recipe_ingredient_id)->count();
-                    foreach($childIngredients as $keys => $childIngredient)
-                    {
-                        $childIngredients[$keys]->title = $this->translate('messages.'.$childIngredient->title,$childIngredient->title);    
-                    }
-                    $parentIngredients[$key]->ingredients = $childIngredients;
-                    
+                    $parentIngredients[$key]->title = $this->translate('messages.'.$parentIngredient->title,$parentIngredient->title);                    
                 }
             }
 
@@ -1449,7 +1621,7 @@ class RecipeController extends CoreController
                 array_push($recipeArray, $favouriteRecipe->recipe_id);
             }
 
-            $myRecipes = Recipe::with('image')->whereIn('recipe_id', $recipeArray)->orderBy('recipe_id', 'DESC')->get();
+            $myRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->whereIn('recipe_id', $recipeArray)->orderBy('recipe_id', 'DESC')->get();
 
             //quick easy
             $easyRecipes = DB::select(DB::raw("select recipe_id from `recipe_steps` GROUP BY recipe_id ORDER BY count(recipe_step_id) ASC LIMIT 8"));
@@ -1458,7 +1630,7 @@ class RecipeController extends CoreController
                 array_push($quickRecipeArray, $easyRecipe->recipe_id);
             }
 
-            $quickEasyRecipes = Recipe::with('image')->whereIn('recipe_id', $quickRecipeArray)->orderBy('recipe_id', 'DESC')->get();
+            $quickEasyRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->whereIn('recipe_id', $quickRecipeArray)->orderBy('recipe_id', 'DESC')->get();
 
 
 
@@ -1492,29 +1664,10 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->paginate(10);    
+            $recipes = Recipe::with('image')->where('name', 'LIKE', '%'.$request->keyword.'%')->paginate(10);    
             
-            if(!empty($request->cook_time))
+            if(count($recipes) > 0)
             {
-                $isSearch = 1;
-                if($request->cook_time == 1 || $request->cook_time == 2)
-                {
-                    if($condition != '')
-                    $condition .=" and recipes.hours = ".$request->cook_time;
-                    else
-                    $condition .="recipes.hours = ".$request->cook_time;
-                }
-                else
-                {
-                    if($condition != '')
-                    $condition .=" and recipes.minutes = ".$request->cook_time;
-                    else
-                    $condition .="recipes.minutes = ".$request->cook_time;
-                }
-            }
-            if($condition != '')
-            {
-                $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->paginate(10);    
                 return response()->json(['success' => $this->successStatus,
                                         'data' => $recipes
                                 ], $this->successStatus);
@@ -1522,6 +1675,43 @@ class RecipeController extends CoreController
             else
             {
                 $message = "No recipe found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
+     * Search Meal
+     * @Params $request
+     */
+    public function searchMeal(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'keyword'   => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $recipes = RecipeMeal::with('image_id')->where('name', 'LIKE', '%'.$request->keyword.'%')->get();    
+            
+            if(count($recipes) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                        'data' => $recipes
+                                ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No meals found";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
         }

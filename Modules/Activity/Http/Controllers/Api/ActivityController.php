@@ -9,6 +9,7 @@ use App\Http\Controllers\CoreController;
 use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\CoreComment;
+use Modules\User\Entities\DeviceToken; 
 use Modules\User\Entities\UserSelectedHub;
 use App\Attachment;
 use App\Http\Traits\NotificationTrait;

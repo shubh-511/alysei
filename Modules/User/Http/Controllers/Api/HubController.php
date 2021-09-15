@@ -213,7 +213,7 @@ class HubController extends CoreController
                                 $hubs[$key]->is_selected = false;
                             }
                         }
-                        $harray[] = ['state_id'=>$states->id,'state_name'=>$states->name, 'lattitude' => $states->latitude, 'longitude' => $states->longitude ,'is_selected'=> (in_array($states->id, $selectedStates)) ? true : false   ,'hubs_array'=>$hubs];
+                        $harray[] = ['state_id'=>$states->id,'state_name'=>$states->name, 'lattitude' => $states->latitude, 'longitude' => $states->longitude ,'radius' => 50, 'is_selected'=> (in_array($states->id, $selectedStates)) ? true : false   ,'hubs_array'=>$hubs];
                     }
 
                     $hubs = ['hubs' => $harray];
