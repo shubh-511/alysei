@@ -1622,6 +1622,13 @@ class RecipeController extends CoreController
             }
 
             $myRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->whereIn('recipe_id', $recipeArray)->orderBy('recipe_id', 'DESC')->get();
+            foreach($myRecipes as $key => $recipe)
+            {
+                $recipeOwner = User::where('user_id', $recipe->user_id)->first();
+                $myRecipes[$key]->total_likes = 3;
+                $myRecipes[$key]->avg_rating = 3;
+                $myRecipes[$key]->username = $recipeOwner->name;
+            }
 
             //quick easy
             $easyRecipes = DB::select(DB::raw("select recipe_id from `recipe_steps` GROUP BY recipe_id ORDER BY count(recipe_step_id) ASC LIMIT 8"));
@@ -1668,6 +1675,13 @@ class RecipeController extends CoreController
             
             if(count($recipes) > 0)
             {
+                foreach($recipes as $key => $recipe)
+                {
+                    $recipeOwner = User::where('user_id', $recipe->user_id)->first();
+                    $recipes[$key]->total_likes = 3;
+                    $recipes[$key]->avg_rating = 3;
+                    $recipes[$key]->username = $recipeOwner->name;
+                }
                 return response()->json(['success' => $this->successStatus,
                                         'data' => $recipes
                                 ], $this->successStatus);

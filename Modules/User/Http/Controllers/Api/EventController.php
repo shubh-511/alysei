@@ -186,7 +186,7 @@ class EventController extends CoreController
                 $event->website = $request->website;
                 $event->event_type = $request->event_type;
                 $event->registration_type = $request->registration_type;
-                $event->status = $request->status;
+                //$event->status = $request->status;
 
                 if(!empty($request->image_id))
                 {
