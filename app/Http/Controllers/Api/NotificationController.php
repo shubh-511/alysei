@@ -119,7 +119,7 @@ class NotificationController extends CoreController
                 $saveNotification = new Notification;
                 $saveNotification->from = $fromUser->user_id;
                 $saveNotification->to = $request->to_id;
-                $saveNotification->notification_type = 'messaging';
+                $saveNotification->notification_type = 1; // New message notification
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'message_screen';
                 $saveNotification->redirect_to_id = $fromUser->user_id;
@@ -129,7 +129,7 @@ class NotificationController extends CoreController
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                 }
             }            
             else

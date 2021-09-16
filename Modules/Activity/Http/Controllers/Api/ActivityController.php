@@ -185,7 +185,7 @@ class ActivityController extends CoreController
                 $saveNotification = new Notification;
                 $saveNotification->from = $user->user_id;
                 $saveNotification->to = $activityPost->subject_id;
-                $saveNotification->notification_type = 'share_post';
+                $saveNotification->notification_type = 2; //post share
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'post_screen';
                 $saveNotification->redirect_to_id = $request->shared_post_id;
@@ -195,7 +195,7 @@ class ActivityController extends CoreController
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                 }
 
                 return response()->json(['success' => $this->successStatus,

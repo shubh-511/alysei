@@ -212,7 +212,7 @@ class SocketConnectionController extends CoreController
                     $saveNotification = new Notification;
                     $saveNotification->from = $poster->user_id;
                     $saveNotification->to = $activityPost->subject_id;
-                    $saveNotification->notification_type = 'commented';
+                    $saveNotification->notification_type = 6; //commented on post
                     $saveNotification->title = $this->translate('messages.'.$title,$title);
                     $saveNotification->redirect_to = 'post_screen';
                     $saveNotification->redirect_to_id = $request->post_id;
@@ -222,7 +222,7 @@ class SocketConnectionController extends CoreController
                     if(count($tokens) > 0)
                     {
                         $collectedTokenArray = $tokens->pluck('device_token');
-                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                     }
 
 
@@ -293,7 +293,7 @@ class SocketConnectionController extends CoreController
                 $saveNotification = new Notification;
                 $saveNotification->from = $poster->user_id;
                 $saveNotification->to = $activityPost->subject_id;
-                $saveNotification->notification_type = 'replied';
+                $saveNotification->notification_type = 7; //replied on a post
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'post_screen';
                 $saveNotification->redirect_to_id = $request->post_id;
@@ -303,7 +303,7 @@ class SocketConnectionController extends CoreController
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                 }
 
                 $message = "Your reply has been posted successfully";
@@ -386,7 +386,7 @@ class SocketConnectionController extends CoreController
                         $saveNotification = new Notification;
                         $saveNotification->from = $poster->user_id;
                         $saveNotification->to = $activityPost->subject_id;
-                        $saveNotification->notification_type = 'liked';
+                        $saveNotification->notification_type = 8; //liked a post
                         $saveNotification->title = $this->translate('messages.'.$title,$title);
                         $saveNotification->redirect_to = 'post_screen';
                         $saveNotification->redirect_to_id = $request->post_id;
@@ -396,7 +396,7 @@ class SocketConnectionController extends CoreController
                         if(count($tokens) > 0)
                         {
                             $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                         }
 
 

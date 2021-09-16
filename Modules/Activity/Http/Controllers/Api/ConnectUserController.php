@@ -383,7 +383,7 @@ class ConnectUserController extends CoreController
                         $saveNotification = new Notification;
                         $saveNotification->from = $myRole->user_id;
                         $saveNotification->to = $request->user_id;
-                        $saveNotification->notification_type = 'connections';
+                        $saveNotification->notification_type = 3; //recieve connection request
                         $saveNotification->title = $this->translate('messages.'.$title,$title);
                         $saveNotification->redirect_to = 'user_screen';
                         $saveNotification->redirect_to_id = $myRole->user_id;
@@ -393,7 +393,7 @@ class ConnectUserController extends CoreController
                         if(count($tokens) > 0)
                         {
                             $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                         }
                         
 
@@ -617,7 +617,7 @@ class ConnectUserController extends CoreController
                     $saveNotification = new Notification;
                     $saveNotification->from = $user->user_id;
                     $saveNotification->to = $checkConnectionId->resource_id;
-                    $saveNotification->notification_type = 'connections';
+                    $saveNotification->notification_type = 4; //request accepted
                     $saveNotification->title = $this->translate('messages.'.$title,$title);
                     $saveNotification->redirect_to = 'user_screen';
                     $saveNotification->redirect_to_id = $user->user_id;
@@ -627,7 +627,7 @@ class ConnectUserController extends CoreController
                     if(count($tokens) > 0)
                     {
                         $collectedTokenArray = $tokens->pluck('device_token');
-                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                     }
 
                 }

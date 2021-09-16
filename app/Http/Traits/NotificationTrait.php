@@ -26,11 +26,11 @@ trait NotificationTrait
     /***
     Send Notification
     ***/
-    public function sendNotification($token, $title, $redirectTo, $redirectToId)
+    public function sendNotification($token, $title, $redirectTo, $redirectToId, $notificationType)
     {
         $fcmUrl = 'https://fcm.googleapis.com/fcm/send';
         $jsonArray['title'] = $title;
-        //$jsonArray['result']->title = $title;
+        $jsonArray['notification_type'] = $notificationType;
         $jsonArray['redirect_to'] = $redirectTo;
         $jsonArray['redirect_to_id'] = $redirectToId;
         

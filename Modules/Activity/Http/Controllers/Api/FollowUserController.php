@@ -96,7 +96,7 @@ class FollowUserController extends CoreController
                             $saveNotification = new Notification;
                             $saveNotification->from = $user->user_id;
                             $saveNotification->to = $request->follow_user_id;
-                            $saveNotification->notification_type = 'follow';
+                            $saveNotification->notification_type = 5; //follow request
                             $saveNotification->title = $this->translate('messages.'.$title,$title);
                             $saveNotification->redirect_to = 'user_screen';
                             $saveNotification->redirect_to_id = $user->user_id;
@@ -106,7 +106,7 @@ class FollowUserController extends CoreController
                             if(count($tokens) > 0)
                             {
                                 $collectedTokenArray = $tokens->pluck('device_token');
-                                $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+                                $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
                             }
 
                             $message = "You are now following this user";
