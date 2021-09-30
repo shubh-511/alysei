@@ -35,7 +35,7 @@ class SeedFeaturedListingFieldsTableSeeder extends Seeder
 
                         //array("title"=>"Blog Link",'type'=>'url','name'=>'blog_link','required'=>'yes'),
 
-                        array("title"=>"Description",'type'=>'text','name'=>'description','required'=>'yes'),
+                        array("title"=>"Description",'type'=>'text','name'=>'description','required'=>'no'),
                         array("title"=>"Tags",'type'=>'text','name'=>'tags','required'=>'yes'),
                         array("title"=>"Host Name",'type'=>'text','name'=>'host_name','required'=>'yes'),
                         array("title"=>"Package Name",'type'=>'text','name'=>'package_name','required'=>'yes'),

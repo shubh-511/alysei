@@ -50,7 +50,7 @@ class ChatController extends CoreController
 
                 $data = $this->uploadMediaUsingS3($request->file('media'));
                 return response()->json(['success' => $this->successStatus,
-                                    'media_url' => "https://alyseiapi.ibyteworkshop.com/".$data[0],
+                                    'media_url' => "https://alysei.s3.us-west-1.amazonaws.com/".$data[0],
                                     'media_type' => $data[1],
                                     ], $this->successStatus);
             }

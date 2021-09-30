@@ -202,12 +202,16 @@ class SocketConnectionController extends CoreController
                     {
                         $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
                     }
+                    elseif($poster->role_id == 9)
+                    {
+                        $name = $poster->restaurant_name;
+                    }
                     else
                     {
                         $name = $poster->company_name;
                     }
 
-                    $title = $name . " commented on your post";
+                    $title = "commented on your post";
 
                     $saveNotification = new Notification;
                     $saveNotification->from = $poster->user_id;
@@ -216,13 +220,25 @@ class SocketConnectionController extends CoreController
                     $saveNotification->title = $this->translate('messages.'.$title,$title);
                     $saveNotification->redirect_to = 'post_screen';
                     $saveNotification->redirect_to_id = $request->post_id;
+
+                    $saveNotification->sender_id = $request->user_id;
+                    $saveNotification->sender_name = $name;
+                    $saveNotification->sender_image = null;
+                    $saveNotification->post_id = $request->post_id;
+                    $saveNotification->connection_id = null;
+                    $saveNotification->sender_role = $poster->role_id;
+                    $saveNotification->comment_id = null;
+                    $saveNotification->reply = null;
+                    $saveNotification->likeUnlike = null;
                     $saveNotification->save();
 
                     $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
                     if(count($tokens) > 0)
                     {
                         $collectedTokenArray = $tokens->pluck('device_token');
-                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, null, null, null);
+
+                        $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, null, null, null);
                     }
 
 
@@ -283,12 +299,16 @@ class SocketConnectionController extends CoreController
                 {
                     $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
                 }
+                elseif($poster->role_id == 9)
+                {
+                    $name = $poster->restaurant_name;
+                }
                 else
                 {
                     $name = $poster->company_name;
                 }
 
-                $title = $name . " replied on your post";
+                $title = "replied on your post";
 
                 $saveNotification = new Notification;
                 $saveNotification->from = $poster->user_id;
@@ -297,13 +317,26 @@ class SocketConnectionController extends CoreController
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'post_screen';
                 $saveNotification->redirect_to_id = $request->post_id;
+
+                $saveNotification->sender_id = $request->user_id;
+                $saveNotification->sender_name = $name;
+                $saveNotification->sender_image = null;
+                $saveNotification->post_id =$request->post_id;
+                $saveNotification->connection_id = null;
+                $saveNotification->sender_role = $poster->role_id;
+                $saveNotification->comment_id = $request->comment_id;
+                $saveNotification->reply = $request->reply;
+                $saveNotification->likeUnlike = null;
+
                 $saveNotification->save();
 
                 $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, $request->comment_id, $request->reply,null);
+
+                    $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, $request->comment_id, $request->reply,null);
                 }
 
                 $message = "Your reply has been posted successfully";
@@ -350,7 +383,7 @@ class SocketConnectionController extends CoreController
             {
                 if($request->like_or_unlike == 1)
                 {
-                    $poster = User::where('user_id', $request->user_id)->first();
+                    $poster = User::with('avatar_id')->where('user_id', $request->user_id)->first();
                     $isLikedActivityPost = ActivityLike::where('resource_id', $request->post_id)->where('poster_id', $request->user_id)->first();
 
 
@@ -376,12 +409,16 @@ class SocketConnectionController extends CoreController
                         {
                             $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
                         }
+                        elseif($poster->role_id == 9)
+                        {
+                            $name = $poster->restaurant_name;
+                        }
                         else
                         {
                             $name = $poster->company_name;
                         }
 
-                        $title = $name . " liked your post";
+                        $title = "liked your post";
 
                         $saveNotification = new Notification;
                         $saveNotification->from = $poster->user_id;
@@ -390,13 +427,26 @@ class SocketConnectionController extends CoreController
                         $saveNotification->title = $this->translate('messages.'.$title,$title);
                         $saveNotification->redirect_to = 'post_screen';
                         $saveNotification->redirect_to_id = $request->post_id;
+
+                        $saveNotification->sender_id = $request->user_id; 
+                        $saveNotification->sender_name = $name;
+                        $saveNotification->sender_image = null;
+                        $saveNotification->post_id = $request->post_id;
+                        $saveNotification->connection_id = null;
+                        $saveNotification->sender_role = $user->role_id;
+                        $saveNotification->comment_id = null;
+                        $saveNotification->reply = null;
+                        $saveNotification->likeUnlike = $request->like_or_unlike;
+
                         $saveNotification->save();
 
                         $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
                         if(count($tokens) > 0)
                         {
                             $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ null, $request->post_id, null, $user->role_id, null,null, $request->like_or_unlike);
+
+                            $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ null, $request->post_id, null, $user->role_id, null,null, $request->like_or_unlike);
                         }
 
 

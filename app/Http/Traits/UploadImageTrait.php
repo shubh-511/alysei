@@ -92,6 +92,8 @@ trait UploadImageTrait
             $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
             $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
             $img->move($target,$newHeaderLogo);
+            list($width, $height, $type, $attr) = getimagesize(env('APP_URL').''.$headerTarget);
+            
         }
         else
         {
@@ -101,6 +103,8 @@ trait UploadImageTrait
         $activityAttachmentLink = new ActivityAttachmentLink;
         $activityAttachmentLink->attachment_url = $headerTarget;
         $activityAttachmentLink->attachment_type = $ext1;
+        $activityAttachmentLink->height = $height;
+        $activityAttachmentLink->width = $width;
         $activityAttachmentLink->save();
         
         return $activityAttachmentLink->activity_attachment_link_id;
@@ -214,18 +218,18 @@ trait UploadImageTrait
 
         $folderPath = "uploads/".$date."/";
         
-            /*$ext1 = $img->getClientOriginalExtension();
+            $ext1 = $img->getClientOriginalExtension();
             $name = $img->getClientOriginalName();
             $filePath = $folderPath.''. $name;
             $url = Storage::disk('s3')->put($filePath, file_get_contents($img));
 
-            $status = [$url, $ext1];
-            return $status; */
+            $status = [$filePath, $ext1];
+            return $status; 
         
 
 
         
-        if(!empty($img))
+        /*if(!empty($img))
         {
             $headerImageName=$img->getClientOriginalName();
             $ext1=$img->getClientOriginalExtension();
@@ -240,7 +244,7 @@ trait UploadImageTrait
         }
 
         $status = [$headerTarget, $ext1];
-        return $status; 
+        return $status; */
 
         
     }

@@ -89,6 +89,7 @@ class LoginController extends CoreController
                     $userData->is_hub_selected = $isHubSelected;
                     $userData->is_store_created = $isStoreCreated;
                     
+                    DeviceToken::where('user_id', $userData->user_id)->delete();
                     if(!empty($request->device_token))
                     {
                         $userToken = new DeviceToken;

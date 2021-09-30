@@ -1858,13 +1858,20 @@ class UserController extends CoreController
     *
     *Get Member Contact Tab
     */
-    public function getMemberContactTab()
+    public function getMemberContactTab($visitorProfileId = '')
     {
         try
         {
             $loggedInUser = $this->user;
-
-            $data = User::select('user_id','role_id','email','phone','country_code','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
+            if(!empty($visitorProfileId))
+            {
+                $data = User::select('user_id','role_id','email','phone','country_code','address','website','fb_link')->where('user_id', $visitorProfileId)->first();    
+            }
+            else
+            {
+                $data = User::select('user_id','role_id','email','phone','country_code','address','website','fb_link')->where('user_id', $loggedInUser->user_id)->first();
+            }
+            
 
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data

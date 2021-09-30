@@ -342,6 +342,7 @@ class RegisterController extends CoreController
                             $userName = $user->restaurant_name;   
                         }
 
+                        DeviceToken::where('user_id', $user->user_id)->delete();
                         if(isset($input['device_token']) && !empty($input['device_token']))
                         {
                             $deviceInfo = [];

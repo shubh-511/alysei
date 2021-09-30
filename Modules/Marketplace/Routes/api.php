@@ -20,7 +20,7 @@ use Illuminate\Http\Request;
 Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/store/prefilled/values', 'Api\StoreController@getPreFilledValues');
-	Route::get('get/marketplace/walkthrough/{tab}', 'Api\WalkthroughScreenController@getWalkThroughScreens');
+	Route::get('get/marketplace/walkthrough', 'Api\WalkthroughScreenController@getWalkThroughScreens');
 	Route::get('get/marketplace/packages', 'Api\PackageController@getPackages');
 	Route::get('get/marketplace/product/categories/{allCategories?}', 'Api\ProductController@getProductCategories');
 	Route::get('get/marketplace/product/subcategories', 'Api\ProductController@getProductSubcategories');
@@ -50,6 +50,10 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/search/product/listing', 'Api\ProductController@getSearchProductListing');
 	Route::post('save/product/enquery', 'Api\ProductController@saveProductEnquery');
 	Route::get('get/enqueries/{tab?}', 'Api\ProductController@getProductEnquery');
+
+	Route::get('get/box/detail/{boxId}', 'Api\HomepageController@getBoxDetails');
+
+	Route::get('get/homescreen', 'Api\HomepageController@getHomeScreen');
 
 	
 });

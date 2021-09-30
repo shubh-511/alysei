@@ -25,6 +25,7 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('get/recipe/regions', 'Api\RecipeController@getRecipeRegions');
     Route::get('get/recipe/meals', 'Api\RecipeController@getRecipeMeals');
     Route::get('get/recipe/courses', 'Api\RecipeController@getRecipeCourses');
+    Route::get('get/child/ingredients/{parentId}', 'Api\RecipeController@getChildIngredients');
 
     Route::post('create/recipe', 'Api\RecipeController@createRecipe');
     Route::get('get/myrecipes', 'Api\RecipeController@getMyRecipes');

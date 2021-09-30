@@ -8,7 +8,7 @@ use App\Attachment;
 
 class RecipeFavourite extends Model
 {
-    protected $PrimaryKey = 'recipe_favourite_id';
+    protected $primaryKey = 'recipe_favourite_id';
 
     public function image_id()
     {

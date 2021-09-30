@@ -17,6 +17,8 @@ class CreateAttachmentsTable extends Migration
             $table->bigIncrements('id');
             $table->string('attachment_url');
             $table->string('attachment_type');
+            $table->string('height');
+            $table->string('width');
             $table->timestamps();
         });
     }

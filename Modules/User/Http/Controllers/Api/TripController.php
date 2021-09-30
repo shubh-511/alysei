@@ -12,6 +12,7 @@ use Modules\User\Entities\AdventureType;
 use Modules\User\Entities\Intensity;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth; 
+use DB;
 use Validator;
 //use App\Events\UserRegisterEvent;
 use App\Http\Traits\UploadImageTrait;
@@ -46,11 +47,50 @@ class TripController extends CoreController
             
             if(!empty($request->visitor_profile_id))
             {
-                $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
+                $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
+                if(count($tripLists) > 0)
+                {
+                    foreach($tripLists as $key => $trip)
+                    {
+                        $specialityTrip = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $trip->adventure_type)
+                                    ->where('user_field_id', 14)
+                                    ->first();
+                        if(!empty($specialityTrip))  
+                        {
+                            $tripLists[$key]->adventure = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrip->option];    
+                        }
+                        else
+                        {
+                            $trip->adventure = null;   
+                        }
+                    }
+                    
+                }
+                
             }
             else
             {
                 $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+                if(count($tripLists) > 0)
+                {
+                    foreach($tripLists as $key => $trip)
+                    {
+                        $specialityTrip = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $trip->adventure_type)
+                                    ->where('user_field_id', 14)
+                                    ->first();
+                        if(!empty($specialityTrip))  
+                        {
+                            $tripLists[$key]->adventure = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrip->option];    
+                        }
+                        else
+                        {
+                            $trip->adventure = null;   
+                        }
+                    }
+                    
+                }
             }
             
             if(count($tripLists) > 0)
@@ -82,16 +122,28 @@ class TripController extends CoreController
         try
         {
             $loggedInUser = $this->user;
-            
-            $AdventureTypes = AdventureType::where('status', '1')->get();
+            //$AdventureTypes = AdventureType::where('status', '1')->get();
+            $AdventureTypes = DB::table('user_field_values')
+                                    ->where('user_id', $loggedInUser->user_id)
+                                    ->where('user_field_id', 14)
+                                    ->get();
+                                     
             if(count($AdventureTypes) > 0)
             {
-                foreach($AdventureTypes as $key => $AdventureType)
+                $typeFields = $AdventureTypes->pluck('value');
+                $specialityTrips = DB::table('user_field_options')
+                                    ->whereIn('user_field_option_id', $typeFields)
+                                    ->where('user_field_id', 14)
+                                    ->get();
+                                    
+                foreach($specialityTrips as $key => $specialityTrip)
                 {
-                    $AdventureTypes[$key]->adventure_type = $this->translate('messages.'.$AdventureType->adventure_type, $AdventureType->adventure_type);
+                    $specialityTrips[$key]->option = $this->translate('messages.'.$specialityTrip->option, $specialityTrip->option);
+                    $types[] = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrips[$key]->option];
                 }
+
                 return response()->json(['success' => $this->successStatus,
-                                         'data' => $AdventureTypes,
+                                         'data' => $types,
                                         ], $this->successStatus);
             }
             else
@@ -105,6 +157,7 @@ class TripController extends CoreController
         }
     }
 
+    
     /***
     Get Intensity list
     ***/
@@ -197,9 +250,24 @@ class TripController extends CoreController
         {
             $loggedInUser = $this->user;
             
-            $trip = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('trip_id', $tripId)->where('status', '1')->first();
+            $trip = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('trip_id', $tripId)->where('status', '1')->first();
             if(!empty($trip))
             {
+                $specialityTrip = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $trip->adventure_type)
+                                    ->where('user_field_id', 14)
+                                    ->first();
+                                    //print_r($specialityTrip);
+                if(!empty($specialityTrip))  
+                {
+                    $trip->adventure = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrip->option];    
+                }
+                else
+                {
+                    $trip->adventure = null;   
+                }                                  
+                
+                //$trip->adventure->$trips;
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $trip,
                                         ], $this->successStatus);

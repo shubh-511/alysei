@@ -10,8 +10,10 @@ use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\CoreComment;
 use Modules\User\Entities\DeviceToken; 
+use Modules\User\Entities\User; 
 use Modules\User\Entities\UserSelectedHub;
 use App\Attachment;
+use App\Notification;
 use App\Http\Traits\NotificationTrait;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
@@ -91,6 +93,8 @@ class ActivityController extends CoreController
                 $activityAction->object_id = $user->user_id;
                 $activityAction->body = $request->body;
                 $activityAction->privacy = $request->privacy;
+                $activityAction->height = $request->height;
+                $activityAction->width = $request->width;
                 if(!empty($request->attachments))
                 {
                     $activityAction->attachment_count = count($request->attachments);
@@ -111,6 +115,7 @@ class ActivityController extends CoreController
             {
                 return response()->json(['success' => $this->successStatus,
                                          'message' => $this->translate('messages.'."Post added successfuly!","Post added successfuly!"),
+                                         'post_id' => $activityAction->activity_action_id,
                                         ], $this->successStatus);
             }
             else
@@ -170,17 +175,22 @@ class ActivityController extends CoreController
             
             if($activityAction)
             {
+                $getUserDetail = User::with('avatar_id')->where('user_id', $user->user_id)->first();
 
                 if($user->role_id == 7 || $user->role_id == 10)
                 {
                     $name = ucwords(strtolower($user->first_name)) . ' ' . ucwords(strtolower($user->last_name));
+                }
+                elseif($user->role_id == 9)
+                {
+                    $name = $user->restaurant_name;
                 }
                 else
                 {
                     $name = $user->company_name;
                 }
 
-                $title = $name . " shared your post";
+                $title = "shared your post";
 
                 $saveNotification = new Notification;
                 $saveNotification->from = $user->user_id;
@@ -189,13 +199,26 @@ class ActivityController extends CoreController
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'post_screen';
                 $saveNotification->redirect_to_id = $request->shared_post_id;
+
+                $saveNotification->sender_id = $user->user_id;
+                $saveNotification->sender_name = $name;
+                $saveNotification->sender_image = null;
+                $saveNotification->post_id =$request->shared_post_id;
+                $saveNotification->connection_id = null;
+                $saveNotification->sender_role = $user->role_id;
+                $saveNotification->comment_id = null;
+                $saveNotification->reply = null;
+                $saveNotification->likeUnlike = null;
+
                 $saveNotification->save();
 
                 $tokens = DeviceToken::where('user_id', $activityPost->subject_id)->get();
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, null, /*(!empty($getUserDetail->avatar_id->attachment_url) ?? $getUserDetail->avatar_id->attachment_url : null),*/ $request->shared_post_id, null, $user->role_id, null,null,null);
+
+                    $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, null, /*(!empty($getUserDetail->avatar_id->attachment_url) ?? $getUserDetail->avatar_id->attachment_url : null),*/ $request->shared_post_id, null, $user->role_id, null,null,null);
                 }
 
                 return response()->json(['success' => $this->successStatus,
@@ -344,12 +367,16 @@ class ActivityController extends CoreController
             {
                 array_push($userIds, $user->user_id);
                 $userIds = array_unique($userIds);
-                $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                 ->with('attachments.attachment_link')
                 ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
-                ->whereIn('subject_id', $userIds)
-                ->where('privacy', 'public')
-                ->orWhere('privacy', 'followers')
+                //->whereIn('subject_id', $userIds)
+
+                ->Where(function ($query) use ($user, $userIds) {
+                $query->where('privacy', 'public')
+                  ->orWhere('privacy', 'followers')
+                  ->whereIn('subject_id', $userIds);
+                 })
                 //->inRandomOrder()
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
@@ -358,11 +385,16 @@ class ActivityController extends CoreController
             }
             else
             {
-                $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                 ->with('attachments.attachment_link')
                 ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
-                ->where('privacy', 'public')
-                ->orWhere('subject_id', $user->user_id)
+
+                ->Where(function ($query) use ($user) {
+                $query->where('privacy', 'public')
+                  ->orWhere('subject_id', $user->user_id);
+                 })
+                /*->where('privacy', 'public')
+                ->orWhere('subject_id', $user->user_id)*/
                 //->inRandomOrder()
                 ->orderBy('created_at', 'DESC')
                 ->paginate(10);
@@ -384,7 +416,7 @@ class ActivityController extends CoreController
                     }
 
                     //shared post
-                    $activityShared = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')->with('attachments.attachment_link')->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
+                    $activityShared = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')->with('attachments.attachment_link')->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
                     if(!empty($activityShared))
                     {
                         $activityPosts[$key]->shared_post = $activityShared;
@@ -432,9 +464,20 @@ class ActivityController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $activityPost = ActivityAction::with('attachments.attachment_link','subject_id')->where('activity_action_id', $request->post_id)->where('subject_id', $user->user_id)->first();
+            $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
+                ->with('attachments.attachment_link')
+                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')->where('activity_action_id', $request->post_id)->first();
             if(!empty($activityPost))
             {
+                $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
+                if(!empty($isLikedActivityPost))
+                {
+                    $activityPost->like_flag = 1;
+                }
+                else
+                {
+                    $activityPost->like_flag = 0;
+                }
                 $activityActionType = ActivityActionType::where('activity_action_type_id', $activityPost->type)->first();
                 $actionType = $this->checkActionType($activityActionType->type, 3);
                 if($actionType[1] > 0)
@@ -737,7 +780,7 @@ class ActivityController extends CoreController
                 {
                     if(!empty($request->per_page))
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $request->visitor_profile_id)
@@ -746,7 +789,7 @@ class ActivityController extends CoreController
                     }
                     else
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $request->visitor_profile_id)
@@ -759,7 +802,7 @@ class ActivityController extends CoreController
                 {
                     if(!empty($request->per_page))
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $request->visitor_profile_id)
@@ -768,7 +811,7 @@ class ActivityController extends CoreController
                     }
                     else
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $request->visitor_profile_id)
@@ -789,7 +832,7 @@ class ActivityController extends CoreController
                 {
                     if(!empty($request->per_page))
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $loggedInUser->user_id)
@@ -798,7 +841,7 @@ class ActivityController extends CoreController
                     }
                     else
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $loggedInUser->user_id)
@@ -811,7 +854,7 @@ class ActivityController extends CoreController
                 {
                     if(!empty($request->per_page))
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $loggedInUser->user_id)
@@ -820,7 +863,7 @@ class ActivityController extends CoreController
                     }
                     else
                     {
-                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at')
+                        $activityPost = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                         ->with('attachments.attachment_link')
                         ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                         ->where('subject_id', $loggedInUser->user_id)

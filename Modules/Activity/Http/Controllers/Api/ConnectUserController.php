@@ -144,7 +144,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $myFollowers = Follower::with('user:user_id,name,email,role_id,first_name,last_name.avatar_id','user.avatar_id')->with('follow_user:user_id,name,email,role_id,first_name,last_name,avatar_id','follow_user.avatar_id')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $myFollowers = Follower::with('followed_by:user_id,name,email,role_id,first_name,last_name,avatar_id','followed_by.avatar_id')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($myFollowers) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -173,7 +173,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $followings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,avatar_id','user.avatar_id')->with('follow_user:user_id,name,email,company_name,first_name,last_name,avatar_id','follow_user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $followings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($followings) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -349,7 +349,7 @@ class ConnectUserController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $myRole = User::where('user_id', $user->user_id)->first();
+            $myRole = User::with('avatar_id')->where('user_id', $user->user_id)->first();
             $checkUser = User::where('user_id', $request->user_id)->first();
             if(!empty($checkUser))
             {
@@ -373,12 +373,16 @@ class ConnectUserController extends CoreController
                         {
                             $name = ucwords(strtolower($myRole->first_name)) . ' ' . ucwords(strtolower($myRole->last_name));
                         }
+                        elseif($myRole->role_id == 9)
+                        {
+                            $name = $myRole->restaurant_name;
+                        }
                         else
                         {
                             $name = $myRole->company_name;
                         }
 
-                        $title = $name . " sent you a connection request";
+                        $title = "sent you a connection request";
 
                         $saveNotification = new Notification;
                         $saveNotification->from = $myRole->user_id;
@@ -387,13 +391,26 @@ class ConnectUserController extends CoreController
                         $saveNotification->title = $this->translate('messages.'.$title,$title);
                         $saveNotification->redirect_to = 'user_screen';
                         $saveNotification->redirect_to_id = $myRole->user_id;
+
+                        $saveNotification->sender_id = $user->user_id;
+                        $saveNotification->sender_name = $name;
+                        $saveNotification->sender_image = null;
+                        $saveNotification->post_id = null;
+                        $saveNotification->connection_id = $newConnection->connection_id;
+                        $saveNotification->sender_role = $user->role_id;
+                        $saveNotification->comment_id = null;
+                        $saveNotification->reply = null;
+                        $saveNotification->likeUnlike = null;
+
                         $saveNotification->save();
 
                         $tokens = DeviceToken::where('user_id', $request->user_id)->get();
                         if(count($tokens) > 0)
                         {
                             $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
+
+                            $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
                         }
                         
 
@@ -429,37 +446,35 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $requests = Connection::where('is_approved', '1')
+            $requestConnections = Connection::where('is_approved', '1')
 
             ->Where(function ($query) use ($user) {
                 $query->where('resource_id', $user->user_id)
                   ->orWhere('user_id', $user->user_id);
             })
 
-            //->where('resource_id', $user->user_id)
-            //->orWhere('user_id', $user->user_id)
             ->orderBy('connection_id', 'DESC')
             ->get();
-            foreach($requests as $key => $request)
+            foreach($requestConnections as $key => $requestConnection)
             {
-                if($request->user_id == $user->user_id)
+                if($requestConnection->user_id == $user->user_id)
                 {
-                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->resource_id)->first();
-                    $requests[$key]->user = $user;
+                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $requestConnection->resource_id)->first();
+                    $requestConnections[$key]->user = $user;
                 }
                 else
                 {
-                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->user_id)->first();
-                    $requests[$key]->user = $user;
+                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $requestConnection->user_id)->first();
+                    $requestConnections[$key]->user = $user;
                 }
 
             }
 
-            if(count($requests) > 0)
+            if(count($requestConnections) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
-                                    'count' => count($requests),
-                                    'data' => $requests,
+                                    'count' => count($requestConnections),
+                                    'data' => $requestConnections,
                                     ], $this->successStatus);
             }
             else
@@ -555,9 +570,23 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $requests = Connection::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
+            $requests = Connection::where('resource_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
             if(count($requests) > 0)
             {
+                foreach($requests as $key => $request)
+                {
+                    if($request->resource_id == $user->user_id)
+                    {
+                        $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->user_id)->first();
+                        $requests[$key]->user = $user;
+                    }
+                    else
+                    {
+                        $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->resource_id)->first();
+                        $requests[$key]->user = $user;
+                    }
+
+                }
                 return response()->json(['success' => $this->successStatus,
                                     'count' => count($requests),
                                     'data' => $requests,
@@ -598,6 +627,7 @@ class ConnectUserController extends CoreController
             {
                 if($request->accept_or_reject == 1)
                 {
+                    $getUserDetail = User::with('avatar_id')->where('user_id', $user->user_id)->first();
                     $checkConnectionId->is_approved = '1';
                     $checkConnectionId->save();
 
@@ -607,12 +637,16 @@ class ConnectUserController extends CoreController
                     {
                         $name = ucwords(strtolower($user->first_name)) . ' ' . ucwords(strtolower($user->last_name));
                     }
+                    elseif($user->role_id == 9)
+                    {
+                        $name = $user->restaurant_name;
+                    }
                     else
                     {
                         $name = $user->company_name;
                     }
 
-                    $title = $name . " accepted your connection request";
+                    $title = "accepted your connection request";
 
                     $saveNotification = new Notification;
                     $saveNotification->from = $user->user_id;
@@ -621,13 +655,26 @@ class ConnectUserController extends CoreController
                     $saveNotification->title = $this->translate('messages.'.$title,$title);
                     $saveNotification->redirect_to = 'user_screen';
                     $saveNotification->redirect_to_id = $user->user_id;
+
+                    $saveNotification->sender_id = $user->user_id;
+                    $saveNotification->sender_name = $name;
+                    $saveNotification->sender_image = null; 
+                    $saveNotification->post_id =null;
+                    $saveNotification->connection_id = null;
+                    $saveNotification->sender_role = $user->role_id;
+                    $saveNotification->comment_id = null;
+                    $saveNotification->reply = null;
+                    $saveNotification->likeUnlike = null;
+
                     $saveNotification->save();
 
                     $tokens = DeviceToken::where('user_id', $checkConnectionId->resource_id)->get();
                     if(count($tokens) > 0)
                     {
                         $collectedTokenArray = $tokens->pluck('device_token');
-                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$getUserDetail->avatar_id->attachment_url*/null, null, null, $user->role_id, null, null, null);
+
+                        $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$getUserDetail->avatar_id->attachment_url*/null, null, null, $user->role_id, null, null, null);
                     }
 
                 }

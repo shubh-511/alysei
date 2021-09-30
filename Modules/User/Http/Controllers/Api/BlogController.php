@@ -44,11 +44,11 @@ class BlogController extends CoreController
             
             if(!empty($request->visitor_profile_id))
             {
-                $blogLists = Blog::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $$request->visitor_profile_id)->get();
+                $blogLists = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
             }
             else
             {
-                $blogLists = Blog::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->get();    
+                $blogLists = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->get();    
             }
             
             if(count($blogLists) > 0)

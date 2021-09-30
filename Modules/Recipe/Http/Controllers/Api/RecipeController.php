@@ -252,6 +252,33 @@ class RecipeController extends CoreController
     }
 
     /*
+    Get child ingresients
+    *
+    *
+    */
+
+    public function getChildIngredients($parentId = '')
+    {
+        try
+        {
+            $childIngredients = RecipeIngredient::with('image_id')->where('parent', $parentId)->get();
+            foreach($childIngredients as $keys => $childIngredient)
+            {
+                $childIngredients[$keys]->title = $this->translate('messages.'.$childIngredient->title,$childIngredient->title);    
+            }
+            return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($childIngredients),
+                                        'data' => $childIngredients,
+                                    ], $this->successStatus);
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+        
+    }
+
+    /*
      * Search ingredients
      * 
      */
@@ -269,7 +296,15 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $ingredients = RecipeIngredient::with('image_id')->where('parent','!=', 0)->where('title','LIKE','%'.$request->keyword.'%')->get();
+            if($request->type == 1)
+            {
+                $ingredients = RecipeIngredient::with('image_id')->where('parent','==', 0)->where('title','LIKE','%'.$request->keyword.'%')->get();    
+            }
+            else
+            {
+                $ingredients = RecipeIngredient::with('image_id')->where('parent','!=', 0)->where('title','LIKE','%'.$request->keyword.'%')->get();
+            }
+            
             if(count($ingredients) > 0)
             {
                 $categoriesWithCount = [];
@@ -487,6 +522,7 @@ class RecipeController extends CoreController
             $recipe->serving = $requestedFields['serving'];
             $recipe->cousin_id = $requestedFields['cousin_id'];
             $recipe->diet_id = $requestedFields['diet_id'];
+            if(!empty($requestedFields['intolerance_id']))
             $recipe->intolerance_id = $requestedFields['intolerance_id'];
             $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
@@ -604,6 +640,7 @@ class RecipeController extends CoreController
             $recipe->serving = $requestedFields['serving'];
             $recipe->cousin_id = $requestedFields['cousin_id'];
             $recipe->diet_id = $requestedFields['diet_id'];
+            if(!empty($requestedFields['intolerance_id']))
             $recipe->intolerance_id = $requestedFields['intolerance_id'];
             $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
@@ -723,6 +760,7 @@ class RecipeController extends CoreController
             $recipe->serving = $requestedFields['serving'];
             $recipe->cousin_id = $requestedFields['cousin_id'];
             $recipe->diet_id = $requestedFields['diet_id'];
+            if(!empty($requestedFields['intolerance_id']))
             $recipe->intolerance_id = $requestedFields['intolerance_id'];
             $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
@@ -862,9 +900,37 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $myRecipes = Recipe::with('image','meal','region')->where('recipe_id', $recipeId)->first();
+            $myRecipes = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->first();
             if(!empty($myRecipes))
             {
+                $userData = User::where('user_id', $myRecipes->user_id)->first();
+                if($userData->role_id == 7 || $userData->role_id == 10)
+                {
+                    $name = ucwords(strtolower($userData->first_name)) . ' ' . ucwords(strtolower($userData->last_name));
+                }
+                else
+                {
+                    $name = $userData->company_name;
+                }
+                $myRecipes->username = $name;
+                $avgRating = RecipeReviewRating::where('recipe_id', $recipeId)->avg('rating');
+                $totalReviews = RecipeReviewRating::where('recipe_id', $recipeId)->count();
+                $getLatestReview = RecipeReviewRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->orderBy('recipe_review_rating_id', 'DESC')->first();
+
+                $isLikedRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $recipeId)->first();
+                if(!empty($isLikedRecipe))
+                {
+                    $myRecipes->is_favourite = 1;
+                }
+                else
+                {
+                    $myRecipes->is_favourite = 0;   
+                }
+
+                $myRecipes->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                $myRecipes->total_reviews = $totalReviews;
+                $myRecipes->latest_review = $getLatestReview;
+
                 $recipeUsedIngredients = RecipeSavedIngredient::with('ingredient','ingredient.image_id')->where('recipe_id', $recipeId)->get();
                 $recipeUsedTools = RecipeSavedTool::with('tool','tool.image_id')->where('recipe_id', $recipeId)->get();
 
@@ -934,12 +1000,21 @@ class RecipeController extends CoreController
                         $recipeUsedSteps[$key]->step_tools = $recipeUsedTools;
                     }
                 }
+
+                $youMightAlsoLikeData = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('cousin_id', $myRecipes->cousin_id)->get();
+                foreach($youMightAlsoLikeData as $lkey => $youMightAlsoLike)
+                {
+                    $avgRatings = RecipeReviewRating::where('recipe_id', $youMightAlsoLike->recipe_id)->avg('rating');
+                    $youMightAlsoLikeData[$lkey]->avg_rating = number_format((float)$avgRatings, 1, '.', '');
+
+                }
                 
                 return response()->json(['success' => $this->successStatus,
                                          'recipe' => $myRecipes,
                                          'used_ingredients' => $recipeUsedIngredients,
                                          'used_tools' => $recipeUsedTools,
-                                         'steps' => $recipeUsedSteps
+                                         'steps' => $recipeUsedSteps,
+                                         'you_might_also_like' => $youMightAlsoLikeData
                                     ], $this->successStatus);
             }
             else
@@ -969,8 +1044,12 @@ class RecipeController extends CoreController
             {
                 foreach($myRecipes as $key => $myRecipe)
                 {
-                    $myRecipes[$key]->total_likes = 3;
-                    $myRecipes[$key]->avg_rating = 3;
+                    $avgRating = RecipeReviewRating::where('recipe_id', $myRecipe->recipe_id)->avg('rating');
+                    $totalLikes = RecipeFavourite::where('recipe_id', $myRecipe->recipe_id)->count();
+
+                    $myRecipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                    $myRecipes[$key]->total_likes = $totalLikes;
+                    
                 }
 
                 return response()->json(['success' => $this->successStatus,
@@ -1029,12 +1108,12 @@ class RecipeController extends CoreController
                         $activityLike->recipe_id = $request->recipe_id;
                         $activityLike->save();
 
-                        /*$getRecipe->favourite_count = $getRecipe->favourite_count + 1;
-                        $getRecipe->save();*/
+                        $getRecipe->favourite_count = $getRecipe->favourite_count + 1;
+                        $getRecipe->save();
 
                         $message = "You added this recipe in your favourite list";
                         return response()->json(['success' => $this->successStatus,
-                                                 'total_favourite_count' => $getRecipe->like_count,
+                                                 'total_likes' => $getRecipe->favourite_count,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->successStatus);
                     }
@@ -1047,12 +1126,12 @@ class RecipeController extends CoreController
                         $isUnlikedActivityPost = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $request->recipe_id)->delete();
                         if($isUnlikedActivityPost == 1)
                         {
-                            /*$isLikedActivityPost->favourite_count = $isLikedActivityPost->favourite_count - 1;
-                            $isLikedActivityPost->save();*/
+                            $getRecipe->favourite_count = $getRecipe->favourite_count - 1;
+                            $getRecipe->save();
 
                             $message = "You removed this recipe from your favourite list";
                             return response()->json(['success' => $this->successStatus,
-                                                 'total_likes' => $isLikedActivityPost->favourite_count,
+                                                 'total_likes' => $getRecipe->favourite_count,
                                                  'message' => $this->translate('messages.'.$message,$message),
                                                 ], $this->successStatus);
                         }
@@ -1111,8 +1190,11 @@ class RecipeController extends CoreController
                 {
                     foreach($myRecipes as $key => $myRecipe)
                     {
-                        $myRecipes[$key]->total_likes = 3;
-                        $myRecipes[$key]->avg_rating = 3;
+                        $avgRating = RecipeReviewRating::where('recipe_id', $myRecipe->recipe_id)->avg('rating');
+                        $totalLikes = RecipeFavourite::where('recipe_id', $myRecipe->recipe_id)->count();
+
+                        $myRecipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                        $myRecipes[$key]->total_likes = $totalLikes;
                     }
                     return response()->json(['success' => $this->successStatus,
                                         'count' =>  count($myRecipes),
@@ -1590,14 +1672,20 @@ class RecipeController extends CoreController
             $user = $this->user;
             $recipeArray = array();
             $quickRecipeArray = array();
-            $categories = RecipeCategory::with('image_id')->where('status', '1')->get();
+            /*$categories = RecipeCategory::with('image_id')->where('status', '1')->get();
             
             foreach($categories as $key => $category)
             {
                 $categories[$key]->name = $this->translate('messages.'.$category->name,$category->name);
+            }*/
+            $meals = RecipeMeal::with('image_id')->get();
+            
+            foreach($meals as $key => $meal)
+            {
+                $meals[$key]->name = $this->translate('messages.'.$meal->name,$meal->name);
             }
 
-            $parentIngredients = RecipeIngredient::with('image_id')->where('parent','!=', 0)->get();
+            $parentIngredients = RecipeIngredient::with('image_id')->where('parent','=', 0)->get();
             if(count($parentIngredients) > 0)
             {
                 foreach($parentIngredients as $key => $parentIngredient)
@@ -1625,8 +1713,12 @@ class RecipeController extends CoreController
             foreach($myRecipes as $key => $recipe)
             {
                 $recipeOwner = User::where('user_id', $recipe->user_id)->first();
-                $myRecipes[$key]->total_likes = 3;
-                $myRecipes[$key]->avg_rating = 3;
+                
+                $avgRating = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
+                $totalLikes = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
+
+                $myRecipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                $myRecipes[$key]->total_likes = $totalLikes;
                 $myRecipes[$key]->username = $recipeOwner->name;
             }
 
@@ -1641,7 +1733,7 @@ class RecipeController extends CoreController
 
 
 
-            $data = ['ingredients' => $parentIngredients, 'categories' => $categories, 'regions' => $regions, 'trending_recipes' => $myRecipes, 'quick_easy' => $quickEasyRecipes];
+            $data = ['ingredients' => $parentIngredients, 'meals' => $meals, 'regions' => $regions, 'trending_recipes' => $myRecipes, 'quick_easy' => $quickEasyRecipes];
 
 
             return response()->json(['success' => $this->successStatus,
@@ -1671,15 +1763,19 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $recipes = Recipe::with('image')->where('name', 'LIKE', '%'.$request->keyword.'%')->paginate(10);    
+            $recipes = Recipe::with('image','meal')->where('name', 'LIKE', '%'.$request->keyword.'%')->paginate(10);    
             
             if(count($recipes) > 0)
             {
                 foreach($recipes as $key => $recipe)
                 {
                     $recipeOwner = User::where('user_id', $recipe->user_id)->first();
-                    $recipes[$key]->total_likes = 3;
-                    $recipes[$key]->avg_rating = 3;
+                    
+                    $avgRating = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
+                    $totalLikes = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
+
+                    $recipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                    $recipes[$key]->total_likes = $totalLikes;
                     $recipes[$key]->username = $recipeOwner->name;
                 }
                 return response()->json(['success' => $this->successStatus,
@@ -1766,25 +1862,7 @@ class RecipeController extends CoreController
                     $condition .="recipes.minutes = ".$request->cook_time;
                 }
             }
-            if(!empty($request->no_of_ingredients))
-            {
-                $isSearch = 1;
-                $ingredientArray = array();
-                $recipeByIngredients = DB::select(DB::raw("select `recipe_id` from `recipe_saved_ingredients` group by recipe_id having count(ingredient_id) < ".$request->no_of_ingredients));
-                if(count($recipeByIngredients) > 0)
-                {
-                    foreach($recipeByIngredients as $recipeByIngredient)
-                    {
-                        array_push($ingredientArray, $recipeByIngredient->recipe_id);
-                    }
-                    $ingredientValues = join(",", $ingredientArray);
-
-                    if($condition != '')
-                    $condition .=" and recipes.recipe_id in(".$ingredientValues.")";
-                    else
-                    $condition .="recipes.recipe_id in(".$ingredientValues.")";
-                }
-            }
+            
             if(!empty($request->meal_type))
             {
                 $isSearch = 1;
@@ -1795,6 +1873,8 @@ class RecipeController extends CoreController
                 $condition .="recipes.meal_id = ".$request->meal_type;
                 
             }
+            
+            
             if(!empty($request->cousin_id))
             {
                 $isSearch = 1;
@@ -1806,10 +1886,75 @@ class RecipeController extends CoreController
                 
             }
 
+            if(empty($request->no_of_ingredients) || empty($request->child_ingredient))
+            {
+                if(!empty($request->no_of_ingredients))
+                {
+                    $isSearch = 1;
+                    $ingredientArray = array();
+                    $recipeByIngredients = DB::select(DB::raw("select `recipe_id` from `recipe_saved_ingredients` group by recipe_id having count(ingredient_id) < ".$request->no_of_ingredients));
+                    if(count($recipeByIngredients) > 0)
+                    {
+                        foreach($recipeByIngredients as $recipeByIngredient)
+                        {
+                            array_push($ingredientArray, $recipeByIngredient->recipe_id);
+                        }
+                        $ingredientValues = join(",", $ingredientArray);
+
+                        if($condition != '')
+                        $condition .=" and recipes.recipe_id in(".$ingredientValues.")";
+                        else
+                        $condition .="recipes.recipe_id in(".$ingredientValues.")";
+                    }
+                    else
+                    {
+                        $ingredientValues = '';
+                    }
+                }
+                if(!empty($request->child_ingredient))
+                {
+                    $isSearch = 1;
+                    
+                    $ingredientArrays = array();
+                    $recipeByIngredient = DB::select(DB::raw("select `recipe_id` from `recipe_saved_ingredients` where ingredient_id in(".$request->child_ingredient.") group by recipe_id"));
+                    
+                    if(!empty($recipeByIngredient))
+                    {
+                        foreach($recipeByIngredient as $recipeByIngrediente)
+                        {
+                            array_push($ingredientArrays, $recipeByIngrediente->recipe_id);
+                        }
+                        $ingredientValue = join(",", $ingredientArrays);
+
+                        if($condition != '')
+                        $condition .=" and recipes.recipe_id in(".$ingredientValue.")";
+                        else
+                        $condition .="recipes.recipe_id in(".$ingredientValue.")";
+                    }
+                    else
+                    {
+                        $ingredientValue = '';
+                    }
+                    
+                }
+            }
+            else
+            {
+                if(!empty($ingredientValues) && !empty($ingredientValue))
+                {
+                    $result = implode("," , array_unique(array_merge(explode(",",$ingredientValues),explode(",", $ingredientValue))));
+                    if($condition != '')
+                    $condition .=" and recipes.recipe_id in(".$result.")";
+                    else
+                    $condition .="recipes.recipe_id in(".$result.")";
+                }
+                
+            }
+
             
             if($condition != '')
             {
-                $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->paginate(10);    
+                $recipes = Recipe::with('image')->whereRaw('('.$condition.')')->where('name', 'LIKE', '%'.$request->keyword.'%')->paginate(10);    
                 return response()->json(['success' => $this->successStatus,
                                         'data' => $recipes
                                 ], $this->successStatus);
@@ -1864,10 +2009,10 @@ class RecipeController extends CoreController
             {
                 $rules[$key] = 'required';
             }
-            elseif($key == 'intolerance_id')
+            /*elseif($key == 'intolerance_id')
             {
                 $rules[$key] = 'required';
-            }
+            }*/
             elseif($key == 'diet_id')
             {
                 $rules[$key] = 'required';

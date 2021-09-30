@@ -118,8 +118,16 @@ class UserController extends CoreController
         $tokens = DeviceToken::where('user_id', $userId)->get();
         if(count($tokens) > 0)
         {
+
             $collectedTokenArray = $tokens->pluck('device_token');
-            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id);
+
+            
+            
+            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id,null,null,null,null,null,null,null,null,null,null);
+
+            $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id,null,null,null,null,null,null,null,null,null,null);
+
+            
         }
              
         return redirect('login/users/edit/'.$userId)->with('success','Updated successfully');

@@ -35,11 +35,27 @@ class CountryController extends Controller
 
             if(count($getCountries) > 0)
             {
-                $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                if(!empty($request->param) && $request->param == 'trips')
+                {
+                    $countryData = Country::where('status', '1')->where('id', 107)->get();
+                }
+                else
+                {
+                    $countryData = Country::where('status', '1')->whereIn('id', $getCountries)->orderBy('name','ASC')->get();
+                }
+                
             }
             else
             {
-                $countryData = Country::where('status', '1')->orderBy('name','ASC')->get();
+                if(!empty($request->param) && $request->param == 'trips')
+                {
+                    $countryData = Country::where('status', '1')->where('id', 107)->get();
+                }
+                else
+                {
+                    $countryData = Country::where('status', '1')->orderBy('name','ASC')->get();    
+                }
+                
             }
             
             if(count($countryData) > 0)

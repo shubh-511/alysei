@@ -97,7 +97,7 @@ class NotificationController extends CoreController
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
-            $fromUser = User::where('user_id', $request->from_id)->first();
+            $fromUser = User::with('avatar_id')->where('user_id', $request->from_id)->first();
             $toUser = User::where('user_id', $request->to_id)->first();
             if(!empty($fromUser) && !empty($toUser))
             {
@@ -123,13 +123,26 @@ class NotificationController extends CoreController
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'message_screen';
                 $saveNotification->redirect_to_id = $fromUser->user_id;
+
+                $saveNotification->sender_id = $request->from_id;
+                $saveNotification->sender_name = $name;
+                $saveNotification->sender_image = null;
+                $saveNotification->post_id = null;
+                $saveNotification->connection_id = null; 
+                $saveNotification->sender_role = $fromUser->role_id;
+                $saveNotification->comment_id = null;
+                $saveNotification->reply = null;
+                $saveNotification->likeUnlike = null;
+
                 $saveNotification->save();
 
                 $tokens = DeviceToken::where('user_id', $request->to_id)->get();
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->from_id, $name, /*$fromUser->avatar_id->attachment_url*/null, null, null, $fromUser->role_id, null, null, null);
+                    
+                    $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->from_id, $name, /*$fromUser->avatar_id->attachment_url*/null, null, null, $fromUser->role_id, null, null, null);
                 }
             }            
             else

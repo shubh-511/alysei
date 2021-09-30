@@ -27,6 +27,10 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Attachment::class, 'avatar_id','id');
     }
+    public function profile_img()
+    {
+        return $this->belongsTo(Attachment::class, 'avatar_id','id');
+    }
     public function cover_id()
     {
         return $this->belongsTo(Attachment::class, 'cover_id','id');

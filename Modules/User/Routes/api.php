@@ -66,7 +66,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/member/profile', 'Api\UserController@getMemberProfile');
 	Route::get('get/member/about/tab', 'Api\UserController@getMemberAboutTab');
-	Route::get('get/member/contact/tab', 'Api\UserController@getMemberContactTab');
+	Route::get('get/member/contact/tab/{profileId?}', 'Api\UserController@getMemberContactTab');
 
 	Route::get('get/all/featured/listing', 'Api\FeaturedListingsController@getAllFeaturedListing');
 	

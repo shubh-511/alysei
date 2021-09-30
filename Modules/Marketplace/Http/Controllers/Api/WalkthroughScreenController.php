@@ -31,12 +31,12 @@ class WalkthroughScreenController extends CoreController
      * Get Walk Through Screens
      * @Params $request
      */
-    public function getWalkThroughScreens($tab)
+    public function getWalkThroughScreens()
     {
         try
         {
             $response_time = (microtime(true) - LARAVEL_START)*1000;
-            $screens = WalkthroughScreen::select('title','description','order','image_id')->where('tab', $tab)
+            $screens = WalkthroughScreen::select('title','description','order','image_id')
                         ->orderBy('order','asc')->get();
 
             foreach ($screens as $key => $screen) {

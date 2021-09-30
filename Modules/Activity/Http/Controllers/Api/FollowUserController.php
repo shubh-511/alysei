@@ -62,7 +62,7 @@ class FollowUserController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $followingUserRoleId = User::select('role_id')->where('user_id', $request->follow_user_id)->first();
+            $followingUserRoleId = User::with('avatar_id')->where('user_id', $request->follow_user_id)->first();
             if(!empty($followingUserRoleId))
             {
                 if($request->follow_or_unfollow == 1)
@@ -86,12 +86,29 @@ class FollowUserController extends CoreController
                             {
                                 $name = ucwords(strtolower($user->first_name)) . ' ' . ucwords(strtolower($user->last_name));
                             }
+                            elseif($user->role_id == 9)
+                            {
+                                $name = $user->restaurant_name;
+                            }
                             else
                             {
                                 $name = $user->company_name;
                             }
 
-                            $title = $name . " started following you";
+                            if($followingUserRoleId->role_id == 7 || $followingUserRoleId->role_id == 10)
+                            {
+                                $accepterName = ucwords(strtolower($followingUserRoleId->first_name)) . ' ' . ucwords(strtolower($followingUserRoleId->last_name));
+                            }
+                            elseif($followingUserRoleId->role_id == 9)
+                            {
+                                $accepterName = $followingUserRoleId->restaurant_name;
+                            }
+                            else
+                            {
+                                $accepterName = $followingUserRoleId->company_name;
+                            }
+
+                            $title = "started following you";
 
                             $saveNotification = new Notification;
                             $saveNotification->from = $user->user_id;
@@ -100,13 +117,26 @@ class FollowUserController extends CoreController
                             $saveNotification->title = $this->translate('messages.'.$title,$title);
                             $saveNotification->redirect_to = 'user_screen';
                             $saveNotification->redirect_to_id = $user->user_id;
+
+                            $saveNotification->sender_id = $followingUserRoleId->user_id;
+                            $saveNotification->sender_name = $accepterName;
+                            $saveNotification->sender_image = null;
+                            $saveNotification->post_id = null;
+                            $saveNotification->connection_id = null; 
+                            $saveNotification->sender_role = $followingUserRoleId->role_id;
+                            $saveNotification->comment_id = null;
+                            $saveNotification->reply = null;
+                            $saveNotification->likeUnlike = null;
+
                             $saveNotification->save();
 
                             $tokens = DeviceToken::where('user_id', $request->follow_user_id)->get();
                             if(count($tokens) > 0)
                             {
                                 $collectedTokenArray = $tokens->pluck('device_token');
-                                $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type);
+                                $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $followingUserRoleId->user_id, $accepterName, null/*$followingUserRoleId->avatar_id->attachment_url*/, null, null, $followingUserRoleId->role_id, null, null, null);
+
+                                $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $followingUserRoleId->user_id, $accepterName, null/*$followingUserRoleId->avatar_id->attachment_url*/, null, null, $followingUserRoleId->role_id, null, null, null);
                             }
 
                             $message = "You are now following this user";
