@@ -1388,7 +1388,16 @@ class UserController extends CoreController
                                     ->where('user_id', $user_id)
                                     ->where('user_field_id', $value->user_field_id)
                                     ->first();
-                        $roleFields[$key]->value = $fieldValue->value??'';
+                        if($fieldValue->user_field_id == 36)
+                        {
+                            $userAbout = User::select('about')->where('user_id', $loggedInUser->user_id)->first();
+                            $roleFields[$key]->value = $userAbout->about;
+                        }
+                        else
+                        {
+                            $roleFields[$key]->value = $fieldValue->value??'';    
+                        }
+                        
                     }
                     
 

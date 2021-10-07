@@ -54,6 +54,13 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/box/detail/{boxId}', 'Api\HomepageController@getBoxDetails');
 
 	Route::get('get/homescreen', 'Api\HomepageController@getHomeScreen');
+	Route::get('get/products', 'Api\HomepageController@getProducts');
+	Route::get('get/products/by/region', 'Api\HomepageController@getProductsByRegions');
+	Route::get('get/products/by/category', 'Api\HomepageController@getProductsByCategory');
+	Route::get('filter', 'Api\HomepageController@filter');
+
+	Route::get('get/product/properties', 'Api\HomepageController@getProductProperties');
+	Route::get('get/conservation/methods', 'Api\HomepageController@getConservationMethod');
 
 	
 });

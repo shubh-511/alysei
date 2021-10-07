@@ -23,10 +23,12 @@ use App\Notification;
 use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
+use App\Http\Traits\UploadImageTrait;
 //use App\Events\UserRegisterEvent;
 
 class ConnectUserController extends CoreController
 {
+    use UploadImageTrait;
     use NotificationTrait;
     public $successStatus = 200;
     public $validationStatus = 422;
@@ -275,6 +277,7 @@ class ConnectUserController extends CoreController
                           //->where("conditional","=",'no')
                           ->orderBy("edit_profile_field_order","asc")
                           ->get();
+        $userDetail = User::where('user_id', $user_id)->first();                  
 
 
             if($roleFields){
@@ -304,6 +307,13 @@ class ConnectUserController extends CoreController
                         {
                             foreach($fieldValues as $fieldValue)
                             {
+                                if(!empty($fieldValue->table_name))
+                                {
+                                    $data = DB::table($fieldValue->table_name)
+                                     ->where('id', $userDetail->country_id)
+                                     ->first();
+                                    $arrayValues[] = $data->name;
+                                }
                                 $options = DB::table('user_field_options')
                                         ->where('head', 0)->where('parent', 0)
                                         ->where('user_field_option_id', $fieldValue->value)

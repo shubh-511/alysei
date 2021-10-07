@@ -237,7 +237,7 @@ class RegisterController extends CoreController
 
                     if(!empty($inputData['first_name']) && !empty($inputData['last_name']))
                     {
-                        $userName = ucwords(strtolower($inputData['first_name']).' '.strtolower($inputData['first_name']));
+                        $userName = (strtolower($inputData['first_name']).' '.strtolower($inputData['last_name']));
                     }
                     elseif(!empty($inputData['company_name']))
                     {
@@ -250,9 +250,11 @@ class RegisterController extends CoreController
 
                     $new_username = strtolower(str_replace(' ', '_', $userName));
                     
-                    $query = DB::table('users')->select(DB::raw('count(user_id) as user_count'))->where('name','LIKE','%'.$userName.'%')->first();
+                    $query = DB::table('users')->select(DB::raw('count(user_id) as user_count'))->where('name','LIKE','%'.$new_username.'%')->first();
+                    
                     
                     $count = $query->user_count;
+                    //return $count;
 
                     if(!empty($count)) {
                         $new_username = $new_username . $count;
@@ -261,6 +263,8 @@ class RegisterController extends CoreController
                     {
                         $new_username;
                     }
+
+                    //return $new_username;
                     $userData['name'] = $new_username;
 
                     $user = User::create($userData); 

@@ -62,7 +62,7 @@ class TripController extends CoreController
                         }
                         else
                         {
-                            $trip->adventure = null;   
+                            $tripLists[$key]->adventure = null;   
                         }
                     }
                     
@@ -71,7 +71,7 @@ class TripController extends CoreController
             }
             else
             {
-                $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','adventure','country:id,name','region:id,name')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+                $tripLists = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
                 if(count($tripLists) > 0)
                 {
                     foreach($tripLists as $key => $trip)
@@ -86,7 +86,7 @@ class TripController extends CoreController
                         }
                         else
                         {
-                            $trip->adventure = null;   
+                            $tripLists[$key]->adventure = null;   
                         }
                     }
                     
