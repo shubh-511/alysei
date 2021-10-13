@@ -28,7 +28,8 @@ class CreateRecipesTable extends Migration
             $table->integer('intolerance_id')->nullable();
             $table->integer('cooking_skill_id')->nullable();
             $table->integer('image_id')->nullable();
-            $table->integer('favourite_count');
+            $table->integer('favourite_count')->default(0);
+            $table->integer('no_of_ingredients')->default(0);
             $table->enum('status',['0','1'])->default('0')->comment("1=published','0=draft");
             $table->timestamps();
         });

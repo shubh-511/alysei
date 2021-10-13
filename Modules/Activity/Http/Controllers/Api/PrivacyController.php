@@ -41,7 +41,7 @@ class PrivacyController extends CoreController
      * Get Roles list to connect with
      *
      */
-    public function getRolesForConnection()
+    /*public function getRolesForConnection()
     {
         try
         {
@@ -70,7 +70,7 @@ class PrivacyController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
-    }
+    }*/
 
     /*
      * Get Privacy data
@@ -91,8 +91,16 @@ class PrivacyController extends CoreController
                 $privacyData = ['user_id' => $userPrivacy->user_id, 'allow_message_from' => $userPrivacy->allow_message_from, 'who_can_view_age' => $userPrivacy->who_can_view_age, 'who_can_view_profile' => $userPrivacy->who_can_view_profile, 'who_can_connect' => $userPrivacy->who_can_connect];
 
                 $messagePreference = ['user_id' => $user->user_id, 'private_messages' => $userEmailPreference->private_messages, 'when_someone_request_to_follow' => $userEmailPreference->when_someone_request_to_follow, 'weekly_updates' => $userEmailPreference->weekly_updates];
-                
+
+                $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+
+            
+                foreach ($roles as $key => $role) {
+                    $roles[$key]->name = $this->translate('messages.'.$roles[$key]->name,$roles[$key]->name);
+                }
+
                 return response()->json(['success' => $this->successStatus,
+                                    'roles' => $roles,
                                      'privacy_data' => $privacyData,
                                      'email_preference' => $messagePreference,
                                     ], $this->successStatus);
@@ -123,6 +131,9 @@ class PrivacyController extends CoreController
                 'who_can_view_age' => 'required',
                 'who_can_view_profile' => 'required',
                 'who_can_connect' => 'required',
+                'private_messages' => 'required', 
+                'when_someone_request_to_follow' => 'required',
+                'weekly_updates' => 'required'
             ]);
 
             if ($validator->fails()) { 
@@ -135,6 +146,7 @@ class PrivacyController extends CoreController
             {
                 
                User::where('user_id', $user->user_id)->update(['allow_message_from' => $request->allow_message_from, 'who_can_view_age' => $request->who_can_view_age, 'who_can_view_profile' => $request->who_can_view_profile, 'who_can_connect' => $request->who_can_connect]);
+               User::where('user_id', $user->user_id)->update(['private_messages' => $request->private_messages, 'when_someone_request_to_follow' => $request->when_someone_request_to_follow, 'weekly_updates' => $request->weekly_updates]);
                             
                 $message = "Privacy settings has been saved";
                 return response()->json(['success' => $this->successStatus,
@@ -158,7 +170,7 @@ class PrivacyController extends CoreController
      * Save Email preference data
      * @Params $request
      */
-    public function saveEmailPreference(Request $request)
+    /*public function saveEmailPreference(Request $request)
     {
         try
         {
@@ -195,7 +207,7 @@ class PrivacyController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
-    }
+    }*/
 
     
 

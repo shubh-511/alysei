@@ -1404,7 +1404,15 @@ class UserController extends CoreController
                 }
             }
 
-
+            $newArr = [];
+            foreach($roleFields as $keyRole => $role)
+            {
+                if($roleFields[$keyRole]->value != "")
+                {
+                    $newArr[] = $roleFields[$keyRole];
+                }
+            }
+            $roleFields = $newArr;
 
 
             /*********************/
@@ -1732,6 +1740,15 @@ class UserController extends CoreController
                 }
             }
 
+            $newArr = [];
+            foreach($roleFields as $keyRole => $role)
+            {
+                if($roleFields[$keyRole]->value != "")
+                {
+                    $newArr[] = $roleFields[$keyRole];
+                }
+            }
+            $roleFields = $newArr;
             /*********************/
 
             /********Contact tab***/

@@ -54,6 +54,8 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('search/recipe', 'Api\RecipeController@searchRecipe');
     Route::get('search/meal', 'Api\RecipeController@searchMeal');
     Route::post('update/recipe/{recipeId}', 'Api\RecipeController@updateRecipe');
+
+    Route::post('delete/recipe/{recipeId}', 'Api\RecipeController@deleteRecipe');
     
 
 });

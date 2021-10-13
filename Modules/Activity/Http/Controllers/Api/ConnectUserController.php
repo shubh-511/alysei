@@ -217,7 +217,12 @@ class ConnectUserController extends CoreController
             $isConnectedUser = Connection::where('connection_id', $request->connection_id)->where('user_id', $user->user_id)->first();
             if(!empty($isConnectedUser))
             {
-                $userData = User::select('user_id','role_id','company_name','first_name','last_name','about','restaurant_name','vat_no','fda_no','avatar_id')->with('avatar_id')->where('user_id', $isConnectedUser->resource_id)->first();
+                $user = User::where('user_id', $isConnectedUser->user_id)->first();
+
+                $userDataForImporter = User::select('user_id','role_id','company_name','first_name','last_name','about','restaurant_name','vat_no','fda_no','avatar_id')->with('avatar_id')->where('user_id', $isConnectedUser->resource_id)->first();
+                $userDataForImporter->reason_to_connect = $isConnectedUser->reason_to_connect;
+
+                $userData = User::select('user_id','role_id','company_name','first_name','last_name','about','restaurant_name','avatar_id')->with('avatar_id')->where('user_id', $isConnectedUser->resource_id)->first();
                 $userData->reason_to_connect = $isConnectedUser->reason_to_connect;
 
                 $fieldOptions = DB::table('user_field_options')->where('parent','=',0)->where('head','=',0)->get();
@@ -235,6 +240,9 @@ class ConnectUserController extends CoreController
                 foreach($fieldOptions as $key => $fieldOption)
                 {
                     $userCertificates = Certificate::with('photo_of_label','fce_sid_certification','phytosanitary_certificate','packaging_for_usa','food_safety_plan','animal_helath_asl_certificate')->where('user_id', $isConnectedUser->resource_id)->where('user_field_option_id', $fieldOption->user_field_option_id)->first();
+                    //return $this->getConservationMethods($isConnectedUser->resource_id, $fieldOption);
+                    $fieldOptions[$key]->conservation_methods = $this->getConservationMethods($isConnectedUser->resource_id, $fieldOption);
+                    $fieldOptions[$key]->product_properties = $this->getProductProperties($isConnectedUser->resource_id, $fieldOption);
                     
                     $fieldOptions[$key]->photo_of_label = (!empty($userCertificates->photo_of_label))?($this->getCertificatesById($userCertificates->photo_of_label)):"";
 
@@ -249,7 +257,16 @@ class ConnectUserController extends CoreController
                     $fieldOptions[$key]->animal_helath_asl_certificate = (!empty($userCertificates->animal_helath_asl_certificate))?($this->getCertificatesById($userCertificates->animal_helath_asl_certificate)):"";
                     
                 }
-                $data = ['user_data' => $userData, 'about_member' => $this->getAboutMember($userData->role_id, $userData->user_id), 'certificates' => $fieldOptions];
+
+                if($user->role_id == 4 || $user->role_id == 5 || $user->role_id == 6)
+                {
+                    $data = ['user_data' => $userDataForImporter, 'about_member' => $this->getAboutMember($userData->role_id, $userData->user_id), 'certificates' => $fieldOptions];    
+                }
+                else
+                {
+                    $data = ['user_data' => $userData, 'about_member' => $this->getAboutMember($userData->role_id, $userData->user_id)];  
+                }
+                
                 return response()->json(['success' => $this->successStatus, 
                                          'data' => $data
                                         ], $this->successStatus);
@@ -264,6 +281,50 @@ class ConnectUserController extends CoreController
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    public function getConservationMethods($user, $fieldOption)
+    {
+        $getValues = DB::table('user_field_values')->whereRaw('user_field_values.user_field_id = 2')->where('user_id', $user)->get();
+        $getSavedValues = $getValues->pluck('value')->toArray();
+        
+        $options = DB::table('user_field_options')
+                                ->where('head','!=', 0)->where('parent','!=', 0)
+                                ->where('user_field_id', 2)
+                                ->where('parent', $fieldOption->user_field_option_id)
+                                ->first();
+                                
+        if($options)
+        {
+            $childOptions = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', $options->user_field_option_id)
+                                ->where('user_field_id', 2)->whereIn('user_field_option_id', $getSavedValues)
+                                ->get();
+            return $childOptions;
+            
+        }
+    }
+
+    public function getProductProperties($user, $fieldOption)
+    {
+        $getValues = DB::table('user_field_values')->whereRaw('user_field_values.user_field_id = 2')->where('user_id', $user)->get();
+        $getSavedValues = $getValues->pluck('value')->toArray();
+        
+        $options = DB::table('user_field_options')
+                                ->where('head','!=', 0)->where('parent','!=', 0)
+                                ->where('user_field_id', 2)
+                                ->where('parent', $fieldOption->user_field_option_id)->skip(1)
+                                ->first();
+                                
+        if($options)
+        {
+            $childOptions = DB::table('user_field_options')
+                                ->where('head', 0)->where('parent', $options->user_field_option_id)
+                                ->where('user_field_id', 2)->whereIn('user_field_option_id', $getSavedValues)
+                                ->get();
+            return $childOptions;
+            
         }
     }
 
@@ -307,7 +368,14 @@ class ConnectUserController extends CoreController
                         {
                             foreach($fieldValues as $fieldValue)
                             {
-                                if(!empty($fieldValue->table_name))
+                                if(!empty($fieldValue->table_name) && $fieldValue->user_field_id == 28)
+                                {
+                                    $data = DB::table($fieldValue->table_name)
+                                     ->where('id', $userDetail->state)
+                                     ->first();
+                                    $arrayValues[] = $data->name;
+                                }
+                                elseif(!empty($fieldValue->table_name))
                                 {
                                     $data = DB::table($fieldValue->table_name)
                                      ->where('id', $userDetail->country_id)
@@ -392,7 +460,9 @@ class ConnectUserController extends CoreController
                             $name = $myRole->company_name;
                         }
 
+                        $title1 = $name." sent you a connection request";
                         $title = "sent you a connection request";
+
 
                         $saveNotification = new Notification;
                         $saveNotification->from = $myRole->user_id;
@@ -418,9 +488,9 @@ class ConnectUserController extends CoreController
                         if(count($tokens) > 0)
                         {
                             $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
+                            $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
 
-                            $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
+                            $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
                         }
                         
 
@@ -632,7 +702,8 @@ class ConnectUserController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $checkConnectionId = Connection::with('user')->where('connection_id', $request->connection_id)->where('is_approved', '0')->where('user_id', $user->user_id)->first();
+            //$checkConnectionId = Connection::with('user')->where('connection_id', $request->connection_id)->where('is_approved', '0')->where('user_id', $user->user_id)->first();
+            $checkConnectionId = Connection::with('user')->where('connection_id', $request->connection_id)->first();
             if(!empty($checkConnectionId))
             {
                 if($request->accept_or_reject == 1)
@@ -656,6 +727,7 @@ class ConnectUserController extends CoreController
                         $name = $user->company_name;
                     }
 
+                    $title1 = $name." accepted your connection request";
                     $title = "accepted your connection request";
 
                     $saveNotification = new Notification;
@@ -682,9 +754,9 @@ class ConnectUserController extends CoreController
                     if(count($tokens) > 0)
                     {
                         $collectedTokenArray = $tokens->pluck('device_token');
-                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$getUserDetail->avatar_id->attachment_url*/null, null, null, $user->role_id, null, null, null);
+                        $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$getUserDetail->avatar_id->attachment_url*/null, null, null, $user->role_id, null, null, null);
 
-                        $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$getUserDetail->avatar_id->attachment_url*/null, null, null, $user->role_id, null, null, null);
+                        $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$getUserDetail->avatar_id->attachment_url*/null, null, null, $user->role_id, null, null, null);
                     }
 
                 }

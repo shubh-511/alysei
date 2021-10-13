@@ -12,6 +12,7 @@ use Modules\Activity\Entities\CoreComment;
 use Modules\User\Entities\DeviceToken; 
 use Modules\User\Entities\User; 
 use Modules\User\Entities\UserSelectedHub;
+use Modules\Recipe\Entities\PreferenceMapUser;
 use App\Attachment;
 use App\Notification;
 use App\Http\Traits\NotificationTrait;
@@ -190,6 +191,7 @@ class ActivityController extends CoreController
                     $name = $user->company_name;
                 }
 
+                $title1 = $name." shared your post";
                 $title = "shared your post";
 
                 $saveNotification = new Notification;
@@ -216,9 +218,9 @@ class ActivityController extends CoreController
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, null, /*(!empty($getUserDetail->avatar_id->attachment_url) ?? $getUserDetail->avatar_id->attachment_url : null),*/ $request->shared_post_id, null, $user->role_id, null,null,null);
+                    $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, null, /*(!empty($getUserDetail->avatar_id->attachment_url) ?? $getUserDetail->avatar_id->attachment_url : null),*/ $request->shared_post_id, null, $user->role_id, null,null,null);
 
-                    $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, null, /*(!empty($getUserDetail->avatar_id->attachment_url) ?? $getUserDetail->avatar_id->attachment_url : null),*/ $request->shared_post_id, null, $user->role_id, null,null,null);
+                    $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, null, /*(!empty($getUserDetail->avatar_id->attachment_url) ?? $getUserDetail->avatar_id->attachment_url : null),*/ $request->shared_post_id, null, $user->role_id, null,null,null);
                 }
 
                 return response()->json(['success' => $this->successStatus,
@@ -369,7 +371,7 @@ class ActivityController extends CoreController
                 $userIds = array_unique($userIds);
                 $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                 ->with('attachments.attachment_link')
-                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+                ->with('subject_id:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
                 //->whereIn('subject_id', $userIds)
 
                 ->Where(function ($query) use ($user, $userIds) {
@@ -387,7 +389,7 @@ class ActivityController extends CoreController
             {
                 $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
                 ->with('attachments.attachment_link')
-                ->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+                ->with('subject_id:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
 
                 ->Where(function ($query) use ($user) {
                 $query->where('privacy', 'public')
@@ -416,7 +418,7 @@ class ActivityController extends CoreController
                     }
 
                     //shared post
-                    $activityShared = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')->with('attachments.attachment_link')->with('subject_id:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
+                    $activityShared = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')->with('attachments.attachment_link')->with('subject_id:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')->where('activity_action_id', $activityPost->shared_post_id)->first();
                     if(!empty($activityShared))
                     {
                         $activityPosts[$key]->shared_post = $activityShared;
@@ -429,7 +431,18 @@ class ActivityController extends CoreController
                     $activityPosts[$key]->posted_at = $activityPost->created_at->diffForHumans();   
                 }
 
+                $getPreferences = PreferenceMapUser::where('user_id', $user->user_id)->count();
+                if($getPreferences > 0)
+                {
+                    $preferenceStatus = 1;
+                }
+                else
+                {
+                    $preferenceStatus = 0;
+                }
+
                 return response()->json(['success' => $this->successStatus,
+                                         'having_preferences' => $preferenceStatus,
                                          'data' => $activityPosts,
                                         ], $this->successStatus);
             }
@@ -883,6 +896,19 @@ class ActivityController extends CoreController
             
             if(!empty($activityPost))
             {
+                foreach($activityPost as $key => $post)
+                {
+                    //is activity liked
+                    $isLikedActivityPost = ActivityLike::where('resource_id', $post->activity_action_id)->where('poster_id', $loggedInUser->user_id)->first();
+                    if(!empty($isLikedActivityPost))
+                    {
+                        $activityPost[$key]->like_flag = 1;
+                    }
+                    else
+                    {
+                        $activityPost[$key]->like_flag = 0;
+                    }
+                }
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $activityPost,
                                         ], $this->successStatus);

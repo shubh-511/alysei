@@ -227,6 +227,7 @@ class TripController extends CoreController
             $createTrip->website = $request->website;
             $createTrip->price = $request->price;
             $createTrip->description = $request->description;
+            $createTrip->currency = $request->currency;
             $createTrip->image_id = $this->uploadImage($request->file('image_id'));
             $createTrip->save();
 
@@ -323,6 +324,7 @@ class TripController extends CoreController
                 $trip->website = $request->website;
                 $trip->price = $request->price;
                 $trip->description = $request->description;
+                $trip->currency = $request->currency;
 
                 if(!empty($request->image_id))
                 {

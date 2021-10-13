@@ -284,14 +284,22 @@ class SearchController extends CoreController
 
     /*Get states list
     */
-    public function getStates()
+    public function getStates(Request $request)
     {
         try
         {
             $user = $this->user;   
             $userCountry = User::where('user_id', $user->user_id)->first();         
-           
-            $states = State::select('id','name','country_id')->where('country_id', $userCountry->country_id)->where('status', '1')->get();
+            
+            if(!empty($request) && $request->param == 'usa')
+            {
+                $states = State::select('id','name','country_id')->where('country_id', 233)->where('status', '1')->get();
+            }
+            else
+            {
+                $states = State::select('id','name','country_id')->where('country_id', $userCountry->country_id)->where('status', '1')->get();
+            }
+            
             if(count($states) > 0)
             {
                 foreach($states as $key => $state)

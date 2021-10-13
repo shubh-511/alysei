@@ -97,6 +97,11 @@ class SocketConnectionController extends CoreController
                 $postComments = CoreComment::with('poster:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('resource_id', $request->post_id)->where('parent_id', 0)->orderBy('core_comment_id', 'DESC')->get();
                 if(count($postComments) > 0)
                 {
+                    foreach($postComments as $key => $postComment)
+                    {
+                        $replyCounts = CoreComment::where('parent_id', $postComment->core_comment_id)->count();
+                        $postComments[$key]->reply_counts = $replyCounts;   
+                    }
                     return response()->json(['success' => $this->successStatus,
                                              'data' => $postComments,
                                             ], $this->successStatus);
@@ -211,6 +216,7 @@ class SocketConnectionController extends CoreController
                         $name = $poster->company_name;
                     }
 
+                    $title1 = $name." commented on your post";
                     $title = "commented on your post";
 
                     $saveNotification = new Notification;
@@ -236,16 +242,17 @@ class SocketConnectionController extends CoreController
                     if(count($tokens) > 0)
                     {
                         $collectedTokenArray = $tokens->pluck('device_token');
-                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, null, null, null);
+                        $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, null, null, null);
 
-                        $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, null, null, null);
+                        $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, null, null, null);
                     }
 
-
+                    $postCommentData = CoreComment::with('poster:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('core_comment_id', $activityComment->core_comment_id)->first();
 
                     $message = "Your comment has been posted successfully";
                     return response()->json(['success' => $this->successStatus,
                                              'message' => $this->translate('messages.'.$message,$message),
+                                             'data' => $postCommentData
                                             ], $this->successStatus);
                 }
             }
@@ -308,6 +315,7 @@ class SocketConnectionController extends CoreController
                     $name = $poster->company_name;
                 }
 
+                $title1 = $name." replied on your post";
                 $title = "replied on your post";
 
                 $saveNotification = new Notification;
@@ -334,14 +342,17 @@ class SocketConnectionController extends CoreController
                 if(count($tokens) > 0)
                 {
                     $collectedTokenArray = $tokens->pluck('device_token');
-                    $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, $request->comment_id, $request->reply,null);
+                    $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, $request->comment_id, $request->reply,null);
 
-                    $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, $request->comment_id, $request->reply,null);
+                    $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/null, $request->post_id, null, $poster->role_id, $request->comment_id, $request->reply,null);
                 }
+
+                $postReplyData = CoreComment::with('poster:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('core_comment_id', $activityComment->core_comment_id)->first();
 
                 $message = "Your reply has been posted successfully";
                 return response()->json(['success' => $this->successStatus,
                                          'message' => $this->translate('messages.'.$message,$message),
+                                         'data' => $postReplyData
                                         ], $this->successStatus);
             }
             else
@@ -418,6 +429,7 @@ class SocketConnectionController extends CoreController
                             $name = $poster->company_name;
                         }
 
+                        $title1 = $name." liked your post";
                         $title = "liked your post";
 
                         $saveNotification = new Notification;
@@ -433,7 +445,7 @@ class SocketConnectionController extends CoreController
                         $saveNotification->sender_image = null;
                         $saveNotification->post_id = $request->post_id;
                         $saveNotification->connection_id = null;
-                        $saveNotification->sender_role = $user->role_id;
+                        //$saveNotification->sender_role = $user->role_id;
                         $saveNotification->comment_id = null;
                         $saveNotification->reply = null;
                         $saveNotification->likeUnlike = $request->like_or_unlike;
@@ -444,16 +456,17 @@ class SocketConnectionController extends CoreController
                         if(count($tokens) > 0)
                         {
                             $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ null, $request->post_id, null, $user->role_id, null,null, $request->like_or_unlike);
+                            $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ null, $request->post_id, null, null, null,null, $request->like_or_unlike);
 
-                            $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ null, $request->post_id, null, $user->role_id, null,null, $request->like_or_unlike);
+                            $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ null, $request->post_id, null, null, null,null, $request->like_or_unlike);
                         }
-
+                        $activityPostData = ActivityLike::with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('resource_id', $request->post_id)->first();
 
                         $message = "You liked this post";
                         return response()->json(['success' => $this->successStatus,
                                                  'total_likes' => $activityPost->like_count,
                                                  'message' => $this->translate('messages.'.$message,$message),
+                                                 'data' => $activityPostData
                                                 ], $this->successStatus);
                     }
                 }

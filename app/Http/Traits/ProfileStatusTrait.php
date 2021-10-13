@@ -10,14 +10,17 @@ use Modules\User\Entities\FeaturedListing;
 use Modules\User\Entities\UserSelectedHub;
 use Modules\User\Entities\UserTempHub;
 use App\Attachment;
+use App\Notification;
+use Modules\User\Entities\DeviceToken;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 use DB;
+use App\Http\Traits\NotificationTrait;
 //use App\Events\UserRegisterEvent;
 
 trait ProfileStatusTrait
 {
-    
+    use NotificationTrait;
     /***
     Get Profile Status
     ***/
@@ -669,7 +672,37 @@ trait ProfileStatusTrait
             else
             {
                 $profilePercentage = "100";
-               
+                if($user->alysei_certification == '0')
+                {
+                    $title = "Your profile is certified from admin";
+                    $userUpdateCertification = User::where('user_id', $userId)->update(['alysei_certification' => '1']);
+
+                    $admin = User::where('role_id', '1')->first();
+
+                    $saveNotification = new Notification;
+                    $saveNotification->from = $admin->user_id;
+                    $saveNotification->to = $userId;
+                    $saveNotification->notification_type = 'progress';
+                    $saveNotification->title = $this->translate('messages.'.$title,$title);
+                    $saveNotification->redirect_to = 'membership_progress';
+                    $saveNotification->redirect_to_id = 0;
+                    $saveNotification->save();
+
+                    $tokens = DeviceToken::where('user_id', $userId)->get();
+                    if(count($tokens) > 0)
+                    {
+
+                        $collectedTokenArray = $tokens->pluck('device_token');
+
+                        
+                        
+                        $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id,null,null,null,null,null,null,null,null,null,null);
+
+                        $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id,null,null,null,null,null,null,null,null,null,null);
+
+                        
+                    }
+                }
             }
         }
 

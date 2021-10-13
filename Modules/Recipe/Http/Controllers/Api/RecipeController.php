@@ -493,6 +493,43 @@ class RecipeController extends CoreController
     }
 
     /*
+     * Delete recipe
+     * 
+     */
+    public function deleteRecipe($recipeId='')
+    {
+        try
+        {
+            $user = $this->user;
+
+            $getRecipe = Recipe::where('recipe_id', $recipeId)->delete();
+            if(!empty($getRecipe))
+            {
+                RecipeSavedIngredient::where('recipe_id', $recipeId)->delete();
+                RecipeSavedTool::where('recipe_id', $recipeId)->delete();
+                RecipeStep::where('recipe_id', $recipeId)->delete();
+                RecipeMapStepIngredient::where('recipe_id', $recipeId)->delete();
+                RecipeMapStepTool::where('recipe_id', $recipeId)->delete();
+                Recipe::where('recipe_id', $recipeId)->delete();
+
+                $message = "Recipe removed successfully";
+                return response()->json(['success' => $this->successStatus,
+                                        'message' => $this->translate('messages.'.$message,$message)
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No recipe found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Create recipe
      * 
      */
@@ -594,6 +631,7 @@ class RecipeController extends CoreController
                 
 
             }
+            Recipe::where('recipe_id', $recipe->recipe_id)->update(['no_of_ingredients' => count($requestedFields['saved_ingredients'])]);
             $message = "Your recipe has been saved successfully";
             return response()->json(['success' => $this->successStatus,
                                         'message' => $this->translate('messages.'.$message,$message),
@@ -711,6 +749,7 @@ class RecipeController extends CoreController
                 
 
             }
+            Recipe::where('recipe_id', $recipe->recipe_id)->update(['no_of_ingredients' => count($requestedFields['saved_ingredients'])]);
             $message = "Your recipe has been updated successfully";
             return response()->json(['success' => $this->successStatus,
                                         'message' => $this->translate('messages.'.$message,$message),
@@ -768,7 +807,7 @@ class RecipeController extends CoreController
             $recipe->image_id = $this->createImage($requestedFields['image_id']);
             //return $recipe->image_id;
             //$this->uploadImage($request->file($requestedFields['image_id']));
-            $recipe->status = '0';
+            $recipe->status = $requestedFields['status'];
             $recipe->save();
 
             
@@ -853,6 +892,8 @@ class RecipeController extends CoreController
                     }
                 }
             }
+
+            Recipe::where('recipe_id', $recipe->recipe_id)->update(['no_of_ingredients' => count($requestedFields['saved_ingredients'])]);
             
             $message = "Your recipe has been saved successfully";
             return response()->json(['success' => $this->successStatus,
@@ -907,6 +948,10 @@ class RecipeController extends CoreController
                 if($userData->role_id == 7 || $userData->role_id == 10)
                 {
                     $name = ucwords(strtolower($userData->first_name)) . ' ' . ucwords(strtolower($userData->last_name));
+                }
+                elseif($userData->role_id == 9)
+                {
+                    $name = $userData->restaurant_name;
                 }
                 else
                 {
@@ -1713,13 +1758,25 @@ class RecipeController extends CoreController
             foreach($myRecipes as $key => $recipe)
             {
                 $recipeOwner = User::where('user_id', $recipe->user_id)->first();
+                if($recipeOwner->role_id == 7 || $recipeOwner->role_id == 10)
+                {
+                    $name = ucwords(strtolower($recipeOwner->first_name)) . ' ' . ucwords(strtolower($recipeOwner->last_name));
+                }
+                elseif($recipeOwner->role_id == 9)
+                {
+                    $name = $recipeOwner->restaurant_name;
+                }
+                else
+                {
+                    $name = $recipeOwner->company_name;
+                }
                 
                 $avgRating = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
                 $totalLikes = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
 
                 $myRecipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $myRecipes[$key]->total_likes = $totalLikes;
-                $myRecipes[$key]->username = $recipeOwner->name;
+                $myRecipes[$key]->username = $name;
             }
 
             //quick easy
@@ -1731,6 +1788,29 @@ class RecipeController extends CoreController
 
             $quickEasyRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->whereIn('recipe_id', $quickRecipeArray)->orderBy('recipe_id', 'DESC')->get();
 
+            foreach($quickEasyRecipes as $keyRecipe => $quickEasyRecipe)
+            {
+                $quickRecipeOwner = User::where('user_id', $recipe->user_id)->first();
+                if($quickRecipeOwner->role_id == 7 || $quickRecipeOwner->role_id == 10)
+                {
+                    $recipeOwnerName = ucwords(strtolower($quickRecipeOwner->first_name)) . ' ' . ucwords(strtolower($quickRecipeOwner->last_name));
+                }
+                elseif($quickRecipeOwner->role_id == 9)
+                {
+                    $recipeOwnerName = $quickRecipeOwner->restaurant_name;
+                }
+                else
+                {
+                    $recipeOwnerName = $quickRecipeOwner->company_name;
+                }
+
+                $avgRatingOfQuickRecipe = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
+                $totalLikesOfQuickRecipe = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
+
+                $quickEasyRecipes[$keyRecipe]->avg_rating = number_format((float)$avgRatingOfQuickRecipe, 1, '.', '');
+                $quickEasyRecipes[$keyRecipe]->total_likes = $totalLikesOfQuickRecipe;
+                $quickEasyRecipes[$keyRecipe]->username = $name;
+            }
 
 
             $data = ['ingredients' => $parentIngredients, 'meals' => $meals, 'regions' => $regions, 'trending_recipes' => $myRecipes, 'quick_easy' => $quickEasyRecipes];
@@ -1746,6 +1826,8 @@ class RecipeController extends CoreController
         }
     }
 
+    
+
     /*
      * Search Recipe
      * @Params $request
@@ -1754,6 +1836,7 @@ class RecipeController extends CoreController
     {
         try
         {
+            $condition = '';
             $user = $this->user;
             $validator = Validator::make($request->all(), [ 
                 'keyword'   => 'required',
@@ -1763,7 +1846,142 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $recipes = Recipe::with('image','meal')->where('name', 'LIKE', '%'.$request->keyword.'%')->paginate(10);    
+            if(!empty($request->cook_time))
+            {
+                $isSearch = 1;
+                if($request->cook_time == 1 || $request->cook_time == 2)
+                {
+                    if($condition != '')
+                    $condition .=" and recipes.hours < ".$request->cook_time;
+                    else
+                    $condition .="recipes.hours < ".$request->cook_time;
+                }
+                else
+                {
+                    if($condition != '')
+                    $condition .=" and recipes.minutes < ".$request->cook_time;
+                    else
+                    $condition .="recipes.minutes < ".$request->cook_time;
+                }
+            }
+            
+            if(!empty($request->meal_type))
+            {
+                $isSearch = 1;
+                
+                if($condition != '')
+                $condition .=" and recipes.meal_id = ".$request->meal_type;
+                else
+                $condition .="recipes.meal_id = ".$request->meal_type;
+                
+            }
+            
+            if(!empty($request->cousin_id))
+            {
+                $isSearch = 1;
+                
+                if($condition != '')
+                $condition .=" and recipes.cousin_id = ".$request->cousin_id;
+                else
+                $condition .="recipes.cousin_id = ".$request->cousin_id;
+                
+            }
+
+            if(!empty($request->no_of_ingredients))
+            {
+                $isSearch = 1;
+                
+                if($condition != '')
+                $condition .=" and recipes.no_of_ingredients < ".$request->no_of_ingredients;
+                else
+                $condition .="recipes.no_of_ingredients < ".$request->no_of_ingredients;
+                
+            }
+
+            //$recipes = Recipe::with('image','meal')->where('name', 'LIKE', '%'.$request->keyword.'%')
+            $getRecipeByIngId = RecipeIngredient::where('title', 'LIKE', '%'.$request->keyword.'%')->get();
+
+            if(count($getRecipeByIngId) > 0)
+            {   
+                $ingIds = $getRecipeByIngId->pluck('recipe_ingredient_id')->toArray();
+                $getRecipeSavedIngId = RecipeSavedIngredient::whereIn('ingredient_id', $ingIds)->get();
+                if(count($getRecipeSavedIngId) > 0)
+                {
+                    $recipesId = $getRecipeSavedIngId->pluck('recipe_id')->toArray();
+                }
+                else
+                {
+                    $recipesId = [];
+                }
+            }
+            else
+            {
+                $recipesId = [];
+            }
+            
+            if(count($recipesId) > 0)
+            {
+                if($condition != '')
+                {
+                    $recipes = DB::table('recipes')
+                    ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
+                    ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->whereRaw('('.$condition.')')
+                    ->where(function ($query) use ($request, $recipesId) {
+                        $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhereIn('recipes.recipe_id', $recipesId);
+
+                    })
+                    ->paginate(10);
+                }
+                else
+                {
+                    $recipes = DB::table('recipes')
+                    ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
+                    ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->where(function ($query) use ($request, $recipesId) {
+                        $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhereIn('recipes.recipe_id', $recipesId);
+
+                    })
+                    ->paginate(10);
+                }
+                
+            }
+            else
+            {
+                if($condition != '')
+                {
+                    $recipes = DB::table('recipes')
+                    ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
+                    ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->whereRaw('('.$condition.')')
+                    ->where(function ($query) use ($request) {
+                        $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%');
+                    })
+                    ->paginate(10);
+                }
+                else
+                {
+                    $recipes = DB::table('recipes')
+                    ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
+                    ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->where(function ($query) use ($request) {
+                        $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%');
+                    })
+                    ->paginate(10);
+                }
+                
+            }
+   
             
             if(count($recipes) > 0)
             {
@@ -1793,6 +2011,7 @@ class RecipeController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }
     }
+
 
     /*
      * Search Meal

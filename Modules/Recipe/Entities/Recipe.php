@@ -28,7 +28,7 @@ class Recipe extends Model
 
     public function course()
     {
-        return $this->belongsTo(RecipeMeal::class, 'meal_id','recipe_meal_id');
+        return $this->belongsTo(RecipeCourse::class, 'course_id','recipe_course_id');
     }
 
     public function cousin()

@@ -17,6 +17,7 @@ class CreateMarketplaceStoresTable extends Migration
             $table->increments('marketplace_store_id');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('user_id')->on('users');
+            $table->integer('package_id');
             $table->string('name');
             $table->longText('description');
             $table->string('website');

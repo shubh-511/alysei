@@ -171,14 +171,14 @@ class StoreController extends CoreController
         try
         {
             $validator = Validator::make($request->all(), [ 
-                'name' => 'required|max:255', 
+                /*'name' => 'required|max:255', 
                 'description' => 'required',
-                'website' => 'required|max:255',
-                'store_region' => 'required',
-                'phone' =>  'required',
+                'website' => 'required|max:255',*/
+                //'store_region' => 'required',
+                //'phone' =>  'required',
                 //'location' => 'required|max:255',
-                'lattitude' => 'required|max:255',
-                'longitude' => 'required|max:255',
+                //'lattitude' => 'required|max:255',
+                //'longitude' => 'required|max:255',
                 'logo_id' => 'required',
                 'banner_id' => 'required',
             ]);
@@ -189,6 +189,7 @@ class StoreController extends CoreController
 
             $user = $this->user;
 
+            $userData = User::where('user_id', $user->user_id)->first();
             $myStore = MarketplaceStore::where('user_id', $user->user_id)->first();
             if(empty($myStore))
             {
@@ -202,12 +203,13 @@ class StoreController extends CoreController
                 $store->location = $request->location;
                 $store->lattitude = $request->lattitude;
                 $store->longitude = $request->longitude;
+                $store->package_id = $request->package_id;
 
                 $store->logo_id = $this->uploadImage($request->file('logo_id'));
                 $store->banner_id = $this->uploadImage($request->file('banner_id'));
                 $store->save();
 
-                $userDetail = User::where('user_id', $user->user_id)->update(['about' => $request->description, 'company_name' => $request->name, 'website' => $request->website, 'phone' => $request->phone, 'address' => $request->location]);
+                $userDetail = MarketplaceStore::where('user_id', $user->user_id)->update(['description' => $userData->about, 'name' => $userData->company_name, 'website' => $userData->website, 'phone' => $userData->phone, 'location' => $userData->address, 'store_region' => $userData->state, 'lattitude' => $userData->lattitude, 'longitude' => $userData->longitude]);
 
                 if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
                 {
@@ -437,14 +439,14 @@ class StoreController extends CoreController
         try
         {
             $validator = Validator::make($request->all(), [ 
-                'name' => 'required|max:255', 
+                /*'name' => 'required|max:255', 
                 'description' => 'required',
-                'website' => 'required|max:255',
-                'store_region' => 'required',
-                'phone' =>  'required',
+                'website' => 'required|max:255',*/
+                //'store_region' => 'required',
+                //'phone' =>  'required',
                 //'location' => 'required|max:255',
-                'lattitude' => 'required|max:255',
-                'longitude' => 'required|max:255'
+                //'lattitude' => 'required|max:255',
+                //'longitude' => 'required|max:255'
             ]);
 
             if ($validator->fails()) { 
@@ -476,6 +478,9 @@ class StoreController extends CoreController
                     $store->banner_id = $this->uploadImage($request->file('banner_id'));    
                 }
                 $store->save();
+
+                $userData = User::where('user_id', $user->user_id)->first();
+                $userDetail = MarketplaceStore::where('user_id', $user->user_id)->update(['description' => $userData->about, 'name' => $userData->company_name, 'website' => $userData->website, 'phone' => $userData->phone, 'location' => $userData->address, 'store_region' => $userData->state, 'lattitude' => $userData->lattitude, 'longitude' => $userData->longitude]);
 
                 $existingGalleries = MarketplaceStoreGallery::where('marketplace_store_id', $store->marketplace_store_id)->get();
                 /*if(count($existingGalleries) > 0)

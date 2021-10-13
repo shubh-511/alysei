@@ -91,22 +91,42 @@ class HomepageController extends CoreController
     public function filter(Request $request)
     {
         $condition = '';
-
+        $storCondition = '';
+        $productsArray = [];
+        $usersArray = [];
+        $storesArray = [];
+        $storesUserArray = [];
         if(!empty($request->category))
         {
-            $categoryIds = explode(",", $request->category);
-            $productList = MarketplaceProduct::whereIn('product_category_id', $categoryIds)->get();
-            if(count($productList))
+            if($request->type == 1)
             {
-                $productIds = $productList->pluck('marketplace_product_id')->toArray();
-                
-                $products = join(",", $productIds);
-                if($condition != '')
-                $condition .=" and marketplace_products.marketplace_product_id in(".$products.")";
-                else
-                $condition .="marketplace_products.marketplace_product_id in(".$products.")";
+                $categoryIds = explode(",", $request->category);
+                $productList = MarketplaceProduct::whereIn('product_category_id', $categoryIds)->get();
+                if(count($productList))
+                {
+                    $productIds = $productList->pluck('marketplace_store_id')->toArray();
+                    foreach($productIds as $productId)
+                    {
+                        array_push($storesArray, $productId);
+                    }
+                }
             }
+            elseif($request->type == 2)
+            {
+                $categoryIds = explode(",", $request->category);
+                $productList = MarketplaceProduct::whereIn('product_category_id', $categoryIds)->get();
+                if(count($productList))
+                {
+                    $productIds = $productList->pluck('marketplace_product_id')->toArray();
+                    foreach($productIds as $productId)
+                    {
+                        array_push($productsArray, $productId);
+                    }
+                }    
+            }
+            
         }
+        
         if(!empty($request->property))
         {
             $properties = explode(",", $request->property);
@@ -123,14 +143,14 @@ class HomepageController extends CoreController
                                     ->where('user_field_id', 2)
                                     ->get();
                 $userIds = $values->pluck('user_id')->toArray();
-                $userIds = join(",", $userIds);
-                if($condition != '')
-                $condition .=" and marketplace_products.user_id in(".$userIds.")";
-                else
-                $condition .="marketplace_products.user_id in(".$userIds.")";
+                foreach($userIds as $userId)
+                {
+                    array_push($usersArray, $userId);
+                    array_push($storesUserArray, $userId);
+                }
             }
         }
-        if(!empty($request->method))
+        if(!empty($request->method) && ($request->type == 1))
         {
             $methods = explode(",", $request->method);
             $optionMethods = DB::table('user_field_options')
@@ -147,11 +167,10 @@ class HomepageController extends CoreController
                                     ->where('user_field_id', 2)
                                     ->get();
                 $idUsers = $methodValues->pluck('user_id')->toArray();
-                $idUsers = join(",", $idUsers);
-                if($condition != '')
-                $condition .=" and marketplace_products.user_id in(".$idUsers.")";
-                else
-                $condition .="marketplace_products.user_id in(".$idUsers.")";
+                foreach($idUsers as $idUser)
+                {
+                    array_push($usersArray, $idUser);
+                }                
             }
         }
         if(!empty($request->region))
@@ -161,15 +180,14 @@ class HomepageController extends CoreController
             if(count($userList))
             {
                 $userIds = $productList->pluck('user_id')->toArray();
-                
-                $users = join(",", $userIds);
-                if($condition != '')
-                $condition .=" and marketplace_products.user_id in(".$users.")";
-                else
-                $condition .="marketplace_products.user_id in(".$users.")";
+                foreach($userIds as $userId)
+                {
+                    array_push($usersArray, $userId);
+                    array_push($storesUserArray, $userId);
+                }
             }
         }
-        if(!empty($request->fda_certified))
+        if(!empty($request->fda_certified) && ($request->type == 1))
         {
             if($request->fda_certified == 1)
             {
@@ -177,11 +195,10 @@ class HomepageController extends CoreController
                 if(count($fdaUsers) > 0)
                 {
                     $fdaCertUsers = $fdaUsers->pluck('user_id')->toArray();
-                    $fdaUsersIds = join(",", $fdaCertUsers);
-                    if($condition != '')
-                    $condition .=" and marketplace_products.user_id in(".$fdaUsersIds.")";
-                    else
-                    $condition .="marketplace_products.user_id in(".$fdaUsersIds.")";
+                    foreach($fdaCertUsers as $fdaCertUser)
+                    {
+                        array_push($usersArray, $fdaCertUser);
+                    }
                 }
             }
             else
@@ -190,11 +207,10 @@ class HomepageController extends CoreController
                 if(count($fdaUsers) > 0)
                 {
                     $fdaCertUsers = $fdaUsers->pluck('user_id')->toArray();
-                    $fdaUsersIds = join(",", $fdaCertUsers);
-                    if($condition != '')
-                    $condition .=" and marketplace_products.user_id in(".$fdaUsersIds.")";
-                    else
-                    $condition .="marketplace_products.user_id in(".$fdaUsersIds.")";
+                    foreach($fdaCertUsers as $fdaCertUser)
+                    {
+                        array_push($usersArray, $fdaCertUser);
+                    }
                 }
             }
             
@@ -206,12 +222,11 @@ class HomepageController extends CoreController
                 $producers = User::orderBy('company_name')->get();
                 if(count($producers) > 0)
                 {
-                    $producersId = $producers->pluck('user_id')->toArray();
-                    $joinProducersId = join(",", $producersId);
-                    if($condition != '')
-                    $condition .=" and marketplace_products.user_id in(".$joinProducersId.")";
-                    else
-                    $condition .="marketplace_products.user_id in(".$joinProducersId.")";
+                    $producersIds = $producers->pluck('user_id')->toArray();
+                    foreach($producersIds as $producersId)
+                    {
+                        array_push($usersArray, $producersId);
+                    }
                 }
             }
             else //decending
@@ -219,17 +234,16 @@ class HomepageController extends CoreController
                 $producers = User::orderBy('company_name', 'DESC')->get();
                 if(count($producers) > 0)
                 {
-                    $producersId = $producers->pluck('user_id')->toArray();
-                    $joinProducersId = join(",", $producersId);
-                    if($condition != '')
-                    $condition .=" and marketplace_products.user_id in(".$joinProducersId.")";
-                    else
-                    $condition .="marketplace_products.user_id in(".$joinProducersId.")";
+                    $producersIds = $producers->pluck('user_id')->toArray();
+                    foreach($producersIds as $producersId)
+                    {
+                        array_push($usersArray, $producersId);
+                    }
                 }
             }
             
         }
-        if(!empty($request->sort_by_product))
+        /*if(!empty($request->sort_by_product))
         {
             if($request->sort_by_product == 1) //accending
             {                
@@ -253,41 +267,138 @@ class HomepageController extends CoreController
                 }
             }
             
-        }
+        }*/
         if(!empty($request->rating))
         {
-            if($request->rating == 1)
+            if($request->rating == 1) //most rated
             {
-                $avgRating = MarketplaceRating::where('type', '2')->groupBy('id')->orderBy(DB::raw("count(*)"), "DESC")->get();
-                
-                if(count($avgRating) > 0)
+                if($request->type == 1)
                 {
-                    $productId = $avgRating->pluck('id')->toArray();
-                    $joinproductId = join(",", $productId);
-                    if($condition != '')
-                    $condition .=" and marketplace_products.marketplace_product_id in(".$joinproductId.")";
-                    else
-                    $condition .="marketplace_products.marketplace_product_id in(".$joinproductId.")";
+                    $avgRating = MarketplaceRating::where('type', '1')->groupBy('id')->orderBy(DB::raw("count(*)"), "DESC")->get();
+                    if(count($avgRating) > 0)
+                    {
+                        $productId = $avgRating->pluck('id')->toArray();
+                        foreach($productId as $productIdss)
+                        {
+                            array_push($storesArray, $productIdss);
+                        }
+                    }
                 }
+                elseif($request->type == 2)
+                {
+                    $avgRating = MarketplaceRating::where('type', '2')->groupBy('id')->orderBy(DB::raw("count(*)"), "DESC")->get();
+                    if(count($avgRating) > 0)
+                    {
+                        $productId = $avgRating->pluck('id')->toArray();
+                        foreach($productId as $productIdss)
+                        {
+                            array_push($productsArray, $productIdss);
+                        }
+                    }
+                }
+                
+            }
+            if($request->rating == 2) //5 star
+            {
+                if($request->type == 1)
+                {
+                    $fiveRating = MarketplaceRating::where('type', '1')->where('rating', 5)->get();
+                    if(count($fiveRating) > 0)
+                    {
+                        $productIds = $fiveRating->pluck('id')->toArray();
+                        foreach($productIds as $prodId)
+                        {
+                            array_push($productsArray, $prodId);
+                        }
+                    }
+                }
+                elseif($request->type == 2)
+                {
+                    $fiveRating = MarketplaceRating::where('type', '2')->where('rating', 5)->get();
+                    if(count($fiveRating) > 0)
+                    {
+                        $productIds = $fiveRating->pluck('id')->toArray();
+                        foreach($productIds as $prodId)
+                        {
+                            array_push($productsArray, $prodId);
+                        }
+                    }
+                }
+                
             }
             
         }
-        
-        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereRaw('('.$condition.')')->paginate(10);
-        foreach($getFilterProducts as $key => $product)
-        {
-            $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
-            $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
-            $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
 
-            $logoId = Attachment::where('id', $store->logo_id)->first();
-            $bannerId = Attachment::where('id', $store->banner_id)->first();
-            $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
-            $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
-            $getFilterProducts[$key]->total_reviews = $totalReviews;
-            $getFilterProducts[$key]->store_name = $store->name;
+        if(count($productsArray) > 0)
+        {
+            $join = join(",", $productsArray);
+            if($condition != '')
+            $condition .=" and marketplace_products.marketplace_product_id in(".$join.")";
+            else
+            $condition .="marketplace_products.marketplace_product_id in(".$join.")";
         }
+        if(count($usersArray) > 0)
+        {
+            $joinUsers = join(",", $usersArray);
+            if($condition != '')
+            $condition .=" and marketplace_products.user_id in(".$joinUsers.")";
+            else
+            $condition .="marketplace_products.user_id in(".$joinUsers.")";
+        }
+        if(count($storesArray) > 0)
+        {
+            $joinStoresId = join(",", $storesArray);
+            if($storCondition != '')
+            $storCondition .=" and marketplace_stores.marketplace_store_id in(".$joinStoresId.")";
+            else
+            $storCondition .="marketplace_stores.marketplace_store_id in(".$joinStoresId.")";
+        }
+        if(count($storesUserArray) > 0)
+        {
+            $joinStoresUsers = join(",", $storesUserArray);
+            if($storCondition != '')
+            $storCondition .=" and marketplace_stores.user_id in(".$joinStoresUsers.")";
+            else
+            $storCondition .="marketplace_stores.user_id in(".$joinStoresUsers.")";
+        }
+
+        if($request->type == 1)
+        {
+            $getFilterProducts = MarketplaceStore::with('store_gallery')->whereRaw('('.$storCondition.')')->paginate(10);
+            foreach($getFilterProducts as $key => $product)
+            {
+                $avgRating = MarketplaceRating::where('type', '1')->where('id', $product->marketplace_store_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '1')->where('id', $product->marketplace_store_id)->count();
+                $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
+
+                $logoId = Attachment::where('id', $store->logo_id)->first();
+                $bannerId = Attachment::where('id', $store->banner_id)->first();
+                $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
+                $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                $getFilterProducts[$key]->total_reviews = $totalReviews;
+                $getFilterProducts[$key]->store_name = $store->name;
+            }
+        }
+        elseif($request->type == 2)
+        {
+            $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereRaw('('.$condition.')')->paginate(10);
+            foreach($getFilterProducts as $key => $product)
+            {
+                $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
+                $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
+
+                $logoId = Attachment::where('id', $store->logo_id)->first();
+                $bannerId = Attachment::where('id', $store->banner_id)->first();
+                $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
+                $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                $getFilterProducts[$key]->total_reviews = $totalReviews;
+                $getFilterProducts[$key]->store_name = $store->name;
+            }
+        }
+        
         return response()->json(['success' => $this->successStatus,
+                                'count' => count($getFilterProducts),
                                  'data' => $getFilterProducts   
                                 ],$this->successStatus); 
     }
