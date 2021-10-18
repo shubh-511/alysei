@@ -29,6 +29,7 @@ class CreateMarketplaceStoresTable extends Migration
             $table->string('logo_id');
             $table->string('banner_id');
             $table->enum('status',['0','1','2'])->default('0')->comment('0=pending for approval, 1=active, 2=disabled');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

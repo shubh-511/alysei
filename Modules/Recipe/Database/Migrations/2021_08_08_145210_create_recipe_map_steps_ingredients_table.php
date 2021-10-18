@@ -18,6 +18,7 @@ class CreateRecipeMapStepsIngredientsTable extends Migration
             $table->integer('recipe_id')->nullable();
             $table->integer('recipe_step_id')->nullable();
             $table->integer('recipe_saved_ingredient_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

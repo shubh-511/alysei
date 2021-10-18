@@ -19,6 +19,7 @@ class CreateMarketplacePackagesTable extends Migration
             $table->integer('duration')->nullable();
             $table->decimal('amount', 10, 2)->default('0.00');
             $table->enum('status',['1','0'])->default('1');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

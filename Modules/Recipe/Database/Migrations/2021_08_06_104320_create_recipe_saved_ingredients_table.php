@@ -19,6 +19,7 @@ class CreateRecipeSavedIngredientsTable extends Migration
             $table->integer('ingredient_id')->nullable();
             $table->string('quantity')->nullable();
             $table->string('unit')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

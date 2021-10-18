@@ -23,6 +23,7 @@ class CreateCoreCommentsTable extends Migration
             $table->integer('parent_id')->default(0);
             $table->text('params')->nullable(); 
             $table->integer('like_count')->default(0);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

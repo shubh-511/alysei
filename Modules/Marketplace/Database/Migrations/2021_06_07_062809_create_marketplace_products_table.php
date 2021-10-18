@@ -32,6 +32,7 @@ class CreateMarketplaceProductsTable extends Migration
             $table->string('available_for_sample');
             $table->decimal('product_price', 10, 2);
             $table->enum('status',['0','1'])->default('1')->comment('0=inactive, 1=active');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

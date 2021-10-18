@@ -19,6 +19,7 @@ class CreateRecipeSavedToolsTable extends Migration
             $table->integer('tool_id')->nullable();
             $table->string('quantity')->nullable();
             $table->string('unit')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

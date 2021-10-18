@@ -28,6 +28,7 @@ class CreateTripsTable extends Migration
             $table->text('description');
             $table->string('image_id');
             $table->enum('status',['1','0'])->default('1')->comment('1= active, 0=inactive');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -29,6 +29,7 @@ class CreateUserFieldsTable extends Migration
             $table->enum('require_update',['true','false'])->default('false');
             $table->enum('display_on_registration',['true','false'])->default('true');
             $table->enum('display_on_dashboard',['true','false'])->default('true');
+            $table->softDeletes();
             $table->timestamps();
         });
 

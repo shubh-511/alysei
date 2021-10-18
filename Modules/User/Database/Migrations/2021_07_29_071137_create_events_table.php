@@ -27,6 +27,7 @@ class CreateEventsTable extends Migration
             $table->enum('registration_type',['free','paid']);
             $table->integer('image_id');
             $table->enum('status',['1','0'])->default('1')->comment('1= active, 0=inactive');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

@@ -17,6 +17,7 @@ class CreateRecipeSavedCategoriesTable extends Migration
             $table->increments('recipe_saved_category_id');
             $table->integer('recipe_id')->nullable();
             $table->integer('category_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }

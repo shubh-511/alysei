@@ -34,7 +34,7 @@ use Illuminate\Http\Request;
 	Route::group(['middleware' => 'auth:api'], function(){
 
 	/**Search**/
-	Route::get('get/mycountry/states', 'Api\SearchController@getStates');
+	Route::get('get/mycountry/states/{param?}', 'Api\SearchController@getStates');
 	Route::get('get/all/hubs', 'Api\SearchController@getAllHubs');
 	Route::get('get/field/value/{fieldId}', 'Api\SearchController@getFieldValues');
 	Route::get('get/pickup/delivery/fields', 'Api\SearchController@getPickupOrDelivery');

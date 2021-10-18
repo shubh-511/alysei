@@ -18,6 +18,7 @@ class CreateRecipeStepsTable extends Migration
             $table->integer('recipe_id')->nullable();
             $table->string('title')->nullable();
             $table->text('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
