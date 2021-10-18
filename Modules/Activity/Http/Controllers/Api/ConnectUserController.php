@@ -863,5 +863,19 @@ class ConnectUserController extends CoreController
         return $status;
     }
 
+
+    /**
+    available_to_connect = 1 means connect button will be enable in visitor profile
+    available_to_follow = 1 means folloe button will be enable in visitor profile
+
+    follow_flag = 1 means you are already following the visitor profile
+    follow_flag = 0 means you are not following the user
+
+    connection_flag = 0 means both the users are not connected
+    connection_flag = 1 means both the users are connected
+    connection_flag = 2 means logged in user has sent a request to another user but that user has not accepted their request
+    connection_flag = 3 means the visitor has sent a request to loggedin user and that user has not accepted the request
+    **/
+
    
 }

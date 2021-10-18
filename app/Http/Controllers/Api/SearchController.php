@@ -7,6 +7,7 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User; 
+use Modules\User\Entities\BlockList; 
 use Modules\User\Entities\UserSelectedHub; 
 use Modules\User\Entities\Hub;
 use Modules\User\Entities\State;
@@ -400,6 +401,7 @@ class SearchController extends CoreController
         try
         {
             $user = $this->user;   
+            $newArr = [];
             $validateSearchType = Validator::make($request->all(), [ 
                 'hub_id' => 'required', 
                 'role_id' => 'required' 
@@ -413,12 +415,30 @@ class SearchController extends CoreController
             if(count($users) > 0)
             {
                 $users = $users->pluck('user_id');
+                /*$blockList = BlockList::where('user_id', $user->user_id)->whereIn('block_user_id', $users)->get();
+                if(count($blockList) > 0)
+                {
+                    $blockUsers = $blockList->pluck('block_user_id');
+                }*/
 
                 $userWithRole = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
+                /*foreach($userWithRole as $key => $getUser)
+                {
+                    if(in_array($getUser->user_id, $users))
+                    {
+                        $newArr[] = $userWithRole[$key];    
+                    }                    
+                }
+                if(!empty($newArr))
+                {
+                    $userWithRole = $newArr;
+                }*/
                     
                 return response()->json(['success' => $this->successStatus,
                                 'data' => $userWithRole
                                 ], $this->successStatus);
+                }
+                }
             }
         }
         catch(\Exception $e)

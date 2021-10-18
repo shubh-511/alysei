@@ -107,6 +107,14 @@ Route::group(['middleware' => 'auth:api'], function(){
 
 	Route::get('get/all/cousins', 'Api\UserController@getCousins');	
 
+	//awards
+	Route::get('get/award/listing', 'Api\AwardController@getAwardListing');	
+	Route::get('get/medal/types', 'Api\AwardController@getMedalTypes');
+	Route::post('create/award', 'Api\AwardController@createAward');
+	Route::get('edit/award/{awardid}', 'Api\AwardController@editAward');
+	Route::post('update/award', 'Api\AwardController@updateAward');
+	Route::post('delete/award', 'Api\AwardController@deleteAward');
+
 
 });
 
