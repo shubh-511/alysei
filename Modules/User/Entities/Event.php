@@ -1,12 +1,13 @@
 <?php
 
 namespace Modules\User\Entities;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
 
 class Event extends Model
 {
+    use SoftDeletes;
     protected $primaryKey = 'event_id';
     
     public function user()

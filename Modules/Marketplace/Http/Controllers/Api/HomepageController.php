@@ -96,6 +96,13 @@ class HomepageController extends CoreController
         $usersArray = [];
         $storesArray = [];
         $storesUserArray = [];
+        $validator = Validator::make($request->all(), [ 
+            'type' => 'required'
+        ]);
+
+        if ($validator->fails()) { 
+            return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+        }
         if(!empty($request->category))
         {
             if($request->type == 1)
@@ -361,6 +368,34 @@ class HomepageController extends CoreController
             else
             $storCondition .="marketplace_stores.user_id in(".$joinStoresUsers.")";
         }
+        if(!empty($request->keyword))
+        {
+            if($request->type == 1)
+            {
+                if($storCondition != '')
+                $storCondition .=" and marketplace_stores.name LIKE '%".$request->keyword."%'";
+                else
+                $storCondition .="marketplace_stores.name LIKE '%".$request->keyword."'%";
+            }
+            elseif($request->type == 2)
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.title LIKE '%".$request->keyword."%'";
+                else
+                $condition .="marketplace_products.title LIKE '%".$request->keyword."%'";
+            }
+            
+        }
+        if(!empty($request->sort_by_product))
+        {
+            if($request->sort_by_product == 1) //accending
+            {
+                if($condition != '')
+                $condition .=" and marketplace_products.title LIKE '%".$request->keyword."%'";
+                else
+                $condition .="marketplace_products.title LIKE '%".$request->keyword."%'";
+            }
+        }
 
         if($request->type == 1)
         {
@@ -557,6 +592,17 @@ class HomepageController extends CoreController
                 {
                     foreach($products as $key => $product)
                     {
+                        $options = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $product->product_category_id)
+                                    ->first();
+                        if(!empty($options->option))
+                        {
+                            $products[$key]->product_category_name = $options->option;
+                        }
+                        else
+                        {
+                            $products[$key]->product_category_name = '';
+                        }
                         $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
                         $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                         $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
@@ -614,6 +660,17 @@ class HomepageController extends CoreController
             {
                 foreach($products as $key => $product)
                 {
+                    $options = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $product->product_category_id)
+                                    ->first();
+                    if(!empty($options->option))
+                    {
+                        $products[$key]->product_category_name = $options->option;
+                    }
+                    else
+                    {
+                        $products[$key]->product_category_name = '';
+                    }
                     $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
                     $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                     $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
@@ -668,6 +725,10 @@ class HomepageController extends CoreController
                 $products = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $userIds)->paginate();
                 foreach($products as $key => $product)
                 {
+                    $options = DB::table('user_field_options')
+                                ->where('user_field_option_id', $product->product_category_id)
+                                ->first();
+
                     $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
                     $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                     $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
@@ -675,6 +736,15 @@ class HomepageController extends CoreController
                     $products[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                     $products[$key]->total_reviews = $totalReviews;
                     $products[$key]->store_name = $store->name;
+                    if(!empty($options->option))
+                    {
+                        $products[$key]->product_category_name = $options->option;
+                    }
+                    else
+                    {
+                        $products[$key]->product_category_name = '';
+                    }
+                    
                 }
                 
             }
@@ -785,6 +855,17 @@ class HomepageController extends CoreController
     		$products = MarketplaceProduct::with('product_gallery')->whereIn('marketplace_product_id', $productIds)->paginate(10);
     		foreach($products as $key => $product)
     		{
+                $options = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $product->product_category_id)
+                                    ->first();
+                if(!empty($options->option))
+                {
+                    $products[$key]->product_category_name = $options->option;
+                }
+                else
+                {
+                    $products[$key]->product_category_name = '';
+                }
     			$avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
                 $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
@@ -819,6 +900,17 @@ class HomepageController extends CoreController
     		$products = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $userIds)->paginate(10);
     		foreach($products as $key => $product)
     		{
+                $options = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $product->product_category_id)
+                                    ->first();
+                if(!empty($options->option))
+                {
+                    $products[$key]->product_category_name = $options->option;
+                }
+                else
+                {
+                    $products[$key]->product_category_name = '';
+                }
     			$avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
                 $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();

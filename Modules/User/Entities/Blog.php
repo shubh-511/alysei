@@ -1,12 +1,13 @@
 <?php
 
 namespace Modules\User\Entities;
-
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
 
 class Blog extends Model
 {
+    use SoftDeletes;
     protected $primaryKey = 'blog_id';
 
     public function user()

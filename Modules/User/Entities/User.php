@@ -7,11 +7,13 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
 use Modules\User\Entities\State;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\User\Entities\Role;
 use App\Attachment;
 
 class User extends Authenticatable
 {
+    use SoftDeletes;
 	use Notifiable, HasApiTokens;
 	
 	protected $primaryKey = 'user_id';

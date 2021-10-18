@@ -94,11 +94,35 @@ class SocketConnectionController extends CoreController
             $activityAction = ActivityAction::where("activity_action_id", $request->post_id)->first();
             if(!empty($activityAction))
             {
-                $postComments = CoreComment::with('poster:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('resource_id', $request->post_id)->where('parent_id', 0)->orderBy('core_comment_id', 'DESC')->get();
+                $postComments = CoreComment::where('resource_id', $request->post_id)->where('parent_id', 0)->orderBy('core_comment_id', 'DESC')->get();
                 if(count($postComments) > 0)
                 {
                     foreach($postComments as $key => $postComment)
                     {
+                        $poster = User::select('user_id','name','email','role_id','avatar_id','first_name','last_name','restaurant_name','company_name')->with('avatar_id')->where('user_id', $postComment->poster_id)->first();
+                        if(!empty($poster))
+                        {
+                            if($poster->role_id == 7 || $poster->role_id == 10)
+                            {
+                                $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
+                            }
+                            elseif($poster->role_id == 9)
+                            {
+                                $name = $poster->restaurant_name;
+                            }
+                            else
+                            {
+                                $name = $poster->company_name;
+                            }
+                            $poster->name = $name;
+                            $postComments[$key]->poster = $poster;
+                        }
+                        else
+                        {
+                            $postComments[$key]->poster = null;   
+                        }
+                        $postComments[$key]->posted_at = $postComment->created_at->diffForHumans();
+
                         $replyCounts = CoreComment::where('parent_id', $postComment->core_comment_id)->count();
                         $postComments[$key]->reply_counts = $replyCounts;   
                     }
@@ -141,7 +165,37 @@ class SocketConnectionController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $postComments = CoreComment::with('poster:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('parent_id', $request->comment_id)->orderBy('core_comment_id', 'DESC')->get();
+            
+            //$postComments = CoreComment::with('poster:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','poster.avatar_id')->where('parent_id', $request->comment_id)->orderBy('core_comment_id', 'DESC')->get();
+            $postComments = CoreComment::where('parent_id', $request->comment_id)->orderBy('core_comment_id', 'DESC')->get();
+            foreach($postComments as $key => $postComment)
+            {
+                $poster = User::select('user_id','name','email','role_id','avatar_id','first_name','last_name','restaurant_name','company_name')->with('avatar_id')->where('user_id', $postComment->poster_id)->first();
+                if(!empty($poster))
+                {
+                    if($poster->role_id == 7 || $poster->role_id == 10)
+                    {
+                        $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
+                    }
+                    elseif($poster->role_id == 9)
+                    {
+                        $name = $poster->restaurant_name;
+                    }
+                    else
+                    {
+                        $name = $poster->company_name;
+                    }
+                    $poster->name = $name;
+                    $postComments[$key]->poster = $poster;
+                }
+                else
+                {
+                    $postComments[$key]->poster = null;   
+                }
+                $postComments[$key]->posted_at = $postComment->created_at->diffForHumans();
+
+                
+            }
             if(count($postComments) > 0)
             {
                 return response()->json(['success' => $this->successStatus,

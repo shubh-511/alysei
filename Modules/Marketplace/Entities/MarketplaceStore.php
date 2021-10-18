@@ -4,10 +4,12 @@ namespace Modules\Marketplace\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 
 class MarketplaceStore extends Model
 {
+    use SoftDeletes;
     protected $primaryKey = 'marketplace_store_id';
     protected $fillable = [];
 

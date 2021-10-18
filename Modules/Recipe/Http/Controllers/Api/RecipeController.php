@@ -502,7 +502,7 @@ class RecipeController extends CoreController
         {
             $user = $this->user;
 
-            $getRecipe = Recipe::where('recipe_id', $recipeId)->delete();
+            $getRecipe = Recipe::where('recipe_id', $recipeId)->where('user_id', $user->user_id)->first();
             if(!empty($getRecipe))
             {
                 RecipeSavedIngredient::where('recipe_id', $recipeId)->delete();
@@ -512,9 +512,22 @@ class RecipeController extends CoreController
                 RecipeMapStepTool::where('recipe_id', $recipeId)->delete();
                 Recipe::where('recipe_id', $recipeId)->delete();
 
+                $myRecipes = Recipe::with('image','meal','course','cousin','region','diet','intolerance','cookingskill')->where('user_id', $user->user_id)->orderBy('recipe_id', 'DESC')->get();
+                
+                foreach($myRecipes as $key => $myRecipe)
+                {
+                    $avgRating = RecipeReviewRating::where('recipe_id', $myRecipe->recipe_id)->avg('rating');
+                    $totalLikes = RecipeFavourite::where('recipe_id', $myRecipe->recipe_id)->count();
+
+                    $myRecipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                    $myRecipes[$key]->total_likes = $totalLikes;
+                    
+                }
                 $message = "Recipe removed successfully";
                 return response()->json(['success' => $this->successStatus,
-                                        'message' => $this->translate('messages.'.$message,$message)
+                                        'message' => $this->translate('messages.'.$message,$message),
+                                        'count' =>  count($myRecipes),
+                                        'data' => $myRecipes,
                                     ], $this->successStatus);
             }
             else
@@ -944,7 +957,7 @@ class RecipeController extends CoreController
             $myRecipes = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->first();
             if(!empty($myRecipes))
             {
-                $userData = User::where('user_id', $myRecipes->user_id)->first();
+                $userData = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $myRecipes->user_id)->first();
                 if($userData->role_id == 7 || $userData->role_id == 10)
                 {
                     $name = ucwords(strtolower($userData->first_name)) . ' ' . ucwords(strtolower($userData->last_name));
@@ -961,6 +974,32 @@ class RecipeController extends CoreController
                 $avgRating = RecipeReviewRating::where('recipe_id', $recipeId)->avg('rating');
                 $totalReviews = RecipeReviewRating::where('recipe_id', $recipeId)->count();
                 $getLatestReview = RecipeReviewRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->orderBy('recipe_review_rating_id', 'DESC')->first();
+
+                if(!empty($getLatestReview))
+                {
+                    $userDataName = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $getLatestReview->user_id)->first();
+                    if($userDataName->role_id == 7 || $userDataName->role_id == 10)
+                    {
+                        $names = ucwords(strtolower($userDataName->first_name)) . ' ' . ucwords(strtolower($userDataName->last_name));
+                    }
+                    elseif($userDataName->role_id == 9)
+                    {
+                        $names = $userDataName->restaurant_name;
+                    }
+                    else
+                    {
+                        $names = $userDataName->company_name;
+                    }
+                    $getLatestReview->user->name = $names;
+                }
+                else
+                {
+                    //$getLatestReview->user->name = null;   
+                }
+                
+
+                $myRecipes->user->name = $name;
+                
 
                 $isLikedRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $recipeId)->first();
                 if(!empty($isLikedRecipe))
@@ -1049,6 +1088,20 @@ class RecipeController extends CoreController
                 $youMightAlsoLikeData = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('cousin_id', $myRecipes->cousin_id)->get();
                 foreach($youMightAlsoLikeData as $lkey => $youMightAlsoLike)
                 {
+                    $userDetail = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $youMightAlsoLike->user_id)->first();
+                    if($userDetail->role_id == 7 || $userDetail->role_id == 10)
+                    {
+                        $userName = ucwords(strtolower($userDetail->first_name)) . ' ' . ucwords(strtolower($userDetail->last_name));
+                    }
+                    elseif($userDetail->role_id == 9)
+                    {
+                        $userName = $userDetail->restaurant_name;
+                    }
+                    else
+                    {
+                        $userName = $userDetail->company_name;
+                    }
+                    $youMightAlsoLikeData[$lkey]->user->name = $userName;
                     $avgRatings = RecipeReviewRating::where('recipe_id', $youMightAlsoLike->recipe_id)->avg('rating');
                     $youMightAlsoLikeData[$lkey]->avg_rating = number_format((float)$avgRatings, 1, '.', '');
 
@@ -1089,6 +1142,20 @@ class RecipeController extends CoreController
             {
                 foreach($myRecipes as $key => $myRecipe)
                 {
+                    $userDataName = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $myRecipe->user_id)->first();
+                    if($userDataName->role_id == 7 || $userDataName->role_id == 10)
+                    {
+                        $names = ucwords(strtolower($userDataName->first_name)) . ' ' . ucwords(strtolower($userDataName->last_name));
+                    }
+                    elseif($userDataName->role_id == 9)
+                    {
+                        $names = $userDataName->restaurant_name;
+                    }
+                    else
+                    {
+                        $names = $userDataName->company_name;
+                    }
+                    $myRecipes[$key]->username = $names;
                     $avgRating = RecipeReviewRating::where('recipe_id', $myRecipe->recipe_id)->avg('rating');
                     $totalLikes = RecipeFavourite::where('recipe_id', $myRecipe->recipe_id)->count();
 
@@ -1235,6 +1302,20 @@ class RecipeController extends CoreController
                 {
                     foreach($myRecipes as $key => $myRecipe)
                     {
+                        $userDataName = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $myRecipe->user_id)->first();
+                        if($userDataName->role_id == 7 || $userDataName->role_id == 10)
+                        {
+                            $names = ucwords(strtolower($userDataName->first_name)) . ' ' . ucwords(strtolower($userDataName->last_name));
+                        }
+                        elseif($userDataName->role_id == 9)
+                        {
+                            $names = $userDataName->restaurant_name;
+                        }
+                        else
+                        {
+                            $names = $userDataName->company_name;
+                        }
+                        $myRecipes[$key]->username = $names;
                         $avgRating = RecipeReviewRating::where('recipe_id', $myRecipe->recipe_id)->avg('rating');
                         $totalLikes = RecipeFavourite::where('recipe_id', $myRecipe->recipe_id)->count();
 
@@ -1790,7 +1871,7 @@ class RecipeController extends CoreController
 
             foreach($quickEasyRecipes as $keyRecipe => $quickEasyRecipe)
             {
-                $quickRecipeOwner = User::where('user_id', $recipe->user_id)->first();
+                $quickRecipeOwner = User::where('user_id', $quickEasyRecipe->user_id)->first();
                 if($quickRecipeOwner->role_id == 7 || $quickRecipeOwner->role_id == 10)
                 {
                     $recipeOwnerName = ucwords(strtolower($quickRecipeOwner->first_name)) . ' ' . ucwords(strtolower($quickRecipeOwner->last_name));
@@ -1804,12 +1885,12 @@ class RecipeController extends CoreController
                     $recipeOwnerName = $quickRecipeOwner->company_name;
                 }
 
-                $avgRatingOfQuickRecipe = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
-                $totalLikesOfQuickRecipe = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
+                $avgRatingOfQuickRecipe = RecipeReviewRating::where('recipe_id', $quickEasyRecipe->recipe_id)->avg('rating');
+                $totalLikesOfQuickRecipe = RecipeFavourite::where('recipe_id', $quickEasyRecipe->recipe_id)->count();
 
                 $quickEasyRecipes[$keyRecipe]->avg_rating = number_format((float)$avgRatingOfQuickRecipe, 1, '.', '');
                 $quickEasyRecipes[$keyRecipe]->total_likes = $totalLikesOfQuickRecipe;
-                $quickEasyRecipes[$keyRecipe]->username = $name;
+                $quickEasyRecipes[$keyRecipe]->username = $recipeOwnerName;
             }
 
 

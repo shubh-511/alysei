@@ -38,7 +38,7 @@ class SeedUserFieldsTableSeeder extends Seeder
 
                         array("title"=>"Restaurant Type","placeholder"=>"Restaurant type",'type'=>'select','name'=>'restaurant_type','required'=>'yes','require_update'=>'true','display_on_dashboard'=>'true'),
 
-                        array("title"=>"What is your specialization","placeholder"=>"Your specialization",'type'=>'multiselect','name'=>'expertise','required'=>'yes','hint'=>'Choose your specialization','require_update'=>'true','display_on_dashboard'=>'true'),
+                        array("title"=>"Select your specialization","placeholder"=>"Your specialization",'type'=>'multiselect','name'=>'expertise','required'=>'yes','hint'=>'Choose your specialization','require_update'=>'true','display_on_dashboard'=>'true'),
 
                         array("title"=>"Title","placeholder"=>"Title",'type'=>'multiselect','name'=>'title','required'=>'yes','require_update'=>'true','display_on_dashboard'=>'true'),
 
@@ -92,9 +92,9 @@ class SeedUserFieldsTableSeeder extends Seeder
 
                         array("title"=>"About",'type'=>'text','name'=>'about','required'=>'no','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false','display_on_dashboard'=>'true'),
 
-                        array("title"=>"Our Menu",'type'=>'text','name'=>'our_menu','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false','display_on_dashboard'=>'true'),
+                        array("title"=>"Our Menu",'type'=>'text','name'=>'our_menu','required'=>'no','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false','display_on_dashboard'=>'true'),
 
-                        array("title"=>"Our Tours",'type'=>'text','name'=>'our_tour','required'=>'yes','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false','display_on_dashboard'=>'true')
+                        array("title"=>"Our Tours",'type'=>'text','name'=>'our_tour','required'=>'no','conditional'=>'no','require_update'=>'true','display_on_registration'=>'false','display_on_dashboard'=>'true')
 
                     );
 

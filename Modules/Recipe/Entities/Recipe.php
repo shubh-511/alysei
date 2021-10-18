@@ -5,10 +5,12 @@ namespace Modules\Recipe\Entities;
 use Illuminate\Database\Eloquent\Model;
 use Modules\User\Entities\User;
 use Modules\User\Entities\Cousin;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Attachment;
 
 class Recipe extends Model
 {
+    use SoftDeletes;
     protected $primaryKey = 'recipe_id';
 
     public function user()
