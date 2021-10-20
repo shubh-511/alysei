@@ -373,16 +373,16 @@ class HomepageController extends CoreController
             if($request->type == 1)
             {
                 if($storCondition != '')
-                $storCondition .=" and marketplace_stores.name LIKE '%".$request->keyword."%'";
+                $storCondition .=" and marketplace_stores.name LIKE "."'%".$request->keyword."%'"."";
                 else
-                $storCondition .="marketplace_stores.name LIKE '%".$request->keyword."'%";
+                $storCondition .="marketplace_stores.name LIKE "."'%".$request->keyword."%'"."";
             }
             elseif($request->type == 2)
             {
                 if($condition != '')
-                $condition .=" and marketplace_products.title LIKE '%".$request->keyword."%'";
+                $condition .=" and marketplace_products.title LIKE "."'%".$request->keyword."%'"."";
                 else
-                $condition .="marketplace_products.title LIKE '%".$request->keyword."%'";
+                $condition .="marketplace_products.title LIKE "."'%".$request->keyword."%'"."";
             }
             
         }
@@ -423,6 +423,18 @@ class HomepageController extends CoreController
                 $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
 
+                $options = DB::table('user_field_options')
+                            ->where('user_field_option_id', $product->product_category_id)
+                            ->first();
+                if(!empty($options->option))
+                {
+                    $getFilterProducts[$key]->product_category_name = $options->option;
+                }
+                else
+                {
+                    $getFilterProducts[$key]->product_category_name = '';
+                }
+
                 $logoId = Attachment::where('id', $store->logo_id)->first();
                 $bannerId = Attachment::where('id', $store->banner_id)->first();
                 $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
@@ -446,7 +458,7 @@ class HomepageController extends CoreController
     {
         $allProducts = MarketplaceProduct::orderBy('marketplace_product_id', 'DESC')->get();
         $allStores = MarketplaceStore::with('logo_id')->where('status', '1')->orderBy('marketplace_store_id', 'DESC')->get();
-        $allRegions = State::select('id','name')->where('country_id', 107)->orderBy('name', 'DESC')->get();
+        $allRegions = State::select('id','name')->where('status', '1')->where('country_id', 107)->orderBy('name', 'DESC')->get();
         $topBanners = MarketplaceBanner::with('attachment')->where('type', '1')->orderBy('marketplace_banner_id', 'DESC')->get();
         $lowerBanners = MarketplaceBanner::with('attachment')->where('type', '2')->orderBy('marketplace_banner_id', 'DESC')->get();
 
@@ -468,7 +480,7 @@ class HomepageController extends CoreController
             
         }
 
-        $data = ['top_banners' => $topBanners, 'recently_added_product' => $allProducts, 'newly_added_sore' => $allStores, 'regions' => $allRegions, 'bottom_banners' => $lowerBanners];
+        $data = ['top_banners' => $topBanners, 'recently_added_product' => $allProducts, 'newly_added_store' => $allStores, 'regions' => $allRegions, 'bottom_banners' => $lowerBanners];
         return response()->json(['success' => $this->successStatus,
                                  'data' => $data   
                                 ],$this->successStatus); 
@@ -486,8 +498,8 @@ class HomepageController extends CoreController
         {
         	foreach($allStores as $key => $store)
         	{
-        		$avgRating = MarketplaceRating::where('type', '2')->where('id', $store->marketplace_store_id)->avg('rating');
-                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $store->marketplace_product_id)->count();
+        		$avgRating = MarketplaceRating::where('type', '1')->where('id', $store->marketplace_store_id)->avg('rating');
+                $totalReviews = MarketplaceRating::where('type', '1')->where('id', $store->marketplace_store_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $store->marketplace_store_id)->first();
 
 
@@ -798,7 +810,7 @@ class HomepageController extends CoreController
      */
     public function getAllRegions()
     {
-    	$allRegions = State::select('id','name')->where('country_id', 107)->orderBy('name', 'DESC')->get();
+    	$allRegions = State::select('id','name')->where('status', '1')->where('country_id', 107)->orderBy('name', 'DESC')->get();
         if(count($allRegions) > 0)
         {
             return response()->json(['success' => $this->successStatus,

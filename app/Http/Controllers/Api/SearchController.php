@@ -438,8 +438,6 @@ class SearchController extends CoreController
                                 'data' => $userWithRole
                                 ], $this->successStatus);
                 }
-                }
-            }
         }
         catch(\Exception $e)
         {

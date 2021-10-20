@@ -195,16 +195,7 @@ class StoreController extends CoreController
             {
                 $store = new MarketplaceStore;
                 $store->user_id = $user->user_id;
-                $store->name = $request->name;
-                $store->description = $request->description;
-                $store->website = $request->website;
-                $store->phone = $request->phone;
-                $store->store_region = $request->store_region;
-                $store->location = $request->location;
-                $store->lattitude = $request->lattitude;
-                $store->longitude = $request->longitude;
                 $store->package_id = $request->package_id;
-
                 $store->logo_id = $this->uploadImage($request->file('logo_id'));
                 $store->banner_id = $this->uploadImage($request->file('banner_id'));
                 $store->save();

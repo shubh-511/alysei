@@ -1021,8 +1021,8 @@ class RecipeController extends CoreController
                 $recipeUsedSteps = RecipeStep::where('recipe_id', $recipeId)->get();
                 if(count($recipeUsedSteps) > 0)
                 {
-                    $arrayValues = [];
-                    $arrayValuesTools = [];
+                    //$arrayValues = [];
+                    //$arrayValuesTools = [];
                     foreach($recipeUsedSteps as $key => $recipeUsedStep)
                     {
                         //for saved ingredients for the steps
@@ -1030,62 +1030,56 @@ class RecipeController extends CoreController
                         //return $mapIngredients;
                         if(count($mapIngredients) > 0)
                         {
-                            foreach($mapIngredients as $mapIngredient)
-                            {
-                                array_push($arrayValues, $mapIngredient->recipe_saved_ingredient_id);
-                            }
-                            //$arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id');
-                            foreach($recipeUsedIngredients as $keyIng => $recipeUsedIngredient)
+                            $recipeUsedIngredientss = RecipeSavedIngredient::with('ingredient','ingredient.image_id')->where('recipe_id', $recipeId)->get();
+                            $arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id')->toArray();
+                            foreach($recipeUsedIngredientss as $keyIng => $recipeUsedIngredient)
                             {
                                 if(in_array($recipeUsedIngredient->ingredient_id, $arrayValues))
-                                    $recipeUsedIngredients[$keyIng]->is_selected = true;
+                                    $recipeUsedIngredientss[$keyIng]->is_selected = true;
                                 else
-                                    $recipeUsedIngredients[$keyIng]->is_selected = false;
+                                    $recipeUsedIngredientss[$keyIng]->is_selected = false;
 
                             }
                         }
                         else
                         {
-                            foreach($recipeUsedIngredients as $keyIng => $recipeUsedIngredient)
+                            foreach($recipeUsedIngredientss as $keyIng => $recipeUsedIngredient)
                             {
-                                $recipeUsedIngredients[$keyIng]->is_selected = false;
+                                $recipeUsedIngredientss[$keyIng]->is_selected = false;
                             }
                         }                   
                         
-                        $recipeUsedSteps[$key]->step_ingredients = $recipeUsedIngredients;
+                        $recipeUsedSteps[$key]->step_ingredients = $recipeUsedIngredientss;
 
                         //for saved tools for the steps
                         $mapTools = RecipeMapStepTool::where('recipe_id', $recipeId)->where('recipe_step_id', $recipeUsedStep->recipe_step_id)->get(); 
                         //return $mapIngredients;
                         if(count($mapTools) > 0)
                         {
-                            foreach($mapTools as $mapTool)
-                            {
-                                array_push($arrayValuesTools, $mapTool->recipe_saved_tool_id);
-                            }
-                            //$arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id');
-                            foreach($recipeUsedTools as $keyTool => $recipeUsedTool)
+                            $recipeUsedToolss = RecipeSavedTool::with('tool','tool.image_id')->where('recipe_id', $recipeId)->get();
+                            $arrayValuesTools = $mapTools->pluck('recipe_saved_tool_id')->toArray();
+                            foreach($recipeUsedToolss as $keyTool => $recipeUsedTool)
                             {
                                 if(in_array($recipeUsedTool->tool_id, $arrayValuesTools))
-                                    $recipeUsedTools[$keyTool]->is_selected = true;
+                                    $recipeUsedToolss[$keyTool]->is_selected = true;
                                 else
-                                    $recipeUsedTools[$keyTool]->is_selected = false;
+                                    $recipeUsedToolss[$keyTool]->is_selected = false;
 
                             }
                         }
                         else
                         {
-                            foreach($recipeUsedTools as $keyTool => $recipeUsedTool)
+                            foreach($recipeUsedToolss as $keyTool => $recipeUsedTool)
                             {
-                                $recipeUsedTools[$keyTool]->is_selected = false;
+                                $recipeUsedToolss[$keyTool]->is_selected = false;
                             }
                         }
 
-                        $recipeUsedSteps[$key]->step_tools = $recipeUsedTools;
+                        $recipeUsedSteps[$key]->step_tools = $recipeUsedToolss;
                     }
                 }
 
-                $youMightAlsoLikeData = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('cousin_id', $myRecipes->cousin_id)->get();
+                $youMightAlsoLikeData = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('cousin_id', $myRecipes->cousin_id)->limit(6)->get();
                 foreach($youMightAlsoLikeData as $lkey => $youMightAlsoLike)
                 {
                     $userDetail = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $youMightAlsoLike->user_id)->first();
@@ -1154,6 +1148,16 @@ class RecipeController extends CoreController
                     else
                     {
                         $names = $userDataName->company_name;
+                    }
+
+                    $isLikedRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $myRecipe->recipe_id)->first();
+                    if(!empty($isLikedRecipe))
+                    {
+                        $myRecipes[$key]->is_favourite = 1;
+                    }
+                    else
+                    {
+                        $myRecipes[$key]->is_favourite = 0;   
                     }
                     $myRecipes[$key]->username = $names;
                     $avgRating = RecipeReviewRating::where('recipe_id', $myRecipe->recipe_id)->avg('rating');
@@ -1851,6 +1855,16 @@ class RecipeController extends CoreController
                 {
                     $name = $recipeOwner->company_name;
                 }
+
+                $isLikedRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $recipe->recipe_id)->first();
+                if(!empty($isLikedRecipe))
+                {
+                    $myRecipes[$key]->is_favourite = 1;
+                }
+                else
+                {
+                    $myRecipes[$key]->is_favourite = 0;   
+                }
                 
                 $avgRating = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
                 $totalLikes = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
@@ -1883,6 +1897,16 @@ class RecipeController extends CoreController
                 else
                 {
                     $recipeOwnerName = $quickRecipeOwner->company_name;
+                }
+
+                $isLikedQuickRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $quickEasyRecipe->recipe_id)->first();
+                if(!empty($isLikedQuickRecipe))
+                {
+                    $quickEasyRecipes[$keyRecipe]->is_favourite = 1;
+                }
+                else
+                {
+                    $quickEasyRecipes[$keyRecipe]->is_favourite = 0;   
                 }
 
                 $avgRatingOfQuickRecipe = RecipeReviewRating::where('recipe_id', $quickEasyRecipe->recipe_id)->avg('rating');
@@ -1968,6 +1992,17 @@ class RecipeController extends CoreController
                 
             }
 
+            if(!empty($request->region_id))
+            {
+                $isSearch = 1;
+                
+                if($condition != '')
+                $condition .=" and recipes.region_id = ".$request->region_id;
+                else
+                $condition .="recipes.region_id = ".$request->region_id;
+                
+            }
+
             if(!empty($request->no_of_ingredients))
             {
                 $isSearch = 1;
@@ -1985,7 +2020,9 @@ class RecipeController extends CoreController
             if(count($getRecipeByIngId) > 0)
             {   
                 $ingIds = $getRecipeByIngId->pluck('recipe_ingredient_id')->toArray();
-                $getRecipeSavedIngId = RecipeSavedIngredient::whereIn('ingredient_id', $ingIds)->get();
+                $getRecipeChildIngId = RecipeIngredient::whereIn('parent', $ingIds)->get();
+                $childIng = $getRecipeChildIngId->pluck('recipe_ingredient_id')->toArray();
+                $getRecipeSavedIngId = RecipeSavedIngredient::whereIn('ingredient_id', $childIng)->get();
                 if(count($getRecipeSavedIngId) > 0)
                 {
                     $recipesId = $getRecipeSavedIngId->pluck('recipe_id')->toArray();
@@ -2069,13 +2106,35 @@ class RecipeController extends CoreController
                 foreach($recipes as $key => $recipe)
                 {
                     $recipeOwner = User::where('user_id', $recipe->user_id)->first();
+                    if($recipeOwner->role_id == 7 || $recipeOwner->role_id == 10)
+                    {
+                        $name = ucwords(strtolower($recipeOwner->first_name)) . ' ' . ucwords(strtolower($recipeOwner->last_name));
+                    }
+                    elseif($recipeOwner->role_id == 9)
+                    {
+                        $name = $recipeOwner->restaurant_name;
+                    }
+                    else
+                    {
+                        $name = $recipeOwner->company_name;
+                    }
+
+                    $isLikedRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $recipe->recipe_id)->first();
+                    if(!empty($isLikedRecipe))
+                    {
+                        $recipes[$key]->is_favourite = 1;
+                    }
+                    else
+                    {
+                        $recipes[$key]->is_favourite = 0;   
+                    }
                     
                     $avgRating = RecipeReviewRating::where('recipe_id', $recipe->recipe_id)->avg('rating');
                     $totalLikes = RecipeFavourite::where('recipe_id', $recipe->recipe_id)->count();
 
                     $recipes[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                     $recipes[$key]->total_likes = $totalLikes;
-                    $recipes[$key]->username = $recipeOwner->name;
+                    $recipes[$key]->username = $name;
                 }
                 return response()->json(['success' => $this->successStatus,
                                         'data' => $recipes

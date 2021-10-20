@@ -908,6 +908,7 @@ class ActivityController extends CoreController
                     {
                         $activityPost[$key]->like_flag = 0;
                     }
+                    $activityPost[$key]->posted_at = $post->created_at->diffForHumans();
                 }
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $activityPost,
