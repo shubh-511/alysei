@@ -950,8 +950,8 @@ class RecipeController extends CoreController
      */
     public function getRecipeDetail($recipeId)
     {
-        try
-        {
+        /*try
+        {*/
             $user = $this->user;
 
             $myRecipes = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->first();
@@ -1027,10 +1027,12 @@ class RecipeController extends CoreController
                     {
                         //for saved ingredients for the steps
                         $mapIngredients = RecipeMapStepIngredient::where('recipe_id', $recipeId)->where('recipe_step_id', $recipeUsedStep->recipe_step_id)->get(); 
+
+                        $recipeUsedIngredientss = RecipeSavedIngredient::with('ingredient','ingredient.image_id')->where('recipe_id', $recipeId)->get();
                         //return $mapIngredients;
                         if(count($mapIngredients) > 0)
                         {
-                            $recipeUsedIngredientss = RecipeSavedIngredient::with('ingredient','ingredient.image_id')->where('recipe_id', $recipeId)->get();
+                            
                             $arrayValues = $mapIngredients->pluck('recipe_saved_ingredient_id')->toArray();
                             foreach($recipeUsedIngredientss as $keyIng => $recipeUsedIngredient)
                             {
@@ -1054,9 +1056,11 @@ class RecipeController extends CoreController
                         //for saved tools for the steps
                         $mapTools = RecipeMapStepTool::where('recipe_id', $recipeId)->where('recipe_step_id', $recipeUsedStep->recipe_step_id)->get(); 
                         //return $mapIngredients;
+
+                        $recipeUsedToolss = RecipeSavedTool::with('tool','tool.image_id')->where('recipe_id', $recipeId)->get();
                         if(count($mapTools) > 0)
                         {
-                            $recipeUsedToolss = RecipeSavedTool::with('tool','tool.image_id')->where('recipe_id', $recipeId)->get();
+                            
                             $arrayValuesTools = $mapTools->pluck('recipe_saved_tool_id')->toArray();
                             foreach($recipeUsedToolss as $keyTool => $recipeUsedTool)
                             {
@@ -1114,11 +1118,11 @@ class RecipeController extends CoreController
                 $message = "No recipe found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
-        }
+        /*}
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }
+        }*/
     }
 
     /*

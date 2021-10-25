@@ -11,6 +11,7 @@ use Modules\Marketplace\Entities\MarketplaceStore;
 use Modules\Marketplace\Entities\MarketplaceProduct;
 use Modules\Marketplace\Entities\MarketplaceRating;
 use Modules\Marketplace\Entities\MarketplaceFavourite;
+use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Modules\Marketplace\Entities\MarketplaceBanner;
 use Modules\User\Entities\User;
 use App\Http\Controllers\CoreController;
@@ -396,52 +397,153 @@ class HomepageController extends CoreController
                 $condition .="marketplace_products.title LIKE '%".$request->keyword."%'";
             }
         }
-
+        $getFilterProducts = [];
         if($request->type == 1)
         {
-            $getFilterProducts = MarketplaceStore::with('store_gallery')->whereRaw('('.$storCondition.')')->paginate(10);
-            foreach($getFilterProducts as $key => $product)
+            if($storCondition != '')
             {
-                $avgRating = MarketplaceRating::where('type', '1')->where('id', $product->marketplace_store_id)->avg('rating');
-                $totalReviews = MarketplaceRating::where('type', '1')->where('id', $product->marketplace_store_id)->count();
-                $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
-
-                $logoId = Attachment::where('id', $store->logo_id)->first();
-                $bannerId = Attachment::where('id', $store->banner_id)->first();
-                $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
-                $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
-                $getFilterProducts[$key]->total_reviews = $totalReviews;
-                $getFilterProducts[$key]->store_name = $store->name;
+                $getFilterProducts = MarketplaceStore::with('store_gallery')->where('status','1')->whereRaw('('.$storCondition.')')->orderBy('marketplace_store_id', 'DESC')->paginate(10);
             }
+            else
+            {
+                $getFilterProducts = MarketplaceStore::with('store_gallery')->where('status','1')->orderBy('marketplace_store_id', 'DESC')->paginate(10);
+            }
+
+            if(count($getFilterProducts) > 0)
+            {
+                foreach($getFilterProducts as $key => $product)
+                {
+                    $avgRating = MarketplaceRating::where('type', '1')->where('id', $product->marketplace_store_id)->avg('rating');
+                    $totalReviews = MarketplaceRating::where('type', '1')->where('id', $product->marketplace_store_id)->count();
+                    $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
+
+                    $logoId = Attachment::where('id', $store->logo_id)->first();
+                    $bannerId = Attachment::where('id', $store->banner_id)->first();
+                    $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
+                    $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                    $getFilterProducts[$key]->total_reviews = $totalReviews;
+                    $getFilterProducts[$key]->store_name = $store->name;
+                }
+            }          
+            
         }
         elseif($request->type == 2)
         {
-            $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereRaw('('.$condition.')')->paginate(10);
-            foreach($getFilterProducts as $key => $product)
+            if($condition != '')
             {
-                $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
-                $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
-                $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
-
-                $options = DB::table('user_field_options')
-                            ->where('user_field_option_id', $product->product_category_id)
-                            ->first();
-                if(!empty($options->option))
-                {
-                    $getFilterProducts[$key]->product_category_name = $options->option;
+                if($request->box_id == 6){
+                    if(count($this->getCertifiedProducts()) > 0)
+                    {
+                        $userIds = $this->getCertifiedProducts();
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereRaw('('.$condition.')')->whereIn('user_id', $userIds)->paginate(10);
+                    } 
                 }
-                else
+                elseif($request->box_id == 2 || $request->box_id == 5)
                 {
-                    $getFilterProducts[$key]->product_category_name = '';
+                    if(count($this->getAllUsersByProductTypes($request->title)) > 0)
+                    {
+                        $conservationUsers = $this->getAllUsersByProductTypes($request->title);
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $conservationUsers)->whereRaw('('.$condition.')')->paginate(10);
+                    }
                 }
-
-                $logoId = Attachment::where('id', $store->logo_id)->first();
-                $bannerId = Attachment::where('id', $store->banner_id)->first();
-                $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
-                $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
-                $getFilterProducts[$key]->total_reviews = $totalReviews;
-                $getFilterProducts[$key]->store_name = $store->name;
+                elseif($request->box_id == 3)
+                {
+                    if(count($this->getAllProductsByRegions($request->title)) > 0)
+                    {
+                        $usersByRegion = $this->getAllProductsByRegions($request->title);
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $usersByRegion)->whereRaw('('.$condition.')')->paginate(10);
+                    }
+                }
+                elseif($request->box_id == 4)
+                {
+                    $getFilterProducts = MarketplaceProduct::with('product_gallery')->where('product_category_id', $request->title)->whereRaw('('.$condition.')')->paginate(10);
+                }
+                elseif($request->box_id == 7)
+                {
+                    if(count($this->getAllFavouriteProducts($request->title)) > 0)
+                    {
+                        $favProducts = $this->getAllFavouriteProducts($request->title);
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('marketplace_product_id', $favProducts)->whereRaw('('.$condition.')')->paginate(10);
+                    }
+                }
             }
+            else
+            {
+                if($request->box_id == 6){
+                    if(count($this->getCertifiedProducts()) > 0)
+                    {
+                        $userIds = $this->getCertifiedProducts();
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $userIds)->paginate(10);
+                    } 
+                }
+                elseif($request->box_id == 2 || $request->box_id == 5)
+                {
+                    if(count($this->getAllUsersByProductTypes($request->title)) > 0)
+                    {
+                        $conservationUsers = $this->getAllUsersByProductTypes($request->title);
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $conservationUsers)->paginate(10);
+                    }
+                }
+                elseif($request->box_id == 3)
+                {
+                    if(count($this->getAllProductsByRegions($request->title)) > 0)
+                    {
+                        $usersByRegion = $this->getAllProductsByRegions($request->title);
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $usersByRegion)->paginate(10);
+                    }
+                }
+                elseif($request->box_id == 4)
+                {
+                    $getFilterProducts = MarketplaceProduct::with('product_gallery')->where('product_category_id', $request->title)->paginate(10);
+                }
+                elseif($request->box_id == 7)
+                {
+                    if(count($this->getAllFavouriteProducts($request->title)) > 0)
+                    {
+                        $favProducts = $this->getAllFavouriteProducts($request->title);
+                        $getFilterProducts = MarketplaceProduct::with('product_gallery')->whereIn('marketplace_product_id', $favProducts)->paginate(10);
+                    }
+                }
+            }
+
+
+
+            /***/
+
+            if(count($getFilterProducts) > 0)
+            {
+                foreach($getFilterProducts as $key => $product)
+                {
+                    $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
+                    $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
+                    $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
+
+                    $options = DB::table('user_field_options')
+                                ->where('user_field_option_id', $product->product_category_id)
+                                ->first();
+                    if(!empty($options->option))
+                    {
+                        $getFilterProducts[$key]->product_category_name = $options->option;
+                    }
+                    else
+                    {
+                        $getFilterProducts[$key]->product_category_name = '';
+                    }
+
+                    $logoId = Attachment::where('id', $store->logo_id)->first();
+                    $bannerId = Attachment::where('id', $store->banner_id)->first();
+                    $getFilterProducts[$key]->logo_id = $logoId->attachment_url;
+                    $getFilterProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
+                    $getFilterProducts[$key]->total_reviews = $totalReviews;
+                    $getFilterProducts[$key]->store_name = $store->name;
+                }
+            }
+            else
+            {
+                $message = "Nothing found";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+            
         }
         
         return response()->json(['success' => $this->successStatus,
@@ -456,6 +558,8 @@ class HomepageController extends CoreController
      */
     public function getHomeScreen()
     {
+        $topRatedProductsArray = [];
+        $topFavouriteProductsArray = [];
         $allProducts = MarketplaceProduct::orderBy('marketplace_product_id', 'DESC')->get();
         $allStores = MarketplaceStore::with('logo_id')->where('status', '1')->orderBy('marketplace_store_id', 'DESC')->get();
         $allRegions = State::select('id','name')->where('status', '1')->where('country_id', 107)->orderBy('name', 'DESC')->get();
@@ -466,13 +570,20 @@ class HomepageController extends CoreController
         {
             foreach($allProducts as $key => $product)
             {
-                $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_store_id)->avg('rating');
+                $avgRating = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->avg('rating');
                 $totalReviews = MarketplaceRating::where('type', '2')->where('id', $product->marketplace_product_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $product->marketplace_store_id)->first();
+                $productImg = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->first();
 
-                $logoId = Attachment::where('id', $store->logo_id)->first();
-                $bannerId = Attachment::where('id', $store->banner_id)->first();
-                $allProducts[$key]->logo_id = $logoId->attachment_url;
+                if(!empty($productImg->attachment_url))
+                {
+                    $allProducts[$key]->logo_id = $productImg->attachment_url;    
+                }
+                else
+                {
+                    $allProducts[$key]->logo_id = "";
+                }
+                
                 $allProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $allProducts[$key]->total_reviews = $totalReviews;
                 $allProducts[$key]->store_name = $store->name;
@@ -480,7 +591,74 @@ class HomepageController extends CoreController
             
         }
 
-        $data = ['top_banners' => $topBanners, 'recently_added_product' => $allProducts, 'newly_added_store' => $allStores, 'regions' => $allRegions, 'bottom_banners' => $lowerBanners];
+        //top rated products
+        $topRatedProductsData = DB::select(DB::raw("select id from marketplace_review_ratings where type = '2' GROUP BY id ORDER BY count(*) DESC LIMIT 8"));
+        foreach($topRatedProductsData as $topRatedProductData)
+        {
+            array_push($topRatedProductsArray, $topRatedProductData->id);
+        }
+
+        $topRatedProducts = MarketplaceProduct::whereIn('marketplace_product_id', $topRatedProductsArray)->orderBy('marketplace_product_id', 'DESC')->get();
+        if(count($topRatedProducts) > 0)
+        {
+            foreach($topRatedProducts as $topKey => $topRatedProduct)
+            {
+                $avgRatingOfTopRated = MarketplaceRating::where('type', '2')->where('id', $topRatedProduct->marketplace_product_id)->avg('rating');
+                $totalReviewsOfToprated = MarketplaceRating::where('type', '2')->where('id', $topRatedProduct->marketplace_product_id)->count();
+                $storeOfTopRated = MarketplaceStore::where('marketplace_store_id', $topRatedProduct->marketplace_store_id)->first();
+                $productOfTopRatedImg = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->first();
+                
+
+                if(!empty($productOfTopRatedImg->attachment_url))
+                {
+                    $topRatedProducts[$topKey]->logo_id = $productOfTopRatedImg->attachment_url;    
+                }
+                else
+                {
+                    $topRatedProducts[$topKey]->logo_id = "";
+                }
+                $topRatedProducts[$topKey]->avg_rating = number_format((float)$avgRatingOfTopRated, 1, '.', '');
+                $topRatedProducts[$topKey]->total_reviews = $totalReviewsOfToprated;
+                $topRatedProducts[$topKey]->store_name = $storeOfTopRated->name;
+            }
+            
+        }
+        //
+
+        //top favourite products
+        $topFavouriteProductsData = DB::select(DB::raw("select id from marketplace_review_ratings where type = '2' GROUP BY id ORDER BY count(*) DESC LIMIT 8"));
+        foreach($topFavouriteProductsData as $topFavouriteProductData)
+        {
+            array_push($topFavouriteProductsArray, $topFavouriteProductData->id);
+        }
+
+        $topFavouriteProducts = MarketplaceProduct::whereIn('marketplace_product_id', $topFavouriteProductsArray)->orderBy('marketplace_product_id', 'DESC')->get();
+        if(count($topFavouriteProducts) > 0)
+        {
+            foreach($topFavouriteProducts as $topFavKey => $topFavouriteProduct)
+            {
+                $avgRatingOfTopFavourite = MarketplaceRating::where('type', '2')->where('id', $topFavouriteProduct->marketplace_product_id)->avg('rating');
+                $totalReviewsOfTopFavourite = MarketplaceRating::where('type', '2')->where('id', $topFavouriteProduct->marketplace_product_id)->count();
+                $storeOfTopFavourite = MarketplaceStore::where('marketplace_store_id', $topFavouriteProduct->marketplace_store_id)->first();
+                $productOfTopFavouriteImg = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->first();
+
+                if(!empty($productOfTopFavouriteImg->attachment_url))
+                {
+                    $topFavouriteProducts[$topFavKey]->logo_id = $productOfTopFavouriteImg->attachment_url;    
+                }
+                else
+                {
+                    $topFavouriteProducts[$topFavKey]->logo_id = "";
+                }
+                $topFavouriteProducts[$topFavKey]->avg_rating = number_format((float)$avgRatingOfTopFavourite, 1, '.', '');
+                $topFavouriteProducts[$topFavKey]->total_reviews = $totalReviewsOfTopFavourite;
+                $topFavouriteProducts[$topFavKey]->store_name = $storeOfTopFavourite->name;
+            }
+            
+        }
+        //
+
+        $data = ['top_banners' => $topBanners, 'recently_added_product' => $allProducts, 'newly_added_store' => $allStores, 'regions' => $allRegions, 'top_rated_products' => $topRatedProducts,'top_favourite_products' => $topFavouriteProducts, 'bottom_banners' => $lowerBanners];
         return response()->json(['success' => $this->successStatus,
                                  'data' => $data   
                                 ],$this->successStatus); 
@@ -734,7 +912,7 @@ class HomepageController extends CoreController
             if(count($values) > 0)
             {
                 $userIds = $values->pluck('user_id');
-                $products = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $userIds)->paginate();
+                $products = MarketplaceProduct::with('product_gallery')->whereIn('user_id', $userIds)->paginate(10);
                 foreach($products as $key => $product)
                 {
                     $options = DB::table('user_field_options')
@@ -941,5 +1119,82 @@ class HomepageController extends CoreController
             $message = "No product found";
             return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);    
         }
+    }
+
+    /*
+     * Get all product types
+     * 
+     */
+    public function getAllUsersByProductTypes($title='')
+    {
+        $userIds = [];
+
+        $options = DB::table('user_field_options')
+                                ->where('option', 'LIKE', '%'.$title.'%')
+                                ->where('user_field_id', 2)
+                                ->get();
+        if(count($options) > 0)
+        {
+            $getOptionIds = $options->pluck('user_field_option_id');
+            $values = DB::table('user_field_values')
+                                ->whereIn('value', $getOptionIds)
+                                ->where('user_field_id', 2)
+                                ->get();
+            if(count($values) > 0)
+            {
+                $userIds = $values->pluck('user_id');
+            }
+        }    
+        return $userIds;
+    }
+
+    /*
+     * Get all products by regions
+     * 
+     */
+    public function getAllProductsByRegions($regionId='')
+    {
+        $getUserRegions = [];
+        $getUsersByRegion = User::where('state', $regionId)->get();
+        if(count($getUsersByRegion) > 0)
+        {
+            $getUserRegions = $getUsersByRegion->pluck('user_id');
+        }
+        return $getUserRegions;
+    }
+
+     /*
+     * Get certified products
+     * 
+     */
+    public function getCertifiedProducts()
+    {
+        $user = $this->user;
+        $userList = User::where('fda_no','!=',null)->get();
+        if(count($userList) > 0)
+        {
+            $userIds = $userList->pluck('user_id');
+        }
+        else
+        {
+            $userIds = [];  
+        }
+        return $userIds;
+    }
+
+    /*
+    * 
+    *
+    */
+    public function getAllFavouriteProducts()
+    {
+        $user = $this->user;
+        $productIds = [];
+        $favouriteList = MarketplaceFavourite::where('favourite_type', '2')->where('user_id', $user->user_id)->get();
+        if(count($favouriteList) > 0)
+        {
+            $productIds = $favouriteList->pluck('id');
+        }
+        return $productIds;
     }
 }
