@@ -695,6 +695,7 @@ class RecipeController extends CoreController
             $recipe->intolerance_id = $requestedFields['intolerance_id'];
             $recipe->cooking_skill_id = $requestedFields['cooking_skill_id'];
             $recipe->region_id = $requestedFields['region_id'];
+            $recipe->status = $requestedFields['status'];
             if(!empty($requestedFields['image_id']))
             $recipe->image_id = $this->createImage($requestedFields['image_id']);
             //$this->uploadImage($request->file($requestedFields['image_id']));
@@ -996,6 +997,12 @@ class RecipeController extends CoreController
                 {
                     //$getLatestReview->user->name = null;   
                 }
+
+                $oneStar = RecipeReviewRating::where('recipe_id', $myRecipes->recipe_id)->where('rating', 1)->count();
+                $twoStar = RecipeReviewRating::where('recipe_id', $myRecipes->recipe_id)->where('rating', 2)->count();
+                $threeStar = RecipeReviewRating::where('recipe_id', $myRecipes->recipe_id)->where('rating', 3)->count();
+                $fourStar = RecipeReviewRating::where('recipe_id', $myRecipes->recipe_id)->where('rating', 4)->count();
+                $fiveStar = RecipeReviewRating::where('recipe_id', $myRecipes->recipe_id)->where('rating', 5)->count();
                 
 
                 $myRecipes->user->name = $name;
@@ -1014,6 +1021,12 @@ class RecipeController extends CoreController
                 $myRecipes->avg_rating = number_format((float)$avgRating, 1, '.', '');
                 $myRecipes->total_reviews = $totalReviews;
                 $myRecipes->latest_review = $getLatestReview;
+
+                $myRecipes->total_one_star = $oneStar;
+                $myRecipes->total_two_star = $twoStar;
+                $myRecipes->total_three_star = $threeStar;
+                $myRecipes->total_four_star = $fourStar;
+                $myRecipes->total_five_star = $fiveStar;
 
                 $recipeUsedIngredients = RecipeSavedIngredient::with('ingredient','ingredient.image_id')->where('recipe_id', $recipeId)->get();
                 $recipeUsedTools = RecipeSavedTool::with('tool','tool.image_id')->where('recipe_id', $recipeId)->get();
@@ -2103,6 +2116,16 @@ class RecipeController extends CoreController
                 }
                 
             }
+
+            if(!empty($request->region_id) && empty($request->cook_time) && empty($request->meal_type) && empty($request->cousin_id) && empty($request->no_of_ingredients))
+            {
+                $recipes = DB::table('recipes')
+                ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
+                ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                ->where('recipes.region_id', '=', $request->region_id)
+                ->paginate(10);
+            }
    
             
             if(count($recipes) > 0)
@@ -2141,6 +2164,7 @@ class RecipeController extends CoreController
                     $recipes[$key]->username = $name;
                 }
                 return response()->json(['success' => $this->successStatus,
+                                        'count' => count($recipes),
                                         'data' => $recipes
                                 ], $this->successStatus);
             }

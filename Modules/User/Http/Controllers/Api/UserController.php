@@ -1550,8 +1550,11 @@ class UserController extends CoreController
                     }
                 }
             }
+
+            $checkPrivacy = User::whereRaw("find_in_set(".$loggedInUser->role_id.",who_can_connect)")->where('user_id', $request
+                ->visitor_profile_id)->first();
             
-            if(!empty($userData->available_to_connect))
+            if(!empty($userData->available_to_connect) && !empty($checkPrivacy))
             {
                 $userData->available_to_connect = 1;
 

@@ -116,6 +116,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('delete/award', 'Api\AwardController@deleteAward');
 
 
+
 });
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {

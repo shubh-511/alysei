@@ -48,12 +48,12 @@ class AwardController extends CoreController
             
             if(!empty($request->visitor_profile_id))
             {
-                $awardLists = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
+                $awardLists = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','medal')->where('user_id', $request->visitor_profile_id)->where('status', '1')->get();
                 
             }
             else
             {
-                $awardLists = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
+                $awardLists = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','medal')->where('user_id', $loggedInUser->user_id)->where('status', '1')->get();
             }
             
             if(count($awardLists) > 0)

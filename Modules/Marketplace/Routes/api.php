@@ -26,7 +26,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/marketplace/product/subcategories', 'Api\ProductController@getProductSubcategories');
 	Route::get('get/marketplace/brand/label', 'Api\ProductController@getBrandLabels');
 	Route::get('checkif/store/created', 'Api\StoreController@checkIfStoreCreated');
-	Route::get('get/dashboard/screen', 'Api\StoreController@getDashboardScreen');
+	Route::get('get/dashboard/screen/{filterType?}', 'Api\StoreController@getDashboardScreen');
 
 	Route::get('get/store/details', 'Api\StoreController@getStoreDetails');
 	Route::post('update/store/details', 'Api\StoreController@updateStoreDetails');

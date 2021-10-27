@@ -15,6 +15,7 @@ use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User;
 use App\Http\Traits\UploadImageTrait;
 use Illuminate\Support\Facades\Auth; 
+use Carbon\Carbon;
 use Validator;
 use DB;
 
@@ -84,46 +85,28 @@ class StoreController extends CoreController
      * Get Dashboard Screen
      * 
      */
-    public function getDashboardScreen()
+    public function getDashboardScreen($filterType='')
     {
         try
         {
             $user = $this->user;
-
             $myStore = MarketplaceStore::where('user_id', $user->user_id)->first();
             if(!empty($myStore))
             {
-                $productCount = MarketplaceProduct::where('user_id', $user->user_id)->count();
                 $logoId = Attachment::where('id', $myStore->logo_id)->first();
                 $bannerId = Attachment::where('id', $myStore->banner_id)->first();
                 $myStore->logo_id = $logoId->attachment_url;
                 $myStore->banner_id = $bannerId->attachment_url;
 
-                $arrayValues = array();
-                $fieldValues = DB::table('user_field_values')
-                            ->where('user_id', $user->user_id)
-                            ->where('user_field_id', 2)
-                            ->get();
-                if(count($fieldValues) > 0)
-                {
-                    foreach($fieldValues as $fieldValue)
-                    {
-                        $options = DB::table('user_field_options')
-                                ->where('head', 0)->where('parent', 0)
-                                ->where('user_field_option_id', $fieldValue->value)
-                                ->first();
-                        
-                        //$arrayValues[] = $options->option;
-                        if(!empty($options->option))
-                        $arrayValues[] = $options->option;
-                    }
-                }
+                $getAnalytics = $this->getAnalyticsByFilter($filterType, $myStore);               
+                
                 
                 return response()->json(['success' => $this->successStatus,
                                         'banner' => $myStore->banner_id,
                                         'logo' => $myStore->logo_id,
-                                        'total_product' => $productCount,
-                                        'total_category' => count($arrayValues),
+                                        'total_product' => $getAnalytics[0],
+                                        'total_category' => count($getAnalytics[1]),
+                                        'total_reviews' => $getAnalytics[2],
                                         //'data' => $myStore
                                     ],$this->successStatus); 
             }
@@ -138,6 +121,98 @@ class StoreController extends CoreController
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
         }
 
+    }
+
+    /**
+    * get analytics by filter
+    * 
+    * */
+    public function getAnalyticsByFilter($filterType, $myStore)
+    {
+        $user = $this->user;
+        $returnedArray = [];
+        $arrayValues = [];
+        if($filterType == 1)
+        {
+            
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->whereYear('created_at', date('Y'))    ->count();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->whereYear('created_at', date('Y'))
+                        ->get();
+            $totalReviewCount = MarketplaceRating::where('type', '1')->where('id', $myStore->store_id)->whereYear('created_at', date('Y'))->count();
+        }
+        elseif($filterType == 2)
+        {
+            
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->whereMonth('created_at', date('m'))->count();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->whereMonth('created_at', date('m'))
+                        ->get();
+            $totalReviewCount = MarketplaceRating::where('type', '1')->where('id', $myStore->store_id)->whereMonth('created_at', date('m'))->count();
+        }
+        elseif($filterType == 3)
+        {
+            
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->count();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
+                        ->get();
+            $totalReviewCount = MarketplaceRating::where('type', '1')->where('id', $myStore->store_id)->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->count();
+        }
+        elseif($filterType == 4)
+        {
+            
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->where('created_at','=', Carbon::yesterday())->count();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->where('created_at','=', Carbon::yesterday())
+                        ->get();
+            $totalReviewCount = MarketplaceRating::where('type', '1')->where('id', $myStore->store_id)->where('created_at','=', Carbon::yesterday())->count();
+        }
+        elseif($filterType == 5)
+        {
+            
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->whereDate('created_at', Carbon::today())->count();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->whereDate('created_at', Carbon::today())
+                        ->get();
+            $totalReviewCount = MarketplaceRating::where('type', '1')->where('id', $myStore->store_id)->whereDate('created_at', Carbon::today())->count();
+        }
+        else
+        {
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->count();
+            $fieldValues = DB::table('user_field_values')
+                        ->where('user_id', $user->user_id)
+                        ->where('user_field_id', 2)
+                        ->get();
+            $totalReviewCount = MarketplaceRating::where('type', '1')->where('id', $myStore->store_id)->count();
+        }
+
+        if(count($fieldValues) > 0)
+        {
+            foreach($fieldValues as $fieldValue)
+            {
+                $options = DB::table('user_field_options')
+                        ->where('head', 0)->where('parent', 0)
+                        ->where('user_field_option_id', $fieldValue->value)
+                        ->first();
+                
+                if(!empty($options->option))
+                $arrayValues[] = $options->option;
+            }
+        }
+
+        $returnedArray = [$productCount, $arrayValues, $totalReviewCount];
+        return $returnedArray;
     }
 
 
