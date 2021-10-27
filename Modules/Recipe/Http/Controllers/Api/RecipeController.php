@@ -2061,11 +2061,13 @@ class RecipeController extends CoreController
                     $recipes = DB::table('recipes')
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
                     ->whereRaw('('.$condition.')')
                     ->where(function ($query) use ($request, $recipesId) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_regions.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhereIn('recipes.recipe_id', $recipesId);
 
                     })
@@ -2076,10 +2078,12 @@ class RecipeController extends CoreController
                     $recipes = DB::table('recipes')
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
                     ->where(function ($query) use ($request, $recipesId) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_regions.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhereIn('recipes.recipe_id', $recipesId);
 
                     })
@@ -2094,11 +2098,13 @@ class RecipeController extends CoreController
                     $recipes = DB::table('recipes')
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
                     ->whereRaw('('.$condition.')')
                     ->where(function ($query) use ($request) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
-                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%');
+                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_regions.name', 'LIKE', '%'.$request->keyword.'%');
                     })
                     ->paginate(10);
                 }
@@ -2107,17 +2113,19 @@ class RecipeController extends CoreController
                     $recipes = DB::table('recipes')
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
+                    ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
                     ->where(function ($query) use ($request) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
-                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%');
+                              ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
+                              ->orWhere('recipe_regions.name', 'LIKE', '%'.$request->keyword.'%');
                     })
                     ->paginate(10);
                 }
                 
             }
 
-            if(!empty($request->region_id) && empty($request->cook_time) && empty($request->meal_type) && empty($request->cousin_id) && empty($request->no_of_ingredients))
+            /*if(!empty($request->region_id) && empty($request->cook_time) && empty($request->meal_type) && empty($request->cousin_id) && empty($request->no_of_ingredients))
             {
                 $recipes = DB::table('recipes')
                 ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
@@ -2125,7 +2133,7 @@ class RecipeController extends CoreController
                 ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
                 ->where('recipes.region_id', '=', $request->region_id)
                 ->paginate(10);
-            }
+            }*/
    
             
             if(count($recipes) > 0)
