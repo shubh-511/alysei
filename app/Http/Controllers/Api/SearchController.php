@@ -607,8 +607,9 @@ class SearchController extends CoreController
         {
             if(!empty($request->restaurant_type))
             {
+                $restaurantTypesArray = explode(",", $request->restaurant_type);
                 $condition = 1;
-                $restaurantTypes = UserFieldValue::where('value', $request->restaurant_type)->where('user_field_id', 10)->groupBy('user_id')->get();
+                $restaurantTypes = UserFieldValue::whereIn('value', $restaurantTypesArray)->where('user_field_id', 10)->groupBy('user_id')->get();
                 if(count($restaurantTypes))
                 {
                     $restaurantTypes = $restaurantTypes->pluck('user_id');

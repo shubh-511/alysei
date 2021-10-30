@@ -644,11 +644,12 @@ trait ProfileStatusTrait
             {
                 $profilePercentage = "85";
             }
-            /****/
-            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && !empty($user->phone) && empty($user->about) && count($FeaturedListing) > 0 && (count($userSelectedHub) > 0 || count($userTempHub) > 0))
+            
+            elseif(!empty($user->cover_id) && !empty($user->avatar_id) && empty($user->phone) && !empty($user->about) && count($FeaturedListing) == 0 && (count($userSelectedHub) == 0 || count($userTempHub) == 0)  && !empty($fieldValue->value))
             {
-                $profilePercentage = "80";
+                $profilePercentage = "55";
             }
+            /****/
             elseif(!empty($user->cover_id) && !empty($user->avatar_id) && !empty($user->phone) && empty($user->about) && count($FeaturedListing) > 0 && (count($userSelectedHub) > 0 || count($userTempHub) > 0))
             {
                 $profilePercentage = "80";

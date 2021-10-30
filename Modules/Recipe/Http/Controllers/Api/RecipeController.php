@@ -331,6 +331,57 @@ class RecipeController extends CoreController
     }
 
     /*
+     * Search tools
+     * 
+     */
+    public function searchTools(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'keyword' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            if($request->type == 1)
+            {
+                $tools = RecipeTool::with('image_id')->where('parent','==', 0)->where('title','LIKE','%'.$request->keyword.'%')->get();    
+            }
+            else
+            {
+                $tools = RecipeTool::with('image_id')->where('parent','!=', 0)->where('title','LIKE','%'.$request->keyword.'%')->get();
+            }
+            
+            if(count($tools) > 0)
+            {
+                foreach($tools as $key => $tool)
+                {
+                    $tools[$key]->title = $this->translate('messages.'.$tool->title, $tool->title);
+                }
+
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($tools),
+                                        'data' => $tools,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No tools found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Get recipie meals
      * 
      */
@@ -2179,44 +2230,6 @@ class RecipeController extends CoreController
             else
             {
                 $message = "No recipe found";
-                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-            }
-        }
-        catch(\Exception $e)
-        {
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }
-    }
-
-
-    /*
-     * Search Meal
-     * @Params $request
-     */
-    public function searchMeal(Request $request)
-    {
-        try
-        {
-            $user = $this->user;
-            $validator = Validator::make($request->all(), [ 
-                'keyword'   => 'required',
-            ]);
-
-            if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-            }
-
-            $recipes = RecipeMeal::with('image_id')->where('name', 'LIKE', '%'.$request->keyword.'%')->get();    
-            
-            if(count($recipes) > 0)
-            {
-                return response()->json(['success' => $this->successStatus,
-                                        'data' => $recipes
-                                ], $this->successStatus);
-            }
-            else
-            {
-                $message = "No meals found";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
         }

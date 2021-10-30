@@ -62,5 +62,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/product/properties', 'Api\HomepageController@getProductProperties');
 	Route::get('get/conservation/methods', 'Api\HomepageController@getConservationMethod');
 
+	Route::get('get/all-entities-for-homesreen/{entityId}', 'Api\HomepageController@getAllEntities');
+
 	
 });

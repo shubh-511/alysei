@@ -227,6 +227,7 @@ class ProductController extends CoreController
             $product->dispatch_instruction = $request->dispatch_instruction;
             $product->available_for_sample = $request->available_for_sample;
             $product->product_price = $request->product_price;
+            $product->unit = $request->unit;
             $product->save();
 
             if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
@@ -297,6 +298,7 @@ class ProductController extends CoreController
                 $product->dispatch_instruction = $request->dispatch_instruction;
                 $product->available_for_sample = $request->available_for_sample;
                 $product->product_price = $request->product_price;
+                $product->unit = $request->unit;
                 $product->save();
 
                 $existingGalleries = MarketplaceProductGallery::where('marketplace_product_id', $product->marketplace_product_id)->get();

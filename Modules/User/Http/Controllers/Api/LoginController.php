@@ -137,10 +137,12 @@ class LoginController extends CoreController
         $mes = 'Logout successfully';
         $message = $this->translate('messages.'.$mes,$mes);
 
+        $user = Auth::user();
+        DeviceToken::where('user_id', $user->user_id)->delete();
         $token = $request->user()->token();
         $token->revoke();
         return response()->json(['success' => $this->successStatus,
-                                 'data' => $message,
+                                 'message' => $message,
                                 ], $this->successStatus); 
     }
 

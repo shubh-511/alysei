@@ -51,8 +51,8 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::get('get/saved/preferences', 'Api\RecipeController@getPreferences');
     Route::post('save/update/draft/recipe/{recipeId?}', 'Api\RecipeController@saveOrUpdateRecipeInDraft');
     Route::get('search/ingredients', 'Api\RecipeController@searchIngredients');
+    Route::get('search/tools', 'Api\RecipeController@searchTools');
     Route::get('search/recipe', 'Api\RecipeController@searchRecipe');
-    Route::get('search/meal', 'Api\RecipeController@searchMeal');
     Route::post('update/recipe/{recipeId}', 'Api\RecipeController@updateRecipe');
 
     Route::post('delete/recipe/{recipeId}', 'Api\RecipeController@deleteRecipe');
