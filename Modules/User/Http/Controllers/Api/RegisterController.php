@@ -154,6 +154,7 @@ class RegisterController extends CoreController
             $stateId='';
             $input = $request->all();
             $rules = [];
+            $getIds = null;
             $rules['role_id'] = 'required';
             /*$rules['device_type'] = 'required';
             $rules['device_token'] = 'required';*/
@@ -163,6 +164,12 @@ class RegisterController extends CoreController
                 return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
             }
 
+            $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+            if(count($roles) > 0)
+            {
+                $getRolesId = $roles->pluck('role_id')->toArray();
+                $getIds = implode(",",$getRolesId);
+            }
             $roleFields = $this->checkFieldsByRoleId($input['role_id']);
 
             if(count($roleFields) == 0){
@@ -268,6 +275,7 @@ class RegisterController extends CoreController
                     $userData['name'] = $new_username;
 
                     $user = User::create($userData); 
+                    User::where('user_id', $user->user_id)->update(["who_can_connect" => $getIds]);
                     
                     if($user){
 

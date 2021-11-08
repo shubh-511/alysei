@@ -92,7 +92,7 @@ class CountryController extends Controller
                     return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                $stateData = State::where('status', '1')->where('country_id', $request->country_id)->orderBy('name','ASC')->get();
+                $stateData = State::where('status', '1')->with('flag_id')->where('country_id', $request->country_id)->orderBy('name','ASC')->get();
                 
                 if(count($stateData) > 0)
                 {

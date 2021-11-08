@@ -107,6 +107,7 @@ class StoreController extends CoreController
                                         'total_product' => $getAnalytics[0],
                                         'total_category' => count($getAnalytics[1]),
                                         'total_reviews' => $getAnalytics[2],
+                                        'total_enquiries' => 0,
                                         //'data' => $myStore
                                     ],$this->successStatus); 
             }
@@ -135,7 +136,7 @@ class StoreController extends CoreController
         if($filterType == 1)
         {
             
-            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->whereYear('created_at', date('Y'))    ->count();
+            $productCount = MarketplaceProduct::where('user_id', $user->user_id)->whereYear('created_at', date('Y'))->count();
             $fieldValues = DB::table('user_field_values')
                         ->where('user_id', $user->user_id)
                         ->where('user_field_id', 2)

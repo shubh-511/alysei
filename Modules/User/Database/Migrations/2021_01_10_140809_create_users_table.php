@@ -78,6 +78,7 @@ class CreateUsersTable extends Migration
             $table->softDeletes();
             $table->integer('created_by')->default(0);
             $table->integer('updated_by')->default(0);
+            $table->enum('is_visited_marketplace',['1','0'])->default('0')->comment("0=not visited, 1=visited");
             $table->timestamps();
         });
     }

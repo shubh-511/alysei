@@ -1561,10 +1561,27 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $getAllRatings = RecipeReviewRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $request->recipe_id)->orderBy('recipe_review_rating_id', 'DESC')->get();
+            $getAllRatings = RecipeReviewRating::with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $request->recipe_id)->orderBy('recipe_review_rating_id', 'DESC')->get();
             if(count($getAllRatings) > 0)
             {
-                    return response()->json(['success' => $this->successStatus,
+                foreach($getAllRatings as $key => $rating)
+                {
+                    $userDataName = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $rating->user_id)->first();
+                    if($userDataName->role_id == 7 || $userDataName->role_id == 10)
+                    {
+                        $names = ucwords(strtolower($userDataName->first_name)) . ' ' . ucwords(strtolower($userDataName->last_name));
+                    }
+                    elseif($userDataName->role_id == 9)
+                    {
+                        $names = $userDataName->restaurant_name;
+                    }
+                    else
+                    {
+                        $names = $userDataName->company_name;
+                    }
+                    $getAllRatings[$key]->user->name = $names;
+                }
+                return response()->json(['success' => $this->successStatus,
                                             'data' => $getAllRatings,
                                          ], $this->successStatus);
             }

@@ -10,7 +10,10 @@ use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\Activity\Entities\CoreComment;
 use Modules\User\Entities\DeviceToken; 
-use Modules\User\Entities\User; 
+use Modules\User\Entities\User;
+use Modules\User\Entities\Blog;
+use Modules\User\Entities\Trip;
+use Modules\User\Entities\Event; 
 use Modules\User\Entities\UserSelectedHub;
 use Modules\Recipe\Entities\PreferenceMapUser;
 use App\Attachment;
@@ -18,6 +21,7 @@ use App\Notification;
 use App\Http\Traits\NotificationTrait;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
+use Modules\Activity\Entities\DiscoverAlysei;
 use Modules\Activity\Entities\ActivityLike;
 use Modules\Activity\Entities\ActivityActionType;
 use Modules\Activity\Entities\ActivityAttachment;
@@ -45,6 +49,135 @@ class ActivityController extends CoreController
             $this->user = Auth::user();
             return $next($request);
         });
+    }
+
+
+    /*
+     * Get Discover Alysei
+     * @Params $request
+     */
+    public function getDiscoverAlysei($user='')
+    {
+        $user = $this->user;
+        
+        $discoverAlysei = DiscoverAlysei::select('discover_alysei_id','title','name','description','image_id','status')->with('attachment')->where('status', '1')->get();            
+        return $discoverAlysei; 
+    }
+
+    /*
+     * Get Discover Alysei listing
+     * @Params $request
+     */
+    public function getDetailListingOfDiscoverAlysei($user='')
+    {
+        $usersArray =[];
+        $getConnections = Connection::where('is_approved', '1')
+        ->Where(function ($query) use ($user) {
+            $query->where('resource_id', $user->user_id)
+              ->orWhere('user_id', $user->user_id);
+        })
+        ->get();
+
+        if(count($getConnections) > 0)
+        {
+            foreach($getConnections as $connections)
+            {
+                if($connections->resource_id == $user->user_id)
+                {
+                    array_push($usersArray, $connections->user_id);
+                }
+                else
+                {
+                    array_push($usersArray, $connections->resource_id);   
+                }
+            }
+        }
+
+        $getFollowings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+
+        foreach($getFollowings as $getFollowing)
+        {
+            array_push($usersArray, $getFollowing->follow_user_id);
+        }
+
+        return $usersArray;
+    }
+
+    /*
+     * Get Discover Alysei(Circle) detail
+     * @Params $request
+     */
+    public function getCircleDetail($discoverAlyseiId='')
+    {
+        try
+        {
+            $user = $this->user;
+            $usersArray = [];
+            $users =  $this->getDetailListingOfDiscoverAlysei($user);
+            $message = 'Nothing found!';
+            switch($discoverAlyseiId)
+            {
+                case (1):
+                    if(count($users) > 0)
+                    {
+                        $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
+                    }
+                    else
+                    {
+                        return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                    
+                break;
+
+                case (2):
+                    if(count($users) > 0)
+                    {
+                        $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
+                    }
+                    else
+                    {
+                        return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                    
+                break;
+
+                case (3):
+                    if(count($users) > 0)
+                    {
+                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
+                    }
+                    else
+                    {
+                        return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                    
+                break;
+
+                case (4):
+                    if(count($users) > 0)
+                    {
+                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
+                    }
+                    else
+                    {
+                        return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                    
+                break;
+
+                default:
+                $message = 'Something went wrong!';
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $data
+                                    ], $this->successStatus);           
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }        
     }
 
     /*
@@ -441,8 +574,11 @@ class ActivityController extends CoreController
                     $preferenceStatus = 0;
                 }
 
+                $getDiscoverAlysei = $this->getDiscoverAlysei($user);
+
                 return response()->json(['success' => $this->successStatus,
                                          'having_preferences' => $preferenceStatus,
+                                         'discover_alysei' => $getDiscoverAlysei,
                                          'data' => $activityPosts,
                                         ], $this->successStatus);
             }
@@ -483,6 +619,7 @@ class ActivityController extends CoreController
             if(!empty($activityPost))
             {
                 $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
+                $activityPost->posted_at = $activityPost->created_at->diffForHumans();
                 if(!empty($isLikedActivityPost))
                 {
                     $activityPost->like_flag = 1;

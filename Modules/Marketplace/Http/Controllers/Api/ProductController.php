@@ -792,6 +792,9 @@ class ProductController extends CoreController
                 /*$galleries = MarketplaceProductGallery::where('marketplace_product_id', $productDetail->marketplace_product_id)->get();
                 (count($galleries) > 0) ? $productDetail->product_gallery = $galleries : $productDetail->product_gallery = [];*/
 
+                $marketplaceProductEnquery = MarketplaceProductEnquery::where('user_id', $user->user_id)->where('product_id', $productDetail->marketplace_product_id)->first();
+                (!empty($marketplaceProductEnquery) ? $productDetail->enquery_status = 1 : $productDetail->enquery_status = 0);
+
                 $relatedProducts = MarketplaceProduct::with('product_gallery')->with('labels')->where('product_category_id', $productDetail->product_category_id)->get();
 
                 foreach($relatedProducts as $key => $relatedProduct)

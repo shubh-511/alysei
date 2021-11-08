@@ -421,7 +421,7 @@ class SearchController extends CoreController
                     $blockUsers = $blockList->pluck('block_user_id');
                 }*/
 
-                $userWithRole = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
+                $userWithRole = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
                 /*foreach($userWithRole as $key => $getUser)
                 {
                     if(in_array($getUser->user_id, $users))
@@ -785,6 +785,7 @@ class SearchController extends CoreController
                 ->where('user_id', '!=' , $myId)
                 ->where('role_id', $roleId)
                 ->groupBy('user_id')
+                ->orderBy('user_id', 'DESC')
                 ->paginate(10);
             }
             else
@@ -794,6 +795,7 @@ class SearchController extends CoreController
                 ->where('user_id', '!=' , $myId)
                 ->where('role_id', $roleId)
                 ->groupBy('user_id')
+                ->orderBy('user_id', 'DESC')
                 ->paginate(10);
             }
             
@@ -812,6 +814,7 @@ class SearchController extends CoreController
                 ->where('user_id', '!=' , $myId)
                 ->whereIn('user_id', $usersArray)
                 ->groupBy('user_id')
+                ->orderBy('user_id', 'DESC')
                 ->paginate(10);  
             }
               
