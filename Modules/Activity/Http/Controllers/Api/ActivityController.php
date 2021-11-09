@@ -27,6 +27,7 @@ use Modules\Activity\Entities\ActivityActionType;
 use Modules\Activity\Entities\ActivityAttachment;
 use Modules\Activity\Entities\ActivityAttachmentLink;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -68,7 +69,7 @@ class ActivityController extends CoreController
      * Get Discover Alysei listing
      * @Params $request
      */
-    public function getDetailListingOfDiscoverAlysei($user='')
+    public function getDetailListingOfStories($user='')
     {
         $usersArray =[];
         $getConnections = Connection::where('is_approved', '1')
@@ -94,30 +95,88 @@ class ActivityController extends CoreController
         }
 
         $getFollowings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
-
-        foreach($getFollowings as $getFollowing)
+        if(count($getFollowings))
         {
-            array_push($usersArray, $getFollowing->follow_user_id);
+            foreach($getFollowings as $getFollowing)
+            {
+                array_push($usersArray, $getFollowing->follow_user_id);
+            }    
+        }
+        
+        return $usersArray;
+    }
+
+    /*
+     * Get Bubbles Shuffling
+     * @Params $request
+     */
+    public function getBubblesShuffling($user='')
+    {
+        $user = $this->user;
+        $userIds =  $this->getDetailListingOfStories($user);
+
+        $events = Event::whereIn('user_id', $userIds)->where('status', '1')->orderBy('created_at','DESC')->first();
+        $trips = Trip::whereIn('user_id', $userIds)->where('status', '1')->orderBy('created_at','DESC')->first();
+        $blogs = Blog::whereIn('user_id', $userIds)->where('status', '1')->orderBy('created_at','DESC')->first();
+        $users = User::where('role_id', 9)->whereIn('user_id', $userIds)->orderBy('created_at','DESC')->first();
+
+        if(($events['created_at'] > $trips['created_at']) && ($events['created_at'] > $blogs['created_at']) && ($events['created_at'] > $users['created_at']))
+        {
+            $top = 'events';
+        }
+        elseif(($trips['created_at'] > $events['created_at']) && ($trips['created_at'] > $blogs['created_at']) && ($trips['created_at'] > $users['created_at']))
+        {   
+            $top = 'trips';
+        }
+        elseif(($blogs['created_at'] > $events['created_at']) && ($blogs['created_at'] > $trips['created_at']) && ($blogs['created_at'] > $users['created_at']))
+        {
+            $top = 'blogs';
+        }
+        elseif(($users['created_at'] > $events['created_at']) && ($users['created_at'] > $trips['created_at']) && ($users['created_at'] > $blogs['created_at']))
+        {
+            $top = 'users';
+        }
+        else
+        {
+            $top = '';
         }
 
-        return $usersArray;
+        $discoverAlysei = DiscoverAlysei::with('attachment')->where('status', '1')->get()->toArray();
+        foreach($discoverAlysei as $key => $stories)
+        {
+            if($stories['name'] == $top)
+            {
+                $new_value = $discoverAlysei[$key];
+                unset($discoverAlysei[$key]);
+                array_unshift($discoverAlysei, $new_value);    
+            }
+        }        
+        
+        return $discoverAlysei;
     }
 
     /*
      * Get Discover Alysei(Circle) detail
      * @Params $request
      */
-    public function getCircleDetail($discoverAlyseiId='')
+    public function getCircleDetail(Request $request)
     {
         try
         {
             $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'type' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
             $usersArray = [];
-            $users =  $this->getDetailListingOfDiscoverAlysei($user);
+            $users =  $this->getDetailListingOfStories($user);
             $message = 'Nothing found!';
-            switch($discoverAlyseiId)
+            switch($request->type)
             {
-                case (1):
+                case ('events'):
                     if(count($users) > 0)
                     {
                         $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
@@ -129,7 +188,7 @@ class ActivityController extends CoreController
                     
                 break;
 
-                case (2):
+                case ('trips'):
                     if(count($users) > 0)
                     {
                         $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
@@ -141,7 +200,7 @@ class ActivityController extends CoreController
                     
                 break;
 
-                case (3):
+                case ('blogs'):
                     if(count($users) > 0)
                     {
                         $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
@@ -153,16 +212,16 @@ class ActivityController extends CoreController
                     
                 break;
 
-                case (4):
+                case ('restaurants'):
                     if(count($users) > 0)
                     {
-                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
+                        $data = User::select('user_id','name','email','restaurant_name','role_id','address','lattitude','longitude','avatar_id')
+                            ->with('avatar_id')->where('role_id', 9)->whereIn('user_id', $users)->paginate(10);
                     }
                     else
                     {
                         return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                    }
-                    
+                    }                    
                 break;
 
                 default:
@@ -574,7 +633,7 @@ class ActivityController extends CoreController
                     $preferenceStatus = 0;
                 }
 
-                $getDiscoverAlysei = $this->getDiscoverAlysei($user);
+                $getDiscoverAlysei = $this->getBubblesShuffling($user);
 
                 return response()->json(['success' => $this->successStatus,
                                          'having_preferences' => $preferenceStatus,

@@ -1042,6 +1042,45 @@ class UserController extends CoreController
         
     }
 
+    /* 
+     * User user fields saperately
+     * @params $request
+     */
+
+    public function updateUserFieldValues(Request $request)
+    {
+        try
+        {
+            $input = $request->all();
+
+            $validator = Validator::make($input, [ 
+                'user_field_id' => 'required',
+                'value' => 'required'
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+            
+            if($request->user_field_id == 36)
+            $updatedData = User::where('user_id','=',$this->user->user_id)->update(['about' => $request->value]);
+
+            DB::table('user_field_values')
+                ->where('user_id', $this->user->user_id)
+                ->where('user_field_id', $request->user_field_id)
+                ->update(['value' => $request->value]);
+
+            $message = "updated successfully";                
+            return response()->json(['success' => $this->successStatus,
+                             'message' => $this->translate('messages.'.$message,$message),
+                            ], $this->successStatus);
+                                  
+        }
+        catch(\Exception $e){
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /*
      * Get profile progress
      *
@@ -1066,6 +1105,14 @@ class UserController extends CoreController
             $userAbout = (!empty($userData->about)) ? true : false;
             $userContact = (!empty($userData->phone)) ? true : false;
 
+            $fieldValue = DB::table('user_field_values')
+                            ->where('user_id', $loggedInUser->user_id)
+                            ->where('user_field_id', 36)
+                            ->first();
+            $aboutStatus = (!empty($fieldValue->value)) ? true : false; 
+            $aboutLabel = "About";
+            $aboutUserFieldId = 36;
+
             
 
             if($loggedInUser->role_id != 10)
@@ -1077,7 +1124,8 @@ class UserController extends CoreController
                                     ->where('user_field_id', 35)
                                     ->first();
                     $status = (!empty($fieldValue->value)) ? true : false;     
-                    $about = "Our Products";    
+                    $about = "Our Products";
+                    $userFieldId = 35;    
                 }
                 elseif($loggedInUser->role_id == 8)
                 {
@@ -1087,6 +1135,7 @@ class UserController extends CoreController
                                     ->first();
                     $status = (!empty($fieldValue->value)) ? true : false; 
                     $about = "Our Tours";
+                    $userFieldId = 38;
                 }
                 else
                 {
@@ -1096,12 +1145,13 @@ class UserController extends CoreController
                                     ->first();
                     $status = (!empty($fieldValue->value)) ? true : false; 
                     $about = "Our Menu";
+                    $userFieldId = 37;
                 }
                 
-                $aboutUs = ['title' => $about,'status' => $status, 'redirect_to' => 'edit_profile'];
+                $aboutUs = ['title' => $about,'status' => $status, 'redirect_to' => 'edit_profile', 'user_field_id' => $userFieldId];
 
                 $fieldsType = $this->getFeaturedType($this->user->role_id);
-                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing'];
+                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing', 'user_field_id' => 0];
 
                 $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => $fieldsType->featured_listing_type_id];
             }
@@ -1111,11 +1161,12 @@ class UserController extends CoreController
             }
             
 
-            $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image'];
-            $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image'];
-            $dataAbout = ['title' => $this->translate('messages.'.'About','About'),'status' => $userAbout, 'redirect_to' => 'edit_profile'];
-            $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub'];
-            $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact'];
+            $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0];
+            $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image', 'user_field_id' => 0];
+            $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $aboutStatus, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId];
+
+            $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub', 'user_field_id' => 0];
+            $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0];
             
 
             if($loggedInUser->role_id == 10)

@@ -114,6 +114,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('edit/award/{awardid}', 'Api\AwardController@editAward');
 	Route::post('update/award', 'Api\AwardController@updateAward');
 	Route::post('delete/award', 'Api\AwardController@deleteAward');
+	Route::post('update/user/field', 'Api\UserController@updateUserFieldValues');
 
 
 

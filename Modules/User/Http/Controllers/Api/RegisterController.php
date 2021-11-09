@@ -241,6 +241,18 @@ class RegisterController extends CoreController
                         $userData['state'] = $inputData['state'];
                         
                     }
+                    if(array_key_exists('lattitude',$inputData)){
+                        $userData['lattitude'] = $inputData['lattitude'];
+                        
+                    }
+                    if(array_key_exists('longitude',$inputData)){
+                        $userData['longitude'] = $inputData['longitude'];
+                        
+                    }
+                    if(array_key_exists('address',$inputData)){
+                        $userData['address'] = $inputData['address'];
+                        
+                    }
 
                     if(!empty($inputData['first_name']) && !empty($inputData['last_name']))
                     {

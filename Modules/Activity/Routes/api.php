@@ -54,6 +54,6 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/user/privacy', 'Api\PrivacyController@getPrivacyData');
 	Route::post('save/privacy', 'Api\PrivacyController@savePrivacy');
 	Route::post('save/email/preference', 'Api\PrivacyController@saveEmailPreference');
-	Route::get('get/circle/detail/{discoverAlyseiId}', 'Api\ActivityController@getCircleDetail');
+	Route::get('get/circle/detail', 'Api\ActivityController@getCircleDetail');
 
 });
