@@ -117,7 +117,7 @@ class TripController extends CoreController
     /***
     Get adventure types
     ***/
-    public function getAdventureTypes()
+    public function getAdventureTypes(Request $request)
     {
         try
         {
@@ -127,15 +127,12 @@ class TripController extends CoreController
                                     ->where('user_id', $loggedInUser->user_id)
                                     ->where('user_field_id', 14)
                                     ->get();
-                                     
-            if(count($AdventureTypes) > 0)
+            if(!empty($request->type) && $request->type == 'all')
             {
-                $typeFields = $AdventureTypes->pluck('value');
                 $specialityTrips = DB::table('user_field_options')
-                                    ->whereIn('user_field_option_id', $typeFields)
-                                    ->where('user_field_id', 14)
-                                    ->get();
-                                    
+                                        ->where('user_field_id', 14)
+                                        ->get();
+                                        
                 foreach($specialityTrips as $key => $specialityTrip)
                 {
                     $specialityTrips[$key]->option = $this->translate('messages.'.$specialityTrip->option, $specialityTrip->option);
@@ -145,11 +142,33 @@ class TripController extends CoreController
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $types,
                                         ], $this->successStatus);
-            }
+            } 
             else
             {
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."No adventure type found","No adventure type found")]], $this->exceptionStatus);       
-            }
+                if(count($AdventureTypes) > 0)
+                {
+                    $typeFields = $AdventureTypes->pluck('value');
+                    $specialityTrips = DB::table('user_field_options')
+                                        ->whereIn('user_field_option_id', $typeFields)
+                                        ->where('user_field_id', 14)
+                                        ->get();
+                                        
+                    foreach($specialityTrips as $key => $specialityTrip)
+                    {
+                        $specialityTrips[$key]->option = $this->translate('messages.'.$specialityTrip->option, $specialityTrip->option);
+                        $types[] = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrips[$key]->option];
+                    }
+
+                    return response()->json(['success' => $this->successStatus,
+                                             'data' => $types,
+                                            ], $this->successStatus);
+                }
+                else
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'."No adventure type found","No adventure type found")]], $this->exceptionStatus);       
+                }
+            }                        
+            
         }
         catch(\Exception $e)
         {

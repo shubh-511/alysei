@@ -441,64 +441,72 @@ class ConnectUserController extends CoreController
                     $isConnectedUser = Connection::where('user_id', $request->user_id)->where('resource_id', $user->user_id)->first();
                     if(empty($isConnectedUser))
                     {
-                        $newConnection = new Connection;
-                        $newConnection->user_id = $request->user_id;
-                        $newConnection->resource_id = $user->user_id;
-                        $newConnection->reason_to_connect = $request->reason_to_connect;
-                        $newConnection->save();
+                        $getPrivacy = User::whereRaw('FIND_IN_SET('.$user->role_id.',who_can_connect)')->where('user_id', $request->user_id)->first();
+                        if(!empty($getPrivacy))
+                        {
+                            $newConnection = new Connection;
+                            $newConnection->user_id = $request->user_id;
+                            $newConnection->resource_id = $user->user_id;
+                            $newConnection->reason_to_connect = $request->reason_to_connect;
+                            $newConnection->save();
 
-                        if($myRole->role_id == 7 || $myRole->role_id == 10)
-                        {
-                            $name = ucwords(strtolower($myRole->first_name)) . ' ' . ucwords(strtolower($myRole->last_name));
-                        }
-                        elseif($myRole->role_id == 9)
-                        {
-                            $name = $myRole->restaurant_name;
+                            if($myRole->role_id == 7 || $myRole->role_id == 10)
+                            {
+                                $name = ucwords(strtolower($myRole->first_name)) . ' ' . ucwords(strtolower($myRole->last_name));
+                            }
+                            elseif($myRole->role_id == 9)
+                            {
+                                $name = $myRole->restaurant_name;
+                            }
+                            else
+                            {
+                                $name = $myRole->company_name;
+                            }
+
+                            $title1 = $name." sent you a connection request";
+                            $title = "sent you a connection request";
+
+
+                            $saveNotification = new Notification;
+                            $saveNotification->from = $myRole->user_id;
+                            $saveNotification->to = $request->user_id;
+                            $saveNotification->notification_type = 3; //recieve connection request
+                            $saveNotification->title = $this->translate('messages.'.$title,$title);
+                            $saveNotification->redirect_to = 'user_screen';
+                            $saveNotification->redirect_to_id = $myRole->user_id;
+
+                            $saveNotification->sender_id = $user->user_id;
+                            $saveNotification->sender_name = $name;
+                            $saveNotification->sender_image = null;
+                            $saveNotification->post_id = null;
+                            $saveNotification->connection_id = $newConnection->connection_id;
+                            $saveNotification->sender_role = $user->role_id;
+                            $saveNotification->comment_id = null;
+                            $saveNotification->reply = null;
+                            $saveNotification->likeUnlike = null;
+
+                            $saveNotification->save();
+
+                            $tokens = DeviceToken::where('user_id', $request->user_id)->get();
+                            if(count($tokens) > 0)
+                            {
+                                $collectedTokenArray = $tokens->pluck('device_token');
+                                $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
+
+                                $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
+                            }
+                            
+
+                            $message = "Connection request has been sent!";
+                            return response()->json(['success' => $this->successStatus,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
                         }
                         else
                         {
-                            $name = $myRole->company_name;
+                            $message = "This user has set his privacy to connect with limited people";
+                            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
                         }
-
-                        $title1 = $name." sent you a connection request";
-                        $title = "sent you a connection request";
-
-
-                        $saveNotification = new Notification;
-                        $saveNotification->from = $myRole->user_id;
-                        $saveNotification->to = $request->user_id;
-                        $saveNotification->notification_type = 3; //recieve connection request
-                        $saveNotification->title = $this->translate('messages.'.$title,$title);
-                        $saveNotification->redirect_to = 'user_screen';
-                        $saveNotification->redirect_to_id = $myRole->user_id;
-
-                        $saveNotification->sender_id = $user->user_id;
-                        $saveNotification->sender_name = $name;
-                        $saveNotification->sender_image = null;
-                        $saveNotification->post_id = null;
-                        $saveNotification->connection_id = $newConnection->connection_id;
-                        $saveNotification->sender_role = $user->role_id;
-                        $saveNotification->comment_id = null;
-                        $saveNotification->reply = null;
-                        $saveNotification->likeUnlike = null;
-
-                        $saveNotification->save();
-
-                        $tokens = DeviceToken::where('user_id', $request->user_id)->get();
-                        if(count($tokens) > 0)
-                        {
-                            $collectedTokenArray = $tokens->pluck('device_token');
-                            $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
-
-                            $this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $user->user_id, $name, /*$myRole->avatar_id->attachment_url*/null, null, $newConnection->connection_id, $user->role_id,null,null,null);
-                        }
-                        
-
-                        $message = "Connection request has been sent!";
-                        return response()->json(['success' => $this->successStatus,
-                                             'message' => $this->translate('messages.'.$message,$message),
-                                            ], $this->successStatus);
-                        
                     }
                     else
                     {

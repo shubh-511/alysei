@@ -19,7 +19,7 @@ class CreateAwardsTable extends Migration
             $table->string('award_name');
             $table->string('winning_product');
             $table->string('medal_id');
-            $table->string('competition_url');
+            $table->string('competition_url')->nullable();
             $table->integer('image_id');
             $table->enum('status',['1','0'])->comment('1= active, 0=inactive');
             $table->softDeletes();

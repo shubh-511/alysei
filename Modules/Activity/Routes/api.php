@@ -55,5 +55,11 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('save/privacy', 'Api\PrivacyController@savePrivacy');
 	Route::post('save/email/preference', 'Api\PrivacyController@saveEmailPreference');
 	Route::get('get/circle/detail', 'Api\ActivityController@getCircleDetail');
+	Route::get('get/stories/byfilter', 'Api\ActivityController@filterDiscoverStories');
+	Route::get('get/story/detail', 'Api\ActivityController@getStoriesDetails');
+
+	Route::get('get/specialization', 'Api\ActivityController@getSpecialization');
+	Route::get('get/restaurant/types', 'Api\ActivityController@getRestaurantTypes');
+	Route::get('get/all/hubs', 'Api\ActivityController@getAllHubs');
 
 });

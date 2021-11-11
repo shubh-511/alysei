@@ -190,7 +190,7 @@ class HomepageController extends CoreController
                 $userList = User::whereIn('state', $regionIds)->get();
                 if(count($userList))
                 {
-                    $userIds = $productList->pluck('user_id')->toArray();
+                    $userIds = $userList->pluck('user_id')->toArray();
                     foreach($userIds as $userId)
                     {
                         array_push($usersArray, $userId);

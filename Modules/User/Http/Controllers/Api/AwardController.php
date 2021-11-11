@@ -124,7 +124,7 @@ class AwardController extends CoreController
                 'award_name' => 'required', 
                 'winning_product' => 'required',
                 'medal_id' => 'required',
-                'competition_url' => 'required',
+                //'competition_url' => 'required',
                 'image_id' => 'required'
             ]);
 
@@ -193,7 +193,7 @@ class AwardController extends CoreController
                 'award_name' => 'required', 
                 'winning_product' => 'required',
                 'medal_id' => 'required',
-                'competition_url' => 'required'
+                //'competition_url' => 'required'
             ]);
 
             if ($validator->fails()) { 

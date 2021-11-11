@@ -723,7 +723,7 @@ class ProductController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
             
-            $productDetail = MarketplaceProduct::with('product_gallery')->with('labels')->where('marketplace_product_id', $request->marketplace_product_id)->first();
+            $productDetail = MarketplaceProduct::with('product_gallery')->with('labels')->with('user:user_id,company_name,email,role_id,avatar_id','user.avatar_id')->where('marketplace_product_id', $request->marketplace_product_id)->first();
             if(!empty($productDetail))
             {
                 $options = DB::table('user_field_options')
@@ -885,20 +885,29 @@ class ProductController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $product = new MarketplaceProductEnquery;
-            $product->user_id = $user->user_id;
-            $product->product_id = $request->product_id;
-            $product->name = $request->name;
-            $product->email = $request->email;
-            $product->phone = $request->phone;
-            $product->message = $request->message;
-            $product->save();
+            $getExistingEnquery = MarketplaceProductEnquery::where('user_id', $user->user_id)->where('product_id', $request->product_id)->first();
+            if(empty($getExistingEnquery))
+            {
+                $product = new MarketplaceProductEnquery;
+                $product->user_id = $user->user_id;
+                $product->product_id = $request->product_id;
+                $product->name = $request->name;
+                $product->email = $request->email;
+                $product->phone = $request->phone;
+                $product->message = $request->message;
+                $product->save();
 
-            $message = "Your enquery has been saved successfully";
-            return response()->json(['success'=>$this->successStatus,
-                                    'message' => $this->translate('messages.'.$message,$message),
-                                    'data' =>$product,
-                                    ],$this->successStatus); 
+                $message = "Your enquery has been saved successfully";
+                return response()->json(['success'=>$this->successStatus,
+                                        'message' => $this->translate('messages.'.$message,$message),
+                                        'data' =>$product,
+                                        ],$this->successStatus);
+            }
+            else
+            {
+                $message = "You already submitted a query on this product";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
 
         }
         catch(\Exception $e)

@@ -15,6 +15,7 @@ use Modules\User\Entities\Blog;
 use Modules\User\Entities\Trip;
 use Modules\User\Entities\Event; 
 use Modules\User\Entities\UserSelectedHub;
+use Modules\User\Entities\Hub;
 use Modules\Recipe\Entities\PreferenceMapUser;
 use App\Attachment;
 use App\Notification;
@@ -50,6 +51,75 @@ class ActivityController extends CoreController
             $this->user = Auth::user();
             return $next($request);
         });
+    }
+
+    /*
+     * Get all hubs
+     * @Params $request
+     */
+    public function getAllHubs()
+    {
+        $user = $this->user;
+        $hubs = DB::table('hubs')->select('id','title')
+                        ->where('status', '1')
+                        ->get();
+        if(count($hubs) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $hubs
+                                    ], $this->successStatus);
+        }
+        else
+        {
+            $message = 'Nothing found';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+    }
+
+    /*
+     * Get Specialization
+     * @Params $request
+     */
+    public function getSpecialization()
+    {
+        $user = $this->user;
+        $specializations = DB::table('user_field_options')->select('user_field_option_id','option')
+                        ->where('user_field_id', 11)
+                        ->get();
+        if(count($specializations) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $specializations
+                                    ], $this->successStatus);
+        }
+        else
+        {
+            $message = 'Nothing found';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+    }
+
+    /*
+     * Get Restaurant types
+     * @Params $request
+     */
+    public function getRestaurantTypes()
+    {
+        $user = $this->user;
+        $restaurants = DB::table('user_field_options')->select('user_field_option_id','option')
+                        ->where('user_field_id', 10)
+                        ->get();
+        if(count($restaurants) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $restaurants
+                                    ], $this->successStatus);
+        }
+        else
+        {
+            $message = 'Nothing found';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
     }
 
 
@@ -177,51 +247,68 @@ class ActivityController extends CoreController
             switch($request->type)
             {
                 case ('events'):
-                    if(count($users) > 0)
-                    {
-                        $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
-                    }
+                    /*if(count($users) > 0)
+                    {*/
+                        $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->paginate(10);
+                    /*}
                     else
                     {
                         return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                    }
+                    }*/
                     
                 break;
 
                 case ('trips'):
-                    if(count($users) > 0)
-                    {
-                        $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
-                    }
+                    /*if(count($users) > 0)
+                    {*/
+                        $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('status', '1')->paginate(10);
+                        foreach($data as $key => $datas)
+                        {
+                            $specialityTrip = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $datas->adventure_type)
+                                    ->where('user_field_id', 14)
+                                    ->first();
+                                    
+                            if(!empty($specialityTrip))  
+                            {
+                                $data[$key]->adventure = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrip->option];    
+                            }
+                            else
+                            {
+                                $data->adventure = null;   
+                            }
+                        }
+
+                    /*}
                     else
                     {
                         return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                    }
+                    }*/
                     
                 break;
 
                 case ('blogs'):
-                    if(count($users) > 0)
-                    {
-                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereIn('user_id', $users)->where('status', '1')->paginate(10);
-                    }
+                    /*if(count($users) > 0)
+                    {*/
+                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->paginate(10);
+                    /*}
                     else
                     {
                         return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                    }
+                    }*/
                     
                 break;
 
                 case ('restaurants'):
-                    if(count($users) > 0)
-                    {
+                    /*if(count($users) > 0)
+                    {*/
                         $data = User::select('user_id','name','email','restaurant_name','role_id','address','lattitude','longitude','avatar_id')
-                            ->with('avatar_id')->where('role_id', 9)->whereIn('user_id', $users)->paginate(10);
-                    }
+                            ->with('avatar_id')->where('role_id', 9)->paginate(10);
+                    /*}
                     else
                     {
                         return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                    }                    
+                    }*/                    
                 break;
 
                 default:
@@ -237,6 +324,288 @@ class ActivityController extends CoreController
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
         }        
+    }
+
+    /*
+     * filter stories
+     * @Params $request
+     */
+    public function filterDiscoverStories(Request $request)
+    {
+        $user = $this->user;
+        $condition = '';
+        
+        $validator = Validator::make($request->all(), [ 
+            'type' => 'required'
+        ]);
+
+        if ($validator->fails()) { 
+            return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+        }
+        $users =  $this->getDetailListingOfStories($user);
+        $message = 'Nothing found!';
+        $usersArray = [];
+        switch($request->type)
+        {
+            case ('events'):
+                if(count($users) > 0)
+                {
+                    if(!empty($request->date))
+                    {
+                        if($condition != '')
+                            $condition .=" and events.date = ".$request->date;
+                        else
+                            $condition .="events.date = ".$request->date;
+                    }
+                    if(!empty($request->event_type))
+                    {
+                        if($condition != '')
+                            $condition .=" and events.event_type = ".$request->event_type;
+                        else
+                            $condition .="events.event_type = ".$request->event_type;
+                    }
+                    if(!empty($request->registration_type))
+                    {
+                        if($condition != '')
+                            $condition .=" and events.registration_type = ".$request->registration_type;
+                        else
+                            $condition .="events.registration_type = ".$request->registration_type;
+                    }
+                    if(!empty($request->restaurant_type))
+                    {
+                        $values = DB::table('user_field_values')
+                                            ->where('value', $request->restaurant_type)
+                                            ->where('user_field_id', 10)
+                                            ->get();
+                        $userIds = $values->pluck('user_id')->toArray();
+                        foreach($userIds as $userId)
+                        {
+                            array_push($usersArray, $userId);
+                        }
+                    }
+
+                    if(count($usersArray) > 0)
+                    {
+                        $join = join(",", $usersArray);
+                        if($condition != '')
+                        $condition .=" and events.user_id in(".$join.")";
+                        else
+                        $condition .="events.user_id in(".$join.")";
+                    }
+
+                    if($condition != '')
+                    {
+                        $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereRaw('('.$condition.')')->where('status', '1')->paginate(10);
+                    }
+                    else
+                    {
+                        $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->paginate(10);    
+                    }
+                }
+                else
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            break;
+
+            case ('trips'):
+                if(count($users) > 0)
+                {
+                    if(!empty($request->region))
+                    {
+                        if($condition != '')
+                            $condition .=" and trips.region = ".$request->region;
+                        else
+                            $condition .="trips.region = ".$request->region;
+                    }
+                    if(!empty($request->adventure_type))
+                    {
+                        if($condition != '')
+                            $condition .=" and trips.adventure_type = ".$request->adventure_type;
+                        else
+                            $condition .="trips.adventure_type = ".$request->adventure_type;
+                    }
+                    if(!empty($request->duration))
+                    {
+                        if($condition != '')
+                            $condition .=" and trips.duration = ".$request->duration;
+                        else
+                            $condition .="trips.duration = ".$request->duration;
+                    }
+                    if(!empty($request->intensity))
+                    {
+                        if($condition != '')
+                            $condition .=" and trips.intensity = ".$request->intensity;
+                        else
+                            $condition .="trips.intensity = ".$request->intensity;
+                    }
+                    if(!empty($request->price))
+                    {
+                        if($condition != '')
+                            $condition .=" and trips.price = ".$request->price;
+                        else
+                            $condition .="trips.price = ".$request->price;
+                    }
+
+                    if($condition != '')
+                    {
+                        $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->whereRaw('('.$condition.')')->where('status', '1')->paginate(10);
+                    }
+                    else
+                    {
+                        $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('status', '1')->paginate(10);
+                    }
+                }
+                else
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            break;
+
+            case ('blogs'):
+                if(count($users) > 0)
+                {
+                    if(!empty($request->title))
+                    {
+                        if($condition != '')
+                            $condition .=" and blogs.title LIKE '%".$request->title."%'";
+                        else
+                            $condition .="blogs.title LIKE '%".$request->title."%'";
+                    }
+
+                    if(!empty($request->specialization))
+                    {
+                        $speciality = explode(",", $request->specialization);
+                        $values = DB::table('user_field_values')
+                                            ->whereIn('value', $speciality)
+                                            ->where('user_field_id', 11)
+                                            ->get();
+                        $userIds = $values->pluck('user_id')->toArray();
+                        foreach($userIds as $userId)
+                        {
+                            array_push($usersArray, $userId);
+                        }
+                    }
+
+                    if(count($usersArray) > 0)
+                    {
+                        $join = join(",", $usersArray);
+                        if($condition != '')
+                        $condition .=" and blogs.user_id in(".$join.")";
+                        else
+                        $condition .="blogs.user_id in(".$join.")";
+                    }
+
+                    if($condition != '')
+                    {
+                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->whereRaw('('.$condition.')')->where('status', '1')->paginate(10);    
+                    }
+                    else
+                    {
+                        $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->paginate(10);
+                    }
+                }
+                else
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            break;
+
+            case ('restaurants'):
+                if(count($users) > 0)
+                {
+                    if(!empty($request->restaurant_type))
+                    {
+                        $values = DB::table('user_field_values')
+                                            ->where('value', $request->restaurant_type)
+                                            ->where('user_field_id', 10)
+                                            ->get();
+                        $userIds = $values->pluck('user_id')->toArray();
+                        foreach($userIds as $userId)
+                        {
+                            array_push($usersArray, $userId);
+                        }
+                    }
+
+                    if(count($usersArray) > 0)
+                    {
+                        $join = join(",", $usersArray);
+                        if($condition != '')
+                        $condition .=" and users.user_id in(".$join.")";
+                        else
+                        $condition .="users.user_id in(".$join.")";
+                    }
+                    if($condition != '')
+                    {
+                        $data = User::select('user_id','name','email','restaurant_name','role_id','address','lattitude','longitude','avatar_id')->with('avatar_id')->whereRaw('('.$condition.')')->where('role_id', 9)->paginate(10);
+                    }
+                    else
+                    {
+                        $data = User::select('user_id','name','email','restaurant_name','role_id','address','lattitude','longitude','avatar_id')->with('avatar_id')->where('role_id', 9)->paginate(10);
+                    }
+                }
+                else
+                {
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }                    
+            break;
+
+            default:
+            $message = 'Something went wrong!';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+    }
+
+    /*
+     * Get Stories detail
+     * @Params $request
+     */
+    public function getStoriesDetails(Request $request)
+    {
+        $user = $this->user;
+        $condition = '';
+        
+        $validator = Validator::make($request->all(), [ 
+            'type' => 'required',
+            'id'   => 'required'
+        ]);
+
+        if ($validator->fails()) { 
+            return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+        }
+        
+        if($request->type == 'events')
+        {
+            $details = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('event_id', $request->id)->where('status', '1')->first();
+        }
+        elseif($request->type == 'trips')
+        {
+            $details = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('trip_id', $request->id)->where('status', '1')->first();
+        }
+        elseif($request->type == 'blogs')
+        {
+            $details = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('blog_id', $request->id)->where('status', '1')->first();
+        }
+        else
+        {
+            $message = 'Something went wrong';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+
+        if(!empty($details))
+        {
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $details
+                                    ], $this->successStatus);
+        }
+        else
+        {
+            $message = 'Invalid id provided!';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
     }
 
     /*

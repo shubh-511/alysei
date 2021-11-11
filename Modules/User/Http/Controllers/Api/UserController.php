@@ -750,9 +750,30 @@ class UserController extends CoreController
     {
         try
         {
-            $input = $request->all();
+            //$input = $request->all();
+            $user = $this->user;
 
-            $validator = Validator::make($input, [ 
+            $userProfile = User::where('user_id', $user->user_id)->first();
+            if(!empty($request->file('avatar_id')))
+            {
+                $this->deleteAttachment($userProfile->avatar_id);
+                $userProfile->avatar_id = $this->uploadImage($request->file('avatar_id'));
+            }
+            if(!empty($request->file('cover_id')))
+            {
+                $this->deleteAttachment($userProfile->cover_id);
+                $userProfile->cover_id = $this->uploadImage($request->file('cover_id'));
+            }
+            $userProfile->save();
+
+            $message = "Updated successfully";
+            return response()->json(['success' => $this->successStatus,
+                                     'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);
+            
+            
+
+            /*$validator = Validator::make($input, [ 
                 'image_type' => 'required', 
             ]);
 
@@ -805,7 +826,7 @@ class UserController extends CoreController
             {
                 $message = "Image type is not valid";
                 return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
-            }
+            }*/
                          
         }
         catch(\Exception $e){
@@ -1065,11 +1086,22 @@ class UserController extends CoreController
             if($request->user_field_id == 36)
             $updatedData = User::where('user_id','=',$this->user->user_id)->update(['about' => $request->value]);
 
-            DB::table('user_field_values')
+
+            $status = DB::table('user_field_values')
+                ->where('user_id', $this->user->user_id)
+                ->where('user_field_id', $request->user_field_id)->first();
+
+            if(!empty($status))
+            {
+                $status = DB::table('user_field_values')
                 ->where('user_id', $this->user->user_id)
                 ->where('user_field_id', $request->user_field_id)
                 ->update(['value' => $request->value]);
-
+            }   
+            else
+            {
+                DB::insert('insert into user_field_values (user_id, user_field_id, value) values (?, ?, ?)', [$this->user->user_id, $request->user_field_id, $request->value]);
+            }
             $message = "updated successfully";                
             return response()->json(['success' => $this->successStatus,
                              'message' => $this->translate('messages.'.$message,$message),
@@ -1095,7 +1127,7 @@ class UserController extends CoreController
             $userTempHub = UserTempHub::where('user_id', $loggedInUser->user_id)->count();
             $featuredListing = FeaturedListing::where('user_id', $loggedInUser->user_id)->count();
 
-            $userData = User::where('user_id', $loggedInUser->user_id)->first();
+            $userData = User::select('user_id','about','phone','profile_percentage','role_id','company_name','restaurant_name','first_name','last_name','name as username','avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $loggedInUser->user_id)->first();
             $profilePercentage = $this->profileStatus($loggedInUser->user_id);
             
             $userFeaturedListing = ($featuredListing > 0) ? true : false;
@@ -1153,17 +1185,17 @@ class UserController extends CoreController
                 $fieldsType = $this->getFeaturedType($this->user->role_id);
                 $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing', 'user_field_id' => 0];
 
-                $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => $fieldsType->featured_listing_type_id];
+                $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => $fieldsType->featured_listing_type_id, 'user_details' => $userData];
             }
             else
             {
-                $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => 0];
+                $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => 0, 'user_details' => $userData];
             }
             
 
             $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0];
             $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image', 'user_field_id' => 0];
-            $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $aboutStatus, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId];
+            $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $userAbout, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId];
 
             $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub', 'user_field_id' => 0];
             $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0];

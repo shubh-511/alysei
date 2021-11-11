@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Marketplace\Entities\MarketplaceBrandLabel;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\User\Entities\User;
 
 class MarketplaceProduct extends Model
 {
@@ -21,6 +22,11 @@ class MarketplaceProduct extends Model
     public function product_gallery()
     {
         return $this->hasMany(MarketplaceProductGallery::class, 'marketplace_product_id','marketplace_product_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id','user_id');
     }
 }
 
