@@ -543,23 +543,24 @@ class ConnectUserController extends CoreController
 
             ->orderBy('connection_id', 'DESC')
             ->get();
-            foreach($requestConnections as $key => $requestConnection)
-            {
-                if($requestConnection->user_id == $user->user_id)
-                {
-                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $requestConnection->resource_id)->first();
-                    $requestConnections[$key]->user = $user;
-                }
-                else
-                {
-                    $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $requestConnection->user_id)->first();
-                    $requestConnections[$key]->user = $user;
-                }
-
-            }
 
             if(count($requestConnections) > 0)
             {
+                foreach($requestConnections as $key => $requestConnection)
+                {
+                    if($requestConnection->user_id == $user->user_id)
+                    {
+                        $userData = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $requestConnection->resource_id)->first();
+                        $requestConnections[$key]->user = $userData;
+                    }
+                    else
+                    {
+                        $userData = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $requestConnection->user_id)->first();
+                        $requestConnections[$key]->user = $userData;
+                    }
+
+                }
+
                 return response()->json(['success' => $this->successStatus,
                                     'count' => count($requestConnections),
                                     'data' => $requestConnections,

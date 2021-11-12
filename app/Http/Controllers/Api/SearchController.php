@@ -20,6 +20,7 @@ use Modules\Activity\Entities\MapPermissionRole;
 use Modules\User\Entities\Role;
 use Carbon\Carbon;
 use DB;
+use App\Attachment;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 //use App\Events\UserRegisterEvent;
@@ -808,14 +809,36 @@ class SearchController extends CoreController
             }
             else
             {
-                $users = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')
-                ->with('avatar_id')
-                ->where('role_id', $roleId)
-                ->where('user_id', '!=' , $myId)
-                ->whereIn('user_id', $usersArray)
-                ->groupBy('user_id')
-                ->orderBy('user_id', 'DESC')
-                ->paginate(10);  
+                if(!empty($request->hub_id))
+                {
+                    $users = DB::table('users')->select('users.user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')
+                    //->with('avatar_id')
+                    ->join('user_selected_hubs','user_selected_hubs.user_id','=','users.user_id')
+                    ->where('user_selected_hubs.hub_id','=',$request->hub_id)
+                    ->where('role_id', $roleId)
+                    ->where('users.user_id', '!=' , $myId)
+                    ->whereIn('users.user_id', $usersArray)
+                    ->groupBy('users.user_id')
+                    ->orderBy('users.user_id', 'DESC')
+                    ->paginate(10);
+                    foreach($users as $keyVal => $user)
+                    {
+                        $avatarId = Attachment::where('id', $user->avatar_id)->first();
+                        $users[$keyVal]->avatar_id = $avatarId;
+                    }
+                }
+                else
+                {
+                    $users = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')
+                    ->with('avatar_id')
+                    ->where('role_id', $roleId)
+                    ->where('user_id', '!=' , $myId)
+                    ->whereIn('user_id', $usersArray)
+                    ->groupBy('user_id')
+                    ->orderBy('user_id', 'DESC')
+                    ->paginate(10);
+                }
+                  
             }
               
         }

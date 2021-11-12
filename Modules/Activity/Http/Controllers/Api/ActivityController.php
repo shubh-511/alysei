@@ -66,7 +66,7 @@ class ActivityController extends CoreController
         if(count($hubs) > 0)
         {
             return response()->json(['success' => $this->successStatus,
-                                     'data' => $hubs
+                                     'hubs' => $hubs
                                     ], $this->successStatus);
         }
         else
@@ -455,6 +455,23 @@ class ActivityController extends CoreController
                     else
                     {
                         $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('status', '1')->paginate(10);
+                    }
+
+                    foreach($data as $key => $datas)
+                    {
+                        $specialityTrip = DB::table('user_field_options')
+                                ->where('user_field_option_id', $datas->adventure_type)
+                                ->where('user_field_id', 14)
+                                ->first();
+                                
+                        if(!empty($specialityTrip))  
+                        {
+                            $data[$key]->adventure = ['adventure_type_id' => $specialityTrip->user_field_option_id, 'adventure_type' => $specialityTrip->option];    
+                        }
+                        else
+                        {
+                            $data->adventure = null;   
+                        }
                     }
                 /*}
                 else
