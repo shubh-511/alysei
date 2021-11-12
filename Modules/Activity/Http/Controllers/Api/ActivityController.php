@@ -348,8 +348,8 @@ class ActivityController extends CoreController
         switch($request->type)
         {
             case ('events'):
-                if(count($users) > 0)
-                {
+                /*if(count($users) > 0)
+                {*/
                     if(!empty($request->date))
                     {
                         if($condition != '')
@@ -401,17 +401,17 @@ class ActivityController extends CoreController
                     {
                         $data = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->paginate(10);    
                     }
-                }
+                /*}
                 else
                 {
                     return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                }
+                }*/
                 
             break;
 
             case ('trips'):
-                if(count($users) > 0)
-                {
+                /*if(count($users) > 0)
+                {*/
                     if(!empty($request->region))
                     {
                         if($condition != '')
@@ -428,10 +428,10 @@ class ActivityController extends CoreController
                     }
                     if(!empty($request->duration))
                     {
-                        if($condition != '')
+                        /*if($condition != '')
                             $condition .=" and trips.duration = ".$request->duration;
                         else
-                            $condition .="trips.duration = ".$request->duration;
+                            $condition .="trips.duration = ".$request->duration;*/
                     }
                     if(!empty($request->intensity))
                     {
@@ -456,17 +456,17 @@ class ActivityController extends CoreController
                     {
                         $data = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('status', '1')->paginate(10);
                     }
-                }
+                /*}
                 else
                 {
                     return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                }
+                }*/
                 
             break;
 
             case ('blogs'):
-                if(count($users) > 0)
-                {
+                /*if(count($users) > 0)
+                {*/
                     if(!empty($request->title))
                     {
                         if($condition != '')
@@ -506,17 +506,17 @@ class ActivityController extends CoreController
                     {
                         $data = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->paginate(10);
                     }
-                }
+                /*}
                 else
                 {
                     return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                }
+                }*/
                 
             break;
 
             case ('restaurants'):
-                if(count($users) > 0)
-                {
+                /*if(count($users) > 0)
+                {*/
                     if(!empty($request->restaurant_type))
                     {
                         $values = DB::table('user_field_values')
@@ -546,15 +546,27 @@ class ActivityController extends CoreController
                     {
                         $data = User::select('user_id','name','email','restaurant_name','role_id','address','lattitude','longitude','avatar_id')->with('avatar_id')->where('role_id', 9)->paginate(10);
                     }
-                }
+                /*}
                 else
                 {
                     return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-                }                    
+                }*/                    
             break;
 
             default:
             $message = 'Something went wrong!';
+            return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+        }
+
+        if(count($data) > 0)
+        {
+            return response()->json(['success' => $this->successStatus,
+                                     'data' => $data
+                                    ], $this->successStatus);
+        }
+        else
+        {
+            $message = 'Nothing found!';
             return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
         }
     }
