@@ -367,7 +367,7 @@ class UserController extends CoreController
      * @params 
      */
 
-    public function getUserSubmitedFields($getFieldsForTab='')
+    public function getUserSubmitedFields($visitorId='')
     {
         try
         { 
@@ -507,14 +507,24 @@ class UserController extends CoreController
             $products = [];
             
             foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
-                
-                $featuredListing = FeaturedListing::with('image')
+                if(!empty($visitorId))
+                {
+                    $featuredListing = FeaturedListing::with('image')
+                                    ->where('user_id', $visitorId)
+                                    ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                    ->orderBy('featured_listing_id','DESC')->get();
+                }
+                else
+                {
+                    $featuredListing = FeaturedListing::with('image')
                                     ->where('user_id', $this->user->user_id)
                                     ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
-                                    ->orderBy('featured_listing_id','DESC')->get(); 
+                                    ->orderBy('featured_listing_id','DESC')->get();
+                }
+                 
 
                 $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
-                
+               
             }
 
             //Get Featured Listing Fields
@@ -550,15 +560,9 @@ class UserController extends CoreController
             $userDataImage = User::select('avatar_id','cover_id')->with('avatar_id','cover_id')->where('user_id', $user_id)->first();
             $data = ['step_1'=>$steps,'products' => $products,'profile_data' => $userDataImage];
 
-            /*************************/
-            if(!empty($getFieldsForTab))
-            {
-                return $steps;
-            }
-            else
-            {
+            
                 return response()->json(['success'=>$this->successStatus,'data' => $data,'response_time'=>$response_time], $this->successStatus); 
-            }
+            
 
             
         }      
@@ -1352,6 +1356,8 @@ class UserController extends CoreController
             })->count();
             $followerCount = Follower::where('follow_user_id', $loggedInUser->user_id)->count();
 
+            $followingCount = Follower::where('user_id', $loggedInUser->user_id)->count();
+
 
             /*****Featured Listings****/
 
@@ -1508,7 +1514,7 @@ class UserController extends CoreController
 
 
            
-            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'about_tab' => $roleFields, 'contact_tab' => $contact];
+            $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'following_count' => $followingCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'about_tab' => $roleFields, 'contact_tab' => $contact];
 
             return response()->json(['success' => $this->successStatus,
                                 'data' => $data
@@ -1703,6 +1709,8 @@ class UserController extends CoreController
                 $connectionsCount = Connection::where('is_approved', '1')->where('resource_id', $request->visitor_profile_id)->orWhere('user_id', $request->visitor_profile_id)->count();
                 $followerCount = Follower::where('follow_user_id', $request->visitor_profile_id)->count();
 
+                $followingCount = Follower::where('user_id', $request->visitor_profile_id)->count();
+
 
                 /*****Featured Listings****/
 
@@ -1846,7 +1854,7 @@ class UserController extends CoreController
                 /*********************/
                 
                 //$loggedInUserData;
-                $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost,'about_tab' => $roleFields, 'contact_tab' => $contact];
+                $data = ['post_count' => $postCount, 'connection_count' => $connectionsCount, 'follower_count' => $followerCount, 'following_count' => $followingCount, 'user_data' => $userData, 'about' => $userAbout->about, 'products' => $products, 'posts' => $activityPost,'about_tab' => $roleFields, 'contact_tab' => $contact];
 
                 return response()->json(['success' => $this->successStatus,
                                     'data' => $data

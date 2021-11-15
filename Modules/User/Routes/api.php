@@ -58,7 +58,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('post/hubs', 'Api\HubController@postUserHubs');
 	Route::get('review/hubs', 'Api\HubController@hubsReviewSelection');
 
-	Route::get('get/user/submited/fields', 'Api\UserController@getUserSubmitedFields');
+	Route::get('get/user/submited/fields/{visitorId?}', 'Api\UserController@getUserSubmitedFields');
 	Route::post('update/user/profile', 'Api\UserController@updateUserProfile');
 
 	Route::get('get/user/certificates', 'Api\UserController@getUserCertificates');

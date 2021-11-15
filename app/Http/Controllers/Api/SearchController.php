@@ -13,10 +13,15 @@ use Modules\User\Entities\Hub;
 use Modules\User\Entities\State;
 use Modules\User\Entities\UserField;
 use Modules\User\Entities\UserFieldValue;
+use Modules\User\Entities\Event;
+use Modules\User\Entities\Trip;
+use Modules\User\Entities\Blog;
+use Modules\User\Entities\Award;
 use App\Http\Traits\UploadImageTrait;
 use Modules\Activity\Entities\UserPrivacy;
-use Modules\Activity\Entities\ConnectFollowPermission;
-use Modules\Activity\Entities\MapPermissionRole;
+use Modules\Activity\Entities\Connection;
+use Modules\Activity\Entities\Follower;
+use Modules\Activity\Entities\ActivityAction;
 use Modules\User\Entities\Role;
 use Carbon\Carbon;
 use DB;
@@ -72,7 +77,7 @@ class SearchController extends CoreController
                     return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
                 }
 
-                return $this->searchGlobalUsers($request->keyword);   
+                return $this->globalSearch($request->keyword);   
             }
             elseif($request->search_type == 2)
             {
@@ -422,7 +427,7 @@ class SearchController extends CoreController
                     $blockUsers = $blockList->pluck('block_user_id');
                 }*/
 
-                $userWithRole = User::select('user_id','name','email','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
+                $userWithRole = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
                 /*foreach($userWithRole as $key => $getUser)
                 {
                     if(in_array($getUser->user_id, $users))
@@ -860,23 +865,73 @@ class SearchController extends CoreController
     /*
     * Searching User
     */
-    public function searchGlobalUsers($keyWord)
+    public function globalSearch($keyWord)
     {
+        $user = $this->user;
         $users = User::select('user_id','role_id','name','email','first_name','last_name','company_name','restaurant_name','avatar_id')->with('avatar_id')
+        ->whereNotIn('role_id', [1,2])
         ->where('email', 'LIKE', '%' . $keyWord . '%')
+        ->orWhere('first_name', 'LIKE', '%' . $keyWord . '%')
+        ->orWhere('company_name', 'LIKE', '%' . $keyWord . '%')
+        ->orWhere('restaurant_name', 'LIKE', '%' . $keyWord . '%')
+        ->orderBy('user_id', 'DESC')
         ->paginate(10);
 
-        if(count($users) > 0)
+        $events = Event::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('status', '1')->Where('event_name', 'LIKE', '%' . $keyWord . '%')->paginate(10);
+
+        $blogs = Blog::with('user:user_id,name,email,first_name,last_name,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment')->where('title', 'LIKE', '%' . $keyWord . '%')->where('status', '1')->paginate(10);
+
+        $trips = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('trip_name', 'LIKE', '%' . $keyWord . '%')->where('status', '1')->paginate(10);
+
+        $awards = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','medal')->where('award_name', 'LIKE', '%' . $keyWord . '%')->where('status', '1')->get();
+
+
+        $myConnections = Connection::select('*','user_id as poster_id')->where('resource_id', $user->user_id)->where('is_approved', '1')->get();
+        $myConnections = $myConnections->pluck('poster_id');
+
+        $myFollowers = Follower::select('*','follow_user_id as poster_id')->where('user_id', $user->user_id)->get();
+        $myFollowers = $myFollowers->pluck('poster_id');
+
+        $merged = $myConnections->merge($myFollowers);
+        $userIds = $merged->all();
+        
+
+        if(count($userIds) > 0)
         {
-            return response()->json(['success' => $this->successStatus,
-                                 'data' => $users
-                                ], $this->successStatus);
+            array_push($userIds, $user->user_id);
+            $userIds = array_unique($userIds);
+            $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
+            ->with('attachments.attachment_link')
+            ->with('subject_id:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+            ->where('body', 'LIKE', '%' . $keyWord . '%')
+            ->Where(function ($query) use ($user, $userIds) {
+            $query->where('privacy', 'public')
+              ->orWhere('privacy', 'followers')
+              ->whereIn('subject_id', $userIds);
+             })
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
         }
         else
         {
-            $message = "No users found for this keyword";
-            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-        }        
+            $activityPosts = ActivityAction::select('activity_action_id','type','subject_id','body','shared_post_id','attachment_count','comment_count','like_count','privacy','created_at','height','width')
+            ->with('attachments.attachment_link')
+            ->with('subject_id:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','subject_id.avatar_id')
+            ->where('body', 'LIKE', '%' . $keyWord . '%')
+            ->Where(function ($query) use ($user) {
+            $query->where('privacy', 'public')
+              ->orWhere('subject_id', $user->user_id);
+             })
+            ->orderBy('created_at', 'DESC')
+            ->paginate(10);
+        }
+
+
+        $data = ['peoples' => $users, 'posts' => $activityPosts, 'events' => $events, 'blogs' => $blogs, 'trips' => $trips];
+        return response()->json(['success' => $this->successStatus,
+                                 'data' => $data
+                                ], $this->successStatus);
+   
     }
 
 

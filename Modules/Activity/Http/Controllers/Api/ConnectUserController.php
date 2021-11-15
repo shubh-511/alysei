@@ -146,7 +146,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $myFollowers = Follower::with('followed_by:user_id,name,email,role_id,first_name,last_name,avatar_id','followed_by.avatar_id')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $myFollowers = Follower::with('followed_by:user_id,name,email,role_id,company_name,restaurant_name,first_name,last_name,avatar_id','followed_by.avatar_id')->where('follow_user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($myFollowers) > 0)
             {
                 return response()->json(['success' => $this->successStatus,
@@ -175,7 +175,7 @@ class ConnectUserController extends CoreController
     {
         try
         {
-            $followings = Follower::with('user:user_id,name,email,company_name,first_name,last_name,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
+            $followings = Follower::with('user:user_id,name,email,company_name,restaurant_name,first_name,last_name,avatar_id','user.avatar_id')->where('user_id', $user->user_id)->orderBy('id', 'DESC')->get();
             if(count($followings) > 0)
             {
                 return response()->json(['success' => $this->successStatus,

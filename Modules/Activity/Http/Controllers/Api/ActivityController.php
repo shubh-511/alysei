@@ -360,16 +360,16 @@ class ActivityController extends CoreController
                     if(!empty($request->event_type))
                     {
                         if($condition != '')
-                            $condition .=" and events.event_type = ".$request->event_type;
+                            $condition .=" and events.event_type = '".$request->event_type."'";
                         else
-                            $condition .="events.event_type = ".$request->event_type;
+                            $condition .="events.event_type = '".$request->event_type."'";
                     }
                     if(!empty($request->registration_type))
                     {
                         if($condition != '')
-                            $condition .=" and events.registration_type = ".$request->registration_type;
+                            $condition .=" and events.registration_type = '".$request->registration_type."'";
                         else
-                            $condition .="events.registration_type = ".$request->registration_type;
+                            $condition .="events.registration_type = '".$request->registration_type."'";
                     }
                     if(!empty($request->restaurant_type))
                     {
