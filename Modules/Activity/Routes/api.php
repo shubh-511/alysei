@@ -39,7 +39,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/permissions', 'Api\ConnectUserController@getPermissions');
 
 	Route::post('send/connection/request', 'Api\ConnectUserController@sendConnectionRequest');
-	Route::post('cancel/connection/request', 'Api\ConnectUserController@cancelConnectionRequest');
+	Route::post('accept/reject/connection/request/from/profile', 'Api\ConnectUserController@acceptRejectRequestFromProfile');
 
 	Route::get('get/connection/tabs', 'Api\ConnectUserController@getConnectionTabs');
 	Route::get('get/pending/recieved/request', 'Api\ConnectUserController@getMyPendingRecievedRequest');

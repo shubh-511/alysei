@@ -18,6 +18,7 @@ use Modules\User\Entities\Trip;
 use Modules\User\Entities\Blog;
 use Modules\User\Entities\Award;
 use App\Http\Traits\UploadImageTrait;
+use Modules\User\Entities\FeaturedListing;
 use Modules\Activity\Entities\UserPrivacy;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
@@ -47,6 +48,20 @@ class SearchController extends CoreController
             $this->user = Auth::user();
             return $next($request);
         });
+    }
+
+    /*
+     * Get Featured Type Using Role Id
+     * @params $roleId
+     */
+    public function getFeaturedListingTypes($roleId){
+        $featuredTypes = DB::table("featured_listing_types as flt")
+            ->join("featured_listing_type_role_maps as fltrm", 'fltrm.featured_listing_type_id', '=', 'flt.featured_listing_type_id')
+
+            ->where("fltrm.role_id","=",$roleId)
+            ->get();
+
+        return $featuredTypes;
     }
 
 
@@ -373,11 +388,31 @@ class SearchController extends CoreController
                         }
                         $roles[$key]->name = $this->translate('messages.'.$role->name,$role->name);
                         $roles[$key]->image = "public/images/roles/".$role->slug.".jpg";
-                        $userWithRole = User::whereHas(
+
+                        /*$userWithRole = User::whereHas(
                             'roles', function($q) use ($role){
                                 $q->where('slug', $role->slug);
                             }
-                        )->whereIn('user_id', $users)->count();
+                        )->whereIn('user_id', $users)->count();*/
+                        if($role->role_id == 6)
+                        {
+                            $userWithRole = User::whereHas(
+                            'roles', function($q) use ($role){
+                                $q->where('role_id', 4)
+                                ->orwhere('role_id', 5)
+                                ->orwhere('role_id', 6);
+                                }
+                            )->whereIn('user_id', $users)->count();
+                        }
+                        else
+                        {
+                            $userWithRole = User::whereHas(
+                            'roles', function($q) use ($role){
+                                $q->where('slug', $role->slug);
+                                }
+                            )->whereIn('user_id', $users)->count();
+                        }
+
                         $roles[$key]->user_count = $userWithRole;
                     }
 
@@ -427,7 +462,15 @@ class SearchController extends CoreController
                     $blockUsers = $blockList->pluck('block_user_id');
                 }*/
 
-                $userWithRole = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->where('role_id', $request->role_id)->whereIn('user_id', $users)->get();
+                if($request->role_id == 6)
+                {
+                    $userWithRole = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->whereIn('user_id', $users)->whereIn('role_id', [4,5,6])->orderBy('user_id', 'DESC')->get();
+                }
+                else
+                {
+                    $userWithRole = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->where('role_id', $request->role_id)->whereIn('user_id', $users)->orderBy('user_id', 'DESC')->get();
+                }
+                
                 /*foreach($userWithRole as $key => $getUser)
                 {
                     if(in_array($getUser->user_id, $users))
@@ -441,9 +484,10 @@ class SearchController extends CoreController
                 }*/
                     
                 return response()->json(['success' => $this->successStatus,
+                                'count' => count($userWithRole),
                                 'data' => $userWithRole
                                 ], $this->successStatus);
-                }
+            }
         }
         catch(\Exception $e)
         {
@@ -883,7 +927,7 @@ class SearchController extends CoreController
 
         $trips = Trip::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','intensity','country:id,name','region:id,name')->where('trip_name', 'LIKE', '%' . $keyWord . '%')->where('status', '1')->paginate(10);
 
-        $awards = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','medal')->where('award_name', 'LIKE', '%' . $keyWord . '%')->where('status', '1')->get();
+        $awards = Award::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id','attachment','medal')->where('award_name', 'LIKE', '%' . $keyWord . '%')->where('status', '1')->paginate(10);
 
 
         $myConnections = Connection::select('*','user_id as poster_id')->where('resource_id', $user->user_id)->where('is_approved', '1')->get();
@@ -926,8 +970,23 @@ class SearchController extends CoreController
             ->paginate(10);
         }
 
+        $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);
+            
+        $products = [];
 
-        $data = ['peoples' => $users, 'posts' => $activityPosts, 'events' => $events, 'blogs' => $blogs, 'trips' => $trips];
+        foreach($fieldsTypes as $fieldsTypesKey => $fieldsTypesValue){
+            
+            $featuredListing = FeaturedListing::with('image')
+                                ->where('user_id', $this->user->user_id)
+                                ->where('featured_listing_type_id', $fieldsTypesValue->featured_listing_type_id)
+                                ->where('title', 'LIKE', '%' . $keyWord . '%')
+                                ->orderBy('featured_listing_id','DESC')->paginate(10); 
+
+            $products[] = ["title" => $fieldsTypesValue->title,"slug" => $fieldsTypesValue->slug,"products" => $featuredListing];
+            
+        }
+
+        $data = ['peoples' => $users, 'posts' => $activityPosts, 'events' => $events, 'blogs' => $blogs, 'trips' => $trips, 'awards' => $awards, 'products' => $products];
         return response()->json(['success' => $this->successStatus,
                                  'data' => $data
                                 ], $this->successStatus);

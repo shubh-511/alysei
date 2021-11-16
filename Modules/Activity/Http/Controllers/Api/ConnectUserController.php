@@ -799,38 +799,94 @@ class ConnectUserController extends CoreController
 
 
     /*
-     * Cancel/Remove connection
+     * Accep/reject a connection from profile screen
      * @Params $request
      */
-    public function cancelConnectionRequest(Request $request)
+    public function acceptRejectRequestFromProfile(Request $request)
     {
         try
         {
             $user = $this->user;
             $validator = Validator::make($request->all(), [ 
-                'visitor_profile_id' => 'required'
+                'visitor_profile_id' => 'required',
+                'accept_or_reject' => 'required' // 1=accept, 2=reject
             ]);
 
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $checkConnection = Connection::with('user')->where('user_id', $request->visitor_profile_id)->where('resource_id', $user->user_id)->first();
-            if(!empty($checkConnection))
+            if($request->accept_or_reject == 1)
             {
-                $checkConnection->delete();
-
-                $message = "The request has been cancelled";
+                $getConnections = Connection::
+                where('is_approved', '0')
+                ->Where(function ($query) use ($user,  $request) {
+                    $query->where('resource_id', $user->user_id)
+                      ->Where('user_id', $request->visitor_profile_id);
+                })
+                ->orWhere(function ($query) use ($user,  $request) {
+                    $query->where('resource_id', $request->visitor_profile_id)
+                      ->Where('user_id', $user->user_id);
+                })
+                ->first();
+                
+                if(!empty($getConnections))
+                {
+                    $getConnections->is_approved = '1';
+                    $getConnections->save();
                     
-                return response()->json(['success' => $this->successStatus,
+                    $message = "The request has been accepted";
+                
+                    return response()->json(['success' => $this->successStatus,
+                                'message' => $this->translate('messages.'.$message,$message),
+                                ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "Invalid connection";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+            }
+            elseif($request->accept_or_reject == 2)
+            {
+                $getConnections = Connection::
+                orWhere(function ($query) use ($user,  $request) {
+                    $query->where('resource_id', $user->user_id)
+                      ->orWhere('user_id', $request->visitor_profile_id);
+                })
+                ->orWhere(function ($query) use ($user,  $request) {
+                    $query->where('resource_id', $request->visitor_profile_id)
+                      ->orWhere('user_id', $user->user_id);
+                })
+                ->first();
+                
+                if(!empty($getConnections))
+                {
+                    if($getConnections->is_approved == '1')
+                    {
+                        $isDeleted = $getConnections->delete();
+                        $message = "Your connection has been removed";
+                    
+                        return response()->json(['success' => $this->successStatus,
                                     'message' => $this->translate('messages.'.$message,$message),
                                     ], $this->successStatus);
+                    }
+                    else
+                    {
+                        $isDeleted = $getConnections->delete();
+                        $message = "The request has been cancelled";
+                    
+                        return response()->json(['success' => $this->successStatus,
+                                    'message' => $this->translate('messages.'.$message,$message),
+                                    ], $this->successStatus);
+                    }
+                }
+                else
+                {
+                    $message = "Invalid connection";
+                    return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
             }
-            else
-            {
-                $message = "You have not send a connection request to this user";
-                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
-            }            
         }
         catch(\Exception $e)
         {
