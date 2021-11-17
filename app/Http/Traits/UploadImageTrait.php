@@ -29,20 +29,35 @@ trait UploadImageTrait
     {
         $date = date("Y/m");
     	$target='uploads/'.$date;
-    	if(!empty($img))
+        $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+
+        if(env('FILESYSTEM') == 'storage_file')
         {
-            $headerImageName=$img->getClientOriginalName();
-            $ext1=$img->getClientOriginalExtension();
-            $temp1=explode(".",$headerImageName);
-            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
-            $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
-            $img->move($target,$newHeaderLogo);
+            if(!empty($img))
+            {
+                $headerImageName=$img->getClientOriginalName();
+                $ext1=$img->getClientOriginalExtension();
+                $temp1=explode(".",$headerImageName);
+                $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
+                $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
+                $img->move($target,$newHeaderLogo);
+            }
+            else
+            {
+                $headerTarget = '';
+            }
         }
         else
         {
-        	$headerTarget = '';
-        }
+            $status = [];
+            
+            
+            $ext1 = $img->getClientOriginalExtension();
+            $name = $img->getClientOriginalName();
+            $headerTarget = $target.''. $name;
+            $url = Storage::disk('s3')->put($headerTarget, file_get_contents($img));
 
+        }
         $attachment = new Attachment;
         $attachment->attachment_url = $headerTarget;
         $attachment->attachment_type = $ext1;
@@ -84,27 +99,44 @@ trait UploadImageTrait
     {
         $date = date("Y/m");
         $target='uploads/'.$date;
-        if(!empty($img))
+        $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+
+        if(env('FILESYSTEM') == 'storage_file')
         {
-            $headerImageName=$img->getClientOriginalName();
-            $ext1=$img->getClientOriginalExtension();
-            $temp1=explode(".",$headerImageName);
-            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
-            $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
-            $img->move($target,$newHeaderLogo);
-            list($width, $height, $type, $attr) = getimagesize(env('APP_URL').''.$headerTarget);
-            
+            if(!empty($img))
+            {
+                $headerImageName=$img->getClientOriginalName();
+                $ext1=$img->getClientOriginalExtension();
+                $temp1=explode(".",$headerImageName);
+                $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
+                $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
+                $img->move($target,$newHeaderLogo);
+                list($width, $height, $type, $attr) = getimagesize(env('APP_URL').''.$headerTarget);
+                
+            }
+            else
+            {
+                $headerTarget = '';
+            }
         }
         else
         {
-            $headerTarget = '';
+            $status = [];
+            
+            
+            $ext1 = $img->getClientOriginalExtension();
+            $name = $img->getClientOriginalName();
+            $headerTarget = $target.''. $name;
+            $url = Storage::disk('s3')->put($headerTarget, file_get_contents($img));
+            //list($width, $height, $type, $attr) = getimagesize(env('APP_URL').''.$headerTarget);
         }
+        
 
         $activityAttachmentLink = new ActivityAttachmentLink;
         $activityAttachmentLink->attachment_url = $headerTarget;
         $activityAttachmentLink->attachment_type = $ext1;
-        $activityAttachmentLink->height = $height;
-        $activityAttachmentLink->width = $width;
+        //$activityAttachmentLink->height = $height;
+        //$activityAttachmentLink->width = $width;
         $activityAttachmentLink->save();
         
         return $activityAttachmentLink->activity_attachment_link_id;
@@ -117,19 +149,34 @@ trait UploadImageTrait
     {
         $date = date("Y/m");
         $target='uploads/'.$date;
-        if(!empty($img))
+
+        if(env('FILESYSTEM') == 'storage_file')
         {
-            $headerImageName=$img->getClientOriginalName();
-            $ext1=$img->getClientOriginalExtension();
-            $temp1=explode(".",$headerImageName);
-            $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
-            $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
-            $img->move($target,$newHeaderLogo);
+            if(!empty($img))
+            {
+                $headerImageName=$img->getClientOriginalName();
+                $ext1=$img->getClientOriginalExtension();
+                $temp1=explode(".",$headerImageName);
+                $newHeaderLogo=rand()."".round(microtime(true)).".".end($temp1);
+                $headerTarget='public/uploads/'.$date.'/'.$newHeaderLogo;
+                $img->move($target,$newHeaderLogo);
+            }
+            else
+            {
+                $headerTarget = '';
+            }
         }
         else
         {
-            $headerTarget = '';
+            $status = [];
+            $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+            
+            $ext1 = $img->getClientOriginalExtension();
+            $name = $img->getClientOriginalName();
+            $headerTarget = $target.''. $name;
+            $url = Storage::disk('s3')->put($headerTarget, file_get_contents($img));
         }
+        
 
         if($storeOrProduct == 1)
         {
