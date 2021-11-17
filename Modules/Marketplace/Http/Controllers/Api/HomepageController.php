@@ -739,8 +739,8 @@ class HomepageController extends CoreController
      */
     public function getHomeScreen()
     {
-        try
-        {
+        /*try
+        {*/
             $user = $this->user;
             $topRatedProductsArray = [];
             $topFavouriteProductsArray = [];
@@ -770,7 +770,7 @@ class HomepageController extends CoreController
                     
                     $allProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                     $allProducts[$key]->total_reviews = $totalReviews;
-                    $allProducts[$key]->store_name = $store->name;
+                    $allProducts[$key]->store_name = (!empty($store->name) ? $store->name : '');
                 }
                 
             }
@@ -803,7 +803,7 @@ class HomepageController extends CoreController
                     }
                     $topRatedProducts[$topKey]->avg_rating = number_format((float)$avgRatingOfTopRated, 1, '.', '');
                     $topRatedProducts[$topKey]->total_reviews = $totalReviewsOfToprated;
-                    $topRatedProducts[$topKey]->store_name = $storeOfTopRated->name;
+                    $topRatedProducts[$topKey]->store_name = (!empty($storeOfTopRated->name) ? $storeOfTopRated->name : '');
                 }
                 
             }
@@ -847,11 +847,11 @@ class HomepageController extends CoreController
                                      'is_visited_marketplace' => ($user->is_visited_marketplace == '1' ? 1 : 0),
                                      'data' => $data   
                                     ],$this->successStatus);
-        }
+        /*}
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
-        }
+        }*/
     }
 
 
