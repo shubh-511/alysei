@@ -4,9 +4,20 @@ namespace Modules\User\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
+use Cviebrock\EloquentSluggable\Sluggable;
 class FeaturedListing extends Model
 {
-	protected $fillable = ["title","description","image_id","listing_url","featured_listing_type_id","created_at","updated_at","user_id"];
+    use Sluggable;
+	protected $fillable = ["title","slug","description","image_id","listing_url","featured_listing_type_id","created_at","updated_at","user_id"];
+
+    public function sluggable()
+    {
+        return [
+            'slug' => [
+                'source' => 'title'
+            ]
+        ];
+    }
 
     public function user()
     {

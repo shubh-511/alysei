@@ -17,6 +17,7 @@ use Cache;
 use App\Http\Traits\UploadImageTrait;
 use Modules\User\Entities\FeaturedListingValue;
 use Modules\User\Entities\FeaturedListingType;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 
 class FeaturedListingsController extends CoreController
 {
@@ -145,6 +146,7 @@ class FeaturedListingsController extends CoreController
 
                         $featuredListingData = [];
                         $featuredListingData['title'] = strip_tags($inputData['title']);
+                        $featuredListingData['slug'] = SlugService::createSlug(FeaturedListing::class, 'slug', $featuredListingData['title'])
                         if(isset($inputData['listing_url']))
                         {
                             $featuredListingData['listing_url'] = strip_tags($inputData['listing_url']);
@@ -157,6 +159,7 @@ class FeaturedListingsController extends CoreController
                         if(!array_key_exists("featured_listing_id",$input)){
                             $update = false;
                             $featuredListing = FeaturedListing::create($featuredListingData);
+
                             $featuredListingId = $featuredListing->id;
                         }else{
                             $featuredListingId = $input["featured_listing_id"];

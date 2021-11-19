@@ -41,6 +41,7 @@ use DB;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 use App\Http\Traits\UploadImageTrait;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 //use App\Events\UserRegisterEvent;
 
 class RecipeController extends CoreController
@@ -616,6 +617,7 @@ class RecipeController extends CoreController
             $recipe = new Recipe;
             $recipe->user_id = $user->user_id;
             $recipe->name = $requestedFields['name'];
+            $recipe->slug = SlugService::createSlug(Recipe::class, 'slug', $requestedFields['name']);
             $recipe->meal_id = $requestedFields['meal_id'];
             $recipe->course_id = $requestedFields['course_id'];
             $recipe->hours = $requestedFields['hours'];
@@ -857,6 +859,7 @@ class RecipeController extends CoreController
             
             $recipe->user_id = $user->user_id;
             $recipe->name = $requestedFields['name'];
+            $recipe->slug = SlugService::createSlug(Recipe::class, 'slug', $requestedFields['name']);
             $recipe->meal_id = $requestedFields['meal_id'];
             $recipe->course_id = $requestedFields['course_id'];
             $recipe->hours = $requestedFields['hours'];
@@ -1960,7 +1963,7 @@ class RecipeController extends CoreController
             }
 
             //quick easy
-            $easyRecipes = DB::select(DB::raw("select recipe_id from `recipe_steps` GROUP BY recipe_id ORDER BY count(recipe_step_id) ASC LIMIT 8"));
+            $easyRecipes = DB::select(DB::raw("select recipe_id from `recipe_steps` where deleted_at is null GROUP BY recipe_id ORDER BY count(recipe_step_id) ASC LIMIT 8"));
             foreach($easyRecipes as $easyRecipe)
             {
                 array_push($quickRecipeArray, $easyRecipe->recipe_id);

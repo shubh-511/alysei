@@ -20,6 +20,7 @@ use App\Http\Traits\UploadImageTrait;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
 use DB;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 
 class ProductController extends CoreController
 {
@@ -215,6 +216,7 @@ class ProductController extends CoreController
             $product->user_id = $user->user_id;
             $product->marketplace_store_id = $request->marketplace_store_id;
             $product->title = $request->title;
+            $product->slug = SlugService::createSlug(MarketplaceProduct::class, 'slug', $request->title);
             $product->description = $request->description;
             $product->keywords = $request->keywords;
             $product->product_category_id = $request->product_category_id;

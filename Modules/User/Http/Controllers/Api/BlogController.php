@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Validator;
 //use App\Events\UserRegisterEvent;
 use App\Http\Traits\UploadImageTrait;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 
 class BlogController extends CoreController
 {
@@ -106,6 +107,7 @@ class BlogController extends CoreController
             $createBLog = new Blog;
             $createBLog->user_id = $loggedInUser->user_id;
             $createBLog->title = $request->title;
+            $createBLog->slug = SlugService::createSlug(Blog::class, 'slug', $request->title);
             $createBLog->date = $request->date;
             $createBLog->time = $request->time;
             $createBLog->description = $request->description;

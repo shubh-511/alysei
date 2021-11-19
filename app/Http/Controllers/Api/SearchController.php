@@ -986,7 +986,7 @@ class SearchController extends CoreController
             
         }
 
-        $data = ['peoples' => $users, 'posts' => $activityPosts, 'events' => $events, 'blogs' => $blogs, 'trips' => $trips, 'awards' => $awards, 'products' => $products];
+        $data = ['peoples' => $users, 'posts' => $activityPosts, 'events' => $events, 'blogs' => $blogs, 'trips' => $trips, 'awards' => $awards/*, 'featured_listing' => $products*/];
         return response()->json(['success' => $this->successStatus,
                                  'data' => $data
                                 ], $this->successStatus);

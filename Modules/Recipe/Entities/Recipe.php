@@ -7,11 +7,22 @@ use Modules\User\Entities\User;
 use Modules\User\Entities\Cousin;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Attachment;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class Recipe extends Model
 {
     use SoftDeletes;
+    use Sluggable;
     protected $primaryKey = 'recipe_id';
+
+    public function sluggable()
+    {
+        return [
+            'slug' => [
+                'source' => 'name'
+            ]
+        ];
+    }
 
     public function user()
     {

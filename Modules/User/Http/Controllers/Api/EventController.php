@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Validator;
 //use App\Events\UserRegisterEvent;
 use App\Http\Traits\UploadImageTrait;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 
 class EventController extends CoreController
 {
@@ -101,6 +102,7 @@ class EventController extends CoreController
             $createBLog = new Event;
             $createBLog->user_id = $loggedInUser->user_id;
             $createBLog->event_name = $request->event_name;
+            $createBLog->slug = SlugService::createSlug(Event::class, 'slug', $request->event_name);
             $createBLog->host_name = $request->host_name;
             $createBLog->location = $request->location;
             $createBLog->date = $request->date;

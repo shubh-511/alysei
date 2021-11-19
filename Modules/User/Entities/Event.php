@@ -4,11 +4,22 @@ namespace Modules\User\Entities;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class Event extends Model
 {
     use SoftDeletes;
+    use Sluggable;
     protected $primaryKey = 'event_id';
+
+    public function sluggable()
+    {
+        return [
+            'slug' => [
+                'source' => 'event_name'
+            ]
+        ];
+    }
     
     public function user()
     {

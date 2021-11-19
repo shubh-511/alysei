@@ -17,6 +17,8 @@ use DB;
 use Validator;
 //use App\Events\UserRegisterEvent;
 use App\Http\Traits\UploadImageTrait;
+use Cviebrock\EloquentSluggable\Services\SlugService;
+
 
 class AwardController extends CoreController
 {
@@ -135,6 +137,7 @@ class AwardController extends CoreController
             $award = new Award;
             $award->user_id = $loggedInUser->user_id;
             $award->award_name = $request->award_name;
+            $award->slug = SlugService::createSlug(Award::class, 'slug', $request->award_name);
             $award->winning_product = $request->winning_product;
             $award->medal_id = $request->medal_id;
             $award->competition_url = $request->competition_url;

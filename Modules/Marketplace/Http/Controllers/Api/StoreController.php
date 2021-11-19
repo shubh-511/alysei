@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Validator;
 use DB;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 
 class StoreController extends CoreController
 {
@@ -276,7 +277,7 @@ class StoreController extends CoreController
                 $store->banner_id = $this->uploadImage($request->file('banner_id'));
                 $store->save();
 
-                $userDetail = MarketplaceStore::where('user_id', $user->user_id)->update(['description' => $userData->about, 'name' => $userData->company_name, 'website' => $userData->website, 'phone' => $userData->phone, 'location' => $userData->address, 'store_region' => $userData->state, 'lattitude' => $userData->lattitude, 'longitude' => $userData->longitude]);
+                $userDetail = MarketplaceStore::where('user_id', $user->user_id)->update(['description' => $userData->about, 'name' => $userData->company_name, 'slug' => SlugService::createSlug(MarketplaceStore::class, 'slug', $userData->company_name), 'website' => $userData->website, 'phone' => $userData->phone, 'location' => $userData->address, 'store_region' => $userData->state, 'lattitude' => $userData->lattitude, 'longitude' => $userData->longitude]);
 
                 if(!empty($request->gallery_images) && count($request->gallery_images) > 0)
                 {

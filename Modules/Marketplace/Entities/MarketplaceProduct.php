@@ -7,12 +7,22 @@ use Modules\Marketplace\Entities\MarketplaceBrandLabel;
 use Modules\Marketplace\Entities\MarketplaceProductGallery;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\User\Entities\User;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class MarketplaceProduct extends Model
 {
     use SoftDeletes;
+    use Sluggable;
     protected $primaryKey = 'marketplace_product_id';
     protected $fillable = [];
+    public function sluggable()
+    {
+        return [
+            'slug' => [
+                'source' => 'title'
+            ]
+        ];
+    }
 
     public function labels()
     {
