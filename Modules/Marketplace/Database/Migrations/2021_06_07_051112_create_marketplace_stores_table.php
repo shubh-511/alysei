@@ -19,6 +19,7 @@ class CreateMarketplaceStoresTable extends Migration
             $table->foreign('user_id')->references('user_id')->on('users');
             $table->integer('package_id');
             $table->string('name');
+            $table->string('slug');
             $table->longText('description');
             $table->string('website');
             $table->string('phone');

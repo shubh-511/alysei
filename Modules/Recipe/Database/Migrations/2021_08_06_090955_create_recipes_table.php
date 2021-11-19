@@ -17,6 +17,7 @@ class CreateRecipesTable extends Migration
             $table->increments('recipe_id');
             $table->integer('user_id');
             $table->string('name')->nullable();
+            $table->string('slug');
             $table->integer('meal_id')->nullable();
             $table->integer('course_id')->nullable();
             $table->integer('hours')->comment('preparation time')->nullable();

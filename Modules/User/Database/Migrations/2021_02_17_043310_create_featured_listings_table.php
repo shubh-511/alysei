@@ -18,6 +18,7 @@ class CreateFeaturedListingsTable extends Migration
             $table->bigInteger('user_id');
             $table->integer('featured_listing_type_id');
             $table->string('title');
+            $table->string('slug');
             $table->longText('description')->nullable();
             $table->string('image_id')->nullable();
             $table->text('anonymous')->nullable();

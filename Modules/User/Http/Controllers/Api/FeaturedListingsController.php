@@ -146,7 +146,7 @@ class FeaturedListingsController extends CoreController
 
                         $featuredListingData = [];
                         $featuredListingData['title'] = strip_tags($inputData['title']);
-                        $featuredListingData['slug'] = SlugService::createSlug(FeaturedListing::class, 'slug', $featuredListingData['title'])
+                        $featuredListingData['slug'] = SlugService::createSlug(FeaturedListing::class, 'slug', $featuredListingData['title']);
                         if(isset($inputData['listing_url']))
                         {
                             $featuredListingData['listing_url'] = strip_tags($inputData['listing_url']);

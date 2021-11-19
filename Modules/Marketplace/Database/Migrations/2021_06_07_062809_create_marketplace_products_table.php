@@ -20,6 +20,7 @@ class CreateMarketplaceProductsTable extends Migration
 
             $table->unsignedBigInteger('marketplace_store_id');
             $table->string('title');
+            $table->string('slug');
             $table->longText('description');
             $table->string('keywords')->nullable();
             $table->integer('product_category_id');
