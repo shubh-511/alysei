@@ -9,6 +9,7 @@ class FeaturedListing extends Model
 {
     use Sluggable;
 	protected $fillable = ["title","slug","description","image_id","listing_url","featured_listing_type_id","created_at","updated_at","user_id"];
+    protected $primaryKey = 'featured_listing_id';
 
     public function sluggable()
     {

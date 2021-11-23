@@ -4,11 +4,22 @@ namespace Modules\User\Entities;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
+use Cviebrock\EloquentSluggable\Sluggable;
 
 class Trip extends Model
 {
     use SoftDeletes;
+    use Sluggable;
     protected $primaryKey = 'trip_id';
+
+    public function sluggable()
+    {
+        return [
+            'slug' => [
+                'source' => 'trip_name'
+            ]
+        ];
+    }
 
     public function user()
     {

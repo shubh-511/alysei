@@ -17,6 +17,7 @@ class CreateActivityActionsTable extends Migration
             $table->increments('activity_action_id');
             $table->integer('type')->default(0);
             $table->string('subject_type');
+            $table->string('slug');
             $table->integer('subject_id');
             $table->string('object_type');
             $table->integer('object_id');

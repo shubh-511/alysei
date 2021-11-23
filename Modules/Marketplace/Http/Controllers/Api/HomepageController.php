@@ -628,7 +628,7 @@ class HomepageController extends CoreController
                 }
                 $topRatedProducts[$topKey]->avg_rating = number_format((float)$avgRatingOfTopRated, 1, '.', '');
                 $topRatedProducts[$topKey]->total_reviews = $totalReviewsOfToprated;
-                $topRatedProducts[$topKey]->store_name = $storeOfTopRated->name;
+                $topRatedProducts[$topKey]->store_name = (!empty($storeOfTopRated->name) ? $storeOfTopRated->name : '');
             }
             
             return response()->json(['success' => $this->successStatus,

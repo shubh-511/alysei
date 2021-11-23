@@ -109,7 +109,7 @@ class UserController extends CoreController
         $saveNotification = new Notification;
         $saveNotification->from = $admin->user_id;
         $saveNotification->to = $userId;
-        $saveNotification->notification_type = 'progress';
+        $saveNotification->notification_type = '9';
         $saveNotification->title = $this->translate('messages.'.$title,$title);
         $saveNotification->redirect_to = 'membership_progress';
         $saveNotification->redirect_to_id = 0;

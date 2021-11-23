@@ -39,7 +39,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('user/settings', 'Api\FeaturedListingsController@userSettings');
 	Route::post('update/user/settings', 'Api\UserController@updateUserSettings');
 	Route::post('change/password', 'Api\ResetPasswordController@changePassword');
-	Route::post('logout', 'Api\LoginController@logout');
+	Route::get('logout', 'Api\LoginController@logout');
 	Route::get('get/alysei/progress', 'Api\LoginController@alyseiProgress');
 
 	Route::post('update/contact/details', 'Api\UserController@updateContactDetails');

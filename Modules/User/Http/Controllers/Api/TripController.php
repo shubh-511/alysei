@@ -16,6 +16,7 @@ use DB;
 use Validator;
 //use App\Events\UserRegisterEvent;
 use App\Http\Traits\UploadImageTrait;
+use Cviebrock\EloquentSluggable\Services\SlugService;
 
 class TripController extends CoreController
 {
@@ -237,6 +238,7 @@ class TripController extends CoreController
             $createTrip = new Trip;
             $createTrip->user_id = $loggedInUser->user_id;
             $createTrip->trip_name = $request->trip_name;
+            $createTrip->slug = SlugService::createSlug(Trip::class, 'slug', $request->trip_name);
             $createTrip->travel_agency = $request->travel_agency;
             $createTrip->country = $request->country;
             $createTrip->region = $request->region;

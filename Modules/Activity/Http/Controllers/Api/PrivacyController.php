@@ -91,8 +91,15 @@ class PrivacyController extends CoreController
                 $privacyData = ['user_id' => $userPrivacy->user_id, 'allow_message_from' => $userPrivacy->allow_message_from, 'who_can_view_age' => $userPrivacy->who_can_view_age, 'who_can_view_profile' => $userPrivacy->who_can_view_profile, 'who_can_connect' => $userPrivacy->who_can_connect];
 
                 $messagePreference = ['user_id' => $user->user_id, 'private_messages' => $userEmailPreference->private_messages, 'when_someone_request_to_follow' => $userEmailPreference->when_someone_request_to_follow, 'weekly_updates' => $userEmailPreference->weekly_updates];
-
-                $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+                if($user->role_id != 10)
+                {
+                    $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+                }
+                else
+                {
+                    $roles = Role::select('role_id','name','slug')->where('slug','voyagers')->get();
+                }
+                
 
             
                 foreach ($roles as $key => $role) {
@@ -100,7 +107,7 @@ class PrivacyController extends CoreController
                 }
 
                 return response()->json(['success' => $this->successStatus,
-                                    'roles' => $roles,
+                                     'roles' => $roles,
                                      'privacy_data' => $privacyData,
                                      'email_preference' => $messagePreference,
                                     ], $this->successStatus);

@@ -160,12 +160,13 @@ class FeaturedListingsController extends CoreController
                             $update = false;
                             $featuredListing = FeaturedListing::create($featuredListingData);
 
-                            $featuredListingId = $featuredListing->id;
+                            $featuredListingId = $featuredListing->featured_listing_id;
                         }else{
                             $featuredListingId = $input["featured_listing_id"];
                             $update = true;
                             $featuredListing = FeaturedListing::where('featured_listing_id',$input['featured_listing_id'])->update($featuredListingData);    
                         }
+                        //return $featuredListingData;
 
                         unset($input["featured_listing_type_id"]);
                         unset($input["featured_listing_id"]);
@@ -337,7 +338,7 @@ class FeaturedListingsController extends CoreController
                         return response()->json(['success'=>$this->validationStatus,'errors' =>$errorMessage], $this->validationStatus); 
                     }
 
-                    $title = "Edit Featured ".$featuredListingType->title;
+                    $title = "Edit ".$featuredListingType->title;
                     $title = $this->translate('messages.'.$title,$title);
                     
                     $fields = $this->getFeaturedListingFields($this->user->role_id,$featuredListing->featured_listing_type_id);    
@@ -380,6 +381,10 @@ class FeaturedListingsController extends CoreController
                                 }
                                 
                             }
+                            else{
+
+                                    $value->value = '';    
+                                }
 
                         }
                     }

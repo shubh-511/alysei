@@ -19,6 +19,7 @@ use Modules\User\Entities\Blog;
 use Modules\User\Entities\Award;
 use App\Http\Traits\UploadImageTrait;
 use Modules\User\Entities\FeaturedListing;
+use Modules\Activity\Entities\ActivityLike;
 use Modules\Activity\Entities\UserPrivacy;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
@@ -968,6 +969,20 @@ class SearchController extends CoreController
              })
             ->orderBy('created_at', 'DESC')
             ->paginate(10);
+        }
+
+        foreach($activityPosts as $activityKey => $activityPost)
+        {
+            $isLikedActivityPost = ActivityLike::where('resource_id', $activityPost->activity_action_id)->where('poster_id', $user->user_id)->first();
+            if(!empty($isLikedActivityPost))
+            {
+                $activityPosts[$activityKey]->like_flag = 1;
+            }
+            else
+            {
+                $activityPosts[$activityKey]->like_flag = 0;
+            }
+            $activityPosts[$activityKey]->posted_at = $activityPost->created_at->diffForHumans();
         }
 
         $fieldsTypes = $this->getFeaturedListingTypes($this->user->role_id);

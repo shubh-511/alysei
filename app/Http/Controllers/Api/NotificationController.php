@@ -91,7 +91,8 @@ class NotificationController extends CoreController
         {
             $validator = Validator::make($request->all(), [ 
                 'from_id' => 'required', 
-                'to_id' =>  'required'
+                'to_id' =>  'required',
+                'type'  =>  'required'
             ]);
 
             if ($validator->fails()) { 
@@ -119,7 +120,15 @@ class NotificationController extends CoreController
                 $saveNotification = new Notification;
                 $saveNotification->from = $fromUser->user_id;
                 $saveNotification->to = $request->to_id;
-                $saveNotification->notification_type = 1; // New message notification
+                if($request->type == 'chat')
+                {
+                    $saveNotification->notification_type = 1; // New message notification
+                }
+                elseif($request->type == 'enquery')
+                {
+                    $saveNotification->notification_type = 10; // New enquery message notification
+                }
+                
                 $saveNotification->title = $this->translate('messages.'.$title,$title);
                 $saveNotification->redirect_to = 'message_screen';
                 $saveNotification->redirect_to_id = $fromUser->user_id;

@@ -656,18 +656,6 @@ class ActivityController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            /*$requestFields = $request->params;
-            
-            $requestedFields = $requestFields;
-            
-            $rules = $this->validateData($requestedFields, 1);
-
-            $validator = Validator::make($requestedFields, $rules);
-
-            if ($validator->fails()) { 
-                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
-            }*/
-
             $actionType = $this->checkActionType($request->action_type, 1);
             if($actionType[1] > 0)
             {
@@ -696,6 +684,8 @@ class ActivityController extends CoreController
                 }
                 
                 $activityAction->save();
+                $slug = rand().''.$activityAction->activity_action_id;
+                ActivityAction::where('activity_action_id', $activityAction->activity_action_id)->update(['slug' => $slug]);
             }
 
             if(!empty($request->attachments) && count($request->attachments) > 0)
@@ -714,7 +704,6 @@ class ActivityController extends CoreController
                 $message = 'Something went wrong!';
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }
-           
         }
         catch(\Exception $e)
         {
@@ -1018,7 +1007,9 @@ class ActivityController extends CoreController
                         $activityPosts[$key]->shared_post = null;   
                     }
 
-                    $activityPosts[$key]->posted_at = $activityPost->created_at->diffForHumans();   
+                    $activityPosts[$key]->posted_at = $activityPost->created_at->diffForHumans(); 
+                    $followerCount = Follower::where('follow_user_id', $activityPost->subject_id)->count();  
+                    $activityPosts[$key]->follower_count = $followerCount; 
                 }
 
                 $getPreferences = PreferenceMapUser::where('user_id', $user->user_id)->count();

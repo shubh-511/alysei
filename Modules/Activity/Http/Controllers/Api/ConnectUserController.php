@@ -232,6 +232,10 @@ class ConnectUserController extends CoreController
                 $userFieldValues = DB::table('user_field_values')->where('user_id', $isConnectedUser->resource_id)->where('user_field_id', 2)->whereIn('value', $fieldOptions)->get();
 
                 $userFieldValues = $userFieldValues->pluck('value');
+                if(!empty($isConnectedUser->product_ids))
+                {
+                    $userFieldValues = explode(",", $isConnectedUser->product_ids);
+                }
 
                 $fieldOptions = DB::table('user_field_options')->whereIn('user_field_option_id',$userFieldValues)->get();
 
@@ -448,6 +452,7 @@ class ConnectUserController extends CoreController
                             $newConnection->user_id = $request->user_id;
                             $newConnection->resource_id = $user->user_id;
                             $newConnection->reason_to_connect = $request->reason_to_connect;
+                            $newConnection->product_ids = $request->product_ids;
                             $newConnection->save();
 
                             if($myRole->role_id == 7 || $myRole->role_id == 10)
