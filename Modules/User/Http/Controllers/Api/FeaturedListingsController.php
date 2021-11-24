@@ -342,9 +342,10 @@ class FeaturedListingsController extends CoreController
                     $title = $this->translate('messages.'.$title,$title);
                     
                     $fields = $this->getFeaturedListingFields($this->user->role_id,$featuredListing->featured_listing_type_id);    
-
+                    $i=1;
+                    $newValue = [];
                     foreach ($fields as $key => $value) {
-
+                    
                         $value->title = $this->translate('messages.'.$value->title,$value->title);
 
                         $value->options = $this->getFeaturedListingFieldOptionParent($value->featured_listing_field_id);
@@ -387,6 +388,21 @@ class FeaturedListingsController extends CoreController
                                 }
 
                         }
+                        if($value->value == '')
+                        {
+                            unset($fields[$key]);
+                        }
+                        if($i == 1)
+                        {
+                            $newValue = $fields[$key];
+                        }
+                            
+                        $i++;
+                    }
+                    if(!empty($newValue))
+                    {
+                        array_shift($fields);
+                        array_unshift($fields, $newValue);
                     }
 
                     return response()->json(['success'=>$this->successStatus,'data' => ["title" => $title,"fields" => $fields]], $this->successStatus); 
@@ -485,7 +501,7 @@ class FeaturedListingsController extends CoreController
 
             ->where("flfrm.role_id","=",$roleId)
             ->where("flfrm.featured_listing_type_id","=",$featuredListingTypeId)
-            ->get();
+            ->get()->toArray();
 
         return $featuredListingFields;
     }

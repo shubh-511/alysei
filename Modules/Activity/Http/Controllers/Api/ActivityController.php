@@ -188,7 +188,7 @@ class ActivityController extends CoreController
         $events = Event::whereIn('user_id', $userIds)->where('status', '1')->orderBy('created_at','DESC')->first();
         $trips = Trip::whereIn('user_id', $userIds)->where('status', '1')->orderBy('created_at','DESC')->first();
         $blogs = Blog::whereIn('user_id', $userIds)->where('status', '1')->orderBy('created_at','DESC')->first();
-        $users = User::where('role_id', 9)->whereIn('user_id', $userIds)->orderBy('created_at','DESC')->first();
+        $users = User::where('role_id','!=', 1)->where('user_id','!=', $user->user_id)->whereIn('user_id', $userIds)->orderBy('created_at','DESC')->first();
 
         if(($events['created_at'] > $trips['created_at']) && ($events['created_at'] > $blogs['created_at']) && ($events['created_at'] > $users['created_at']))
         {
@@ -750,6 +750,9 @@ class ActivityController extends CoreController
                 $activityAction->shared_post_id = $request->shared_post_id;
                 //$activityAction->attachment_count = count($requestedFields["attachments"]);
                 $activityAction->save();
+
+                $slug = rand().''.$activityAction->activity_action_id;
+                ActivityAction::where('activity_action_id', $activityAction->activity_action_id)->update(['slug' => $slug]);
             }
 
             

@@ -56,7 +56,7 @@ class RegisterController extends CoreController
         try{
 
             $response_time = (microtime(true) - LARAVEL_START)*1000;
-            $roles = Role::select('role_id','name','slug','display_name')->whereNotIn('slug',['super_admin','admin','importer','distributer'])->orderBy('order')->get();
+            $roles = Role::select('role_id','name','slug','display_name','description')->whereNotIn('slug',['super_admin','admin','importer','distributer'])->orderBy('order')->get();
 
             $importerRoles = Role::select('role_id','name','slug','display_name')->whereNotIn('slug',['super_admin','admin','Italian_F_and_B_Producers','voice_of_expert','travel_agencies','restaurents','voyagers'])->get();
             
@@ -164,7 +164,7 @@ class RegisterController extends CoreController
                 return response()->json(['success'=>$this->validationStatus,'errors'=>$validator->errors()->first()], $this->validationStatus);
             }
 
-            $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer','voyagers'])->orderBy('order')->get();
+            $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','Importer_and_Distributer'])->orderBy('order')->get();
             if(count($roles) > 0)
             {
                 $getRolesId = $roles->pluck('role_id')->toArray();
