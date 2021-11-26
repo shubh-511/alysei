@@ -919,6 +919,55 @@ class ProductController extends CoreController
     }
 
     /*
+     * Update Product Enquery
+     * @Params $request
+     */
+    public function editProductEnquery(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'marketplace_product_enquery_id' => 'required',
+                'name' => 'required',
+                'email' => 'required|email',
+                'phone' => 'required',
+                'message' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $getExistingEnquery = MarketplaceProductEnquery::where('user_id', $user->user_id)->where('marketplace_product_enquery_id', $request->marketplace_product_enquery_id)->first();
+            if(empty($getExistingEnquery))
+            {
+                $getExistingEnquery->name = $request->name;
+                $getExistingEnquery->email = $request->email;
+                $getExistingEnquery->phone = $request->phone;
+                $getExistingEnquery->message = $request->message;
+                $getExistingEnquery->save();
+
+                $message = "Your enquery has been updated successfully";
+                return response()->json(['success'=>$this->successStatus,
+                                        'message' => $this->translate('messages.'.$message,$message),
+                                        'data' =>$getExistingEnquery,
+                                        ],$this->successStatus);
+            }
+            else
+            {
+                $message = "Enquery does not exist";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>$e->getMessage()],$this->exceptionStatus); 
+        }
+    }
+
+    /*
     Get product enqueries
     */
     public function getProductEnquery($tab)

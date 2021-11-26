@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Attachment;
+use Modules\User\Entities\State;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Marketplace\Entities\MarketplaceStoreGallery;
 use Cviebrock\EloquentSluggable\Sluggable;
@@ -27,6 +28,10 @@ class MarketplaceStore extends Model
     public function logo_id()
     {
         return $this->belongsTo(Attachment::class, 'logo_id','id');
+    }
+    public function region()
+    {
+        return $this->belongsTo(State::class, 'store_region','id');
     }
 
     public function store_gallery()

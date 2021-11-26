@@ -648,7 +648,7 @@ class HomepageController extends CoreController
      */
     public function getNewlyAddedStores()
     {
-        $newAddedStores = MarketplaceStore::where('status', '1')->orderBy('marketplace_store_id', 'DESC')->paginate(10);
+        $newAddedStores = MarketplaceStore::with('region:id,name')->where('status', '1')->orderBy('marketplace_store_id', 'DESC')->paginate(10);
         if(count($newAddedStores) > 0)
         {
             foreach($newAddedStores as $key => $store)
@@ -657,6 +657,19 @@ class HomepageController extends CoreController
                 $totalReviews = MarketplaceRating::where('type', '1')->where('id', $store->marketplace_store_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $store->marketplace_store_id)->first();
 
+                $getProduct = MarketplaceProduct::where('marketplace_store_id', $store->marketplace_store_id)->first();
+
+                if(!empty($getProduct->product_category_id))
+                {
+                    $options = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $getProduct->product_category_id)
+                                    ->first();
+                    (!empty($options->option) ? $newAddedStores[$key]->product_category_name = $options->option : $newAddedStores[$key]->product_category_name = '');
+                }
+                else
+                {
+                    $newAddedStores[$key]->product_category_name = '';
+                }
 
                 $logoId = Attachment::where('id', $store->logo_id)->first();
                 $bannerId = Attachment::where('id', $store->banner_id)->first();
@@ -861,7 +874,7 @@ class HomepageController extends CoreController
      */
     public function getAllStores()
     {
-    	$allStores = MarketplaceStore::where('status', '1')->orderBy('marketplace_store_id', 'DESC')->paginate(10);
+    	$allStores = MarketplaceStore::with('region:id,name')->where('status', '1')->orderBy('marketplace_store_id', 'DESC')->paginate(10);
         if(count($allStores) > 0)
         {
         	foreach($allStores as $key => $store)
@@ -869,6 +882,21 @@ class HomepageController extends CoreController
         		$avgRating = MarketplaceRating::where('type', '1')->where('id', $store->marketplace_store_id)->avg('rating');
                 $totalReviews = MarketplaceRating::where('type', '1')->where('id', $store->marketplace_store_id)->count();
                 $store = MarketplaceStore::where('marketplace_store_id', $store->marketplace_store_id)->first();
+
+                $getProduct = MarketplaceProduct::where('marketplace_store_id', $store->marketplace_store_id)->first();
+
+                if(!empty($getProduct->product_category_id))
+                {
+                    $options = DB::table('user_field_options')
+                                    ->where('user_field_option_id', $getProduct->product_category_id)
+                                    ->first();
+                    (!empty($options->option) ? $allStores[$key]->product_category_name = $options->option : $allStores[$key]->product_category_name = '');
+                }
+                else
+                {
+                    $allStores[$key]->product_category_name = '';
+                }
+                
 
 
                 $logoId = Attachment::where('id', $store->logo_id)->first();
@@ -1115,7 +1143,7 @@ class HomepageController extends CoreController
 
                     $products[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');
                     $products[$key]->total_reviews = $totalReviews;
-                    $products[$key]->store_name = $store->name;
+                    $products[$key]->store_name = $store->name??'';
                     if(!empty($options->option))
                     {
                         $products[$key]->product_category_name = $options->option;

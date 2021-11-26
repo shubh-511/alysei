@@ -56,6 +56,7 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::post('update/recipe/{recipeId}', 'Api\RecipeController@updateRecipe');
 
     Route::post('delete/recipe/{recipeId}', 'Api\RecipeController@deleteRecipe');
+    Route::post('update/review', 'Api\RecipeController@updateReview');
     
 
 });

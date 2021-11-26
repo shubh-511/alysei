@@ -1548,6 +1548,51 @@ class RecipeController extends CoreController
     }
 
     /*
+     * Update a Review on recipe
+     * @Params $request
+     */
+    public function updateReview(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'recipe_review_rating_id' => 'required',
+                'rating' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $isRated = RecipeReviewRating::where('user_id', $user->user_id)->where('recipe_review_rating_id', $request->recipe_review_rating_id)->first();
+            if(!empty($isRated))
+            {
+                $isRated->rating = $request->rating;
+                $isRated->review = $request->review;
+                $isRated->save();
+
+                $message = "Your rating has been updated";
+                return response()->json(['success' => $this->successStatus,
+                                            'message' => $this->translate('messages.'.$message,$message),
+                                            'data' => $isRated,
+                                         ], $this->successStatus);
+            }
+            else
+            {
+                $message = "Something went wrong";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * get all ratings
      * @Params $request
      */

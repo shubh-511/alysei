@@ -115,6 +115,81 @@ class RatingController extends CoreController
         }
     }
 
+    /*
+     * Update a Review on store/product
+     * @Params $request
+     */
+    public function updateReview(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'marketplace_review_rating_id' => 'required',
+                'type' => 'required', // 1 for store 2 for product
+                'rating' => 'required',
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            if($request->type == 1)
+            {
+                $isRated = MarketplaceRating::where('user_id', $user->user_id)->where('type', '1')->where('marketplace_review_rating_id', $request->marketplace_review_rating_id)->first();
+                if(!empty($isRated))
+                {
+                    $isRated->rating = $request->rating;
+                    $isRated->review = $request->review;
+                    $isRated->save();
+
+                    $message = "Your rating has been updated";
+                    return response()->json(['success' => $this->successStatus,
+                                                'message' => $this->translate('messages.'.$message,$message),
+                                                'data' => $isRated,
+                                             ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "Something went wrong";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+
+            }
+            elseif($request->type == 2)
+            {
+                $isRated = MarketplaceRating::where('user_id', $user->user_id)->where('type', '2')->where('marketplace_review_rating_id', $request->marketplace_review_rating_id)->first();
+                if(!empty($isRated))
+                {
+                    $isRated->rating = $request->rating;
+                    $isRated->review = $request->review;
+                    $isRated->save();
+
+                    $message = "Your rating has been updated";
+                    return response()->json(['success' => $this->successStatus,
+                                                'message' => $this->translate('messages.'.$message,$message),
+                                                'data' => $isRated,
+                                             ], $this->successStatus);
+                }
+                else
+                {
+                    $message = "Something went wrong";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+            }
+            else
+            {
+                $message = "Invalid favourite type";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
 
     /*
      * get all ratings

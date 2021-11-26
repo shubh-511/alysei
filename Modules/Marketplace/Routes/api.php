@@ -63,6 +63,7 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::get('get/conservation/methods', 'Api\HomepageController@getConservationMethod');
 
 	Route::get('get/all/entities/for/homescreen/{entityId}', 'Api\HomepageController@getAllEntities');
+	Route::post('update/marketplace/rating', 'Api\RatingController@updateReview');
 
 	
 });

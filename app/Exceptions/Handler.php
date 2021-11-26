@@ -5,6 +5,9 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
+use League\OAuth2\Server\Exception\OAuthServerException;
 
 class Handler extends ExceptionHandler
 {
@@ -45,9 +48,23 @@ class Handler extends ExceptionHandler
      * @param  \Exception  $exception
      * @return \Illuminate\Http\Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, \Exception $e)
     {
-        return parent::render($request, $exception);
+        if ($e instanceof MethodNotAllowedHttpException) {
+            return response()->json(['success' => 405,'errors' =>['exception' => $e->getMessage()]], 405);
+        }
+        if ($e instanceof FatalThrowableError) {
+            return response()->json(['success' => 500,'errors' =>['exception' => $e->getMessage()]], 500);
+        }
+        if ($exception instanceof OAuthServerException || $exception instanceof AuthenticationException) {
+
+            if(isset($exception->guards) && isset($exception->guards()[0]) ==='api')
+            return response()->json(['success' => 401,'errors' =>['exception' => $exception->getMessage()]], 401);
+            else if ($exception instanceof OAuthServerException)
+            return response()->json(['success' => 401,'errors' =>['exception' => $exception->getMessage()]], 401);
+        }
+
+        return parent::render($request, $e);
     }
 
 
