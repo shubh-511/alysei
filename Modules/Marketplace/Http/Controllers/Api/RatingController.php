@@ -208,13 +208,24 @@ class RatingController extends CoreController
             if ($validator->fails()) { 
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
+            $checkIfRated = MarketplaceRating::where('user_id', $user->user_id)->where('id', $request->id)->first();
 
             if($request->type == 1)
             {
-                $getAllRatings = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '1')->where('id', $request->id)->orderBy('marketplace_review_rating_id', 'DESC')->get();
+                $getAllRatings = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '1')->where('id', $request->id)->orderBy('marketplace_review_rating_id', 'DESC')->get()->toArray();
                 if(count($getAllRatings) > 0)
                 {
-                        return response()->json(['success' => $this->successStatus,
+                    foreach($getAllRatings as $key => $stories)
+                    {
+                        if($stories['user_id'] == $user->user_id)
+                        {
+                            $new_value = $getAllRatings[$key];
+                            unset($getAllRatings[$key]);
+                            array_unshift($getAllRatings, $new_value);    
+                        }
+                    }
+                    return response()->json(['success' => $this->successStatus,
+                                                'is_rated' => (!empty($checkIfRated) ? 1 : 0),
                                                 'data' => $getAllRatings,
                                              ], $this->successStatus);
                 }
@@ -226,10 +237,20 @@ class RatingController extends CoreController
             }
             elseif($request->type == 2)
             {
-                $getAllRatings = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '2')->where('id', $request->id)->orderBy('marketplace_review_rating_id', 'DESC')->get();
+                $getAllRatings = MarketplaceRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('type', '2')->where('id', $request->id)->orderBy('marketplace_review_rating_id', 'DESC')->get()->toArray();
                 if(count($getAllRatings) > 0)
                 {
-                        return response()->json(['success' => $this->successStatus,
+                    foreach($getAllRatings as $key => $stories)
+                    {
+                        if($stories['user_id'] == $user->user_id)
+                        {
+                            $new_value = $getAllRatings[$key];
+                            unset($getAllRatings[$key]);
+                            array_unshift($getAllRatings, $new_value);    
+                        }
+                    }
+                    return response()->json(['success' => $this->successStatus,
+                                                'is_rated' => (!empty($checkIfRated) ? 1 : 0),
                                                 'data' => $getAllRatings,
                                              ], $this->successStatus);
                 }

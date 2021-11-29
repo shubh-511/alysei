@@ -1568,10 +1568,11 @@ class RecipeController extends CoreController
             $isRated = RecipeReviewRating::where('user_id', $user->user_id)->where('recipe_review_rating_id', $request->recipe_review_rating_id)->first();
             if(!empty($isRated))
             {
-                $isRated->rating = $request->rating;
+                /*$isRated->rating = $request->rating;
                 $isRated->review = $request->review;
-                $isRated->save();
-
+                $isRated->save();*/
+                RecipeReviewRating::where('recipe_review_rating_id', $request->recipe_review_rating_id)->update(['rating'=>$request->rating]);
+                $isRated = RecipeReviewRating::where('user_id', $user->user_id)->where('recipe_review_rating_id', $request->recipe_review_rating_id)->first();
                 $message = "Your rating has been updated";
                 return response()->json(['success' => $this->successStatus,
                                             'message' => $this->translate('messages.'.$message,$message),
@@ -1629,7 +1630,9 @@ class RecipeController extends CoreController
                     }
                     $getAllRatings[$key]->user->name = $names;
                 }
+                $isRated = RecipeReviewRating::where('recipe_id', $request->recipe_id)->where('user_id', $user->user_id)->first();
                 return response()->json(['success' => $this->successStatus,
+                                            'is_rated' => (!empty($isRated) ? 1 : 0),
                                             'data' => $getAllRatings,
                                          ], $this->successStatus);
             }
@@ -2179,6 +2182,7 @@ class RecipeController extends CoreController
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->whereNull('deleted_at')
                     ->whereRaw('('.$condition.')')
                     ->where(function ($query) use ($request, $recipesId) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
@@ -2196,6 +2200,7 @@ class RecipeController extends CoreController
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->whereNull('deleted_at')
                     ->where(function ($query) use ($request, $recipesId) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
@@ -2217,6 +2222,7 @@ class RecipeController extends CoreController
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
                     ->whereRaw('('.$condition.')')
+                    ->whereNull('deleted_at')
                     ->where(function ($query) use ($request) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')
@@ -2231,6 +2237,7 @@ class RecipeController extends CoreController
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
                     ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->whereNull('deleted_at')
                     ->where(function ($query) use ($request) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
                               ->orWhere('recipe_meals.name', 'LIKE', '%'.$request->keyword.'%')

@@ -99,12 +99,14 @@ class StoreController extends CoreController
                 $myStore->logo_id = $logoId->attachment_url;
                 $myStore->banner_id = $bannerId->attachment_url;
 
-                $getAnalytics = $this->getAnalyticsByFilter($filterType, $myStore);               
+                $getAnalytics = $this->getAnalyticsByFilter($filterType, $myStore); 
+                $productCount = MarketplaceProduct::where('user_id', $user->user_id)->count();              
                 
                 
                 return response()->json(['success' => $this->successStatus,
                                         'banner' => $myStore->banner_id,
                                         'logo' => $myStore->logo_id,
+                                        'product_counts' => $productCount,
                                         'total_product' => $getAnalytics[0],
                                         'total_category' => count($getAnalytics[1]),
                                         'total_reviews' => $getAnalytics[2],

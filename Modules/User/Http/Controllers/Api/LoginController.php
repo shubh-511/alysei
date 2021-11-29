@@ -165,13 +165,13 @@ class LoginController extends CoreController
                 $alyseiQuality = ($userData->alysei_qualitymark > 0) ? true : false;
                 
                
-                $profileReview = ['title' => $this->translate('messages.'.'Review','Review'),'status' => $alyseiReview, 'description' => $this->translate('messages.'.'Your account is being reviewed by our staff','Your account is being reviewed by our staff')];
+                $profileReview = ['title' => $this->translate('messages.'.'Review','Review'),'status' => $alyseiReview, 'description' => $this->translate('messages.'.'Your account has been reviewed by our staff.','Your account has been reviewed by our staff.')];
 
-                $profileCertified = ['title' => $this->translate('messages.'.'Alysei Certification','Alysei Certification'),'status' => $alyseiCertification, 'description' => $this->translate('messages.'.'You have been officially certified by our staff','You have been officially certified by our staff')];
+                $profileCertified = ['title' => $this->translate('messages.'.'Alysei Certification','Alysei Certification'),'status' => $alyseiCertification, 'description' => $this->translate('messages.'.'You are now a Certified Alysei Member.','You are now a Certified Alysei Member.')];
 
-                $profileRecognised = ['title' => $this->translate('messages.'.'Recognition','Recognition'),'status' => $alyseiRecognition, 'description' => $this->translate('messages.'.'You have been recognised by our app','You have been recognised by our app')];
+                $profileRecognised = ['title' => $this->translate('messages.'.'Recognition','Recognition'),'status' => $alyseiRecognition, 'description' => $this->translate('messages.'.'You are within the top 10 most searched Alysei Members.','You are within the top 10 most searched Alysei Members.')];
 
-                $profileQualityMarked = ['title' => $this->translate('messages.'.'Quality Mark','Quality Mark'),'status' => $alyseiQuality, 'description' => $this->translate('messages.'.'You will recieve an official quality mark on your profile','You will recieve an official quality mark on your profile')];
+                $profileQualityMarked = ['title' => $this->translate('messages.'.'Quality Mark','Quality Mark'),'status' => $alyseiQuality, 'description' => $this->translate('messages.'.'You are within the top 5 highest rated Alysei Members.','You are within the top 5 highest rated Alysei Members.')];
 
                 $dataProgress = [$profileReview, $profileCertified, $profileRecognised, $profileQualityMarked];
                
