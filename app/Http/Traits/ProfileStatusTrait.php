@@ -675,7 +675,7 @@ trait ProfileStatusTrait
                 $profilePercentage = "100";
                 if($user->alysei_certification == '0')
                 {
-                    $title = "Your profile is certified from admin";
+                    $title = "Congratulations! You are now a fully on boarded Alysei member";
                     $userUpdateCertification = User::where('user_id', $userId)->update(['alysei_certification' => '1']);
 
                     $admin = User::where('role_id', '1')->first();

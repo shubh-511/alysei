@@ -116,6 +116,8 @@ Route::group(['middleware' => 'auth:api'], function(){
 	Route::post('delete/award', 'Api\AwardController@deleteAward');
 	Route::post('update/user/field', 'Api\UserController@updateUserFieldValues');
 
+	Route::post('like/unlike/event', 'Api\EventController@likeUnlikeEvent');
+
 
 
 });

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Modules\User\Entities\User; 
 use Modules\User\Entities\DeviceToken;
 use App\Attachment;
+use App\Notification;
 use Modules\User\Entities\City;
 use Validator;
 use Str;
@@ -18,12 +19,14 @@ use Kreait\Firebase\Factory;
 use Cache;
 use App\Events\Welcome;
 use App\Events\VerifyEmail;
+use App\Http\Traits\NotificationTrait;
 
 class RegisterController extends CoreController
 {
     public $successStatus = 200;
     public $validationStatus = 422;
     public $exceptionStatus = 409;
+    use NotificationTrait;
 
     public function conn_firbase(){
         
@@ -398,6 +401,29 @@ class RegisterController extends CoreController
                             //Send Welcome Mail
                     
                             //event(new Welcome($user->user_id));
+                            $title = "Thank you ".$userName.". The Alysei team is reviewing your request and will notify you about status change.";
+
+                            $admin = User::where('role_id', '1')->first();
+
+                            $saveNotification = new Notification;
+                            $saveNotification->from = $admin->user_id;
+                            $saveNotification->to = $user->user_id;
+                            $saveNotification->notification_type = 'progress';
+                            $saveNotification->title = $this->translate('messages.'.$title,$title);
+                            $saveNotification->redirect_to = 'membership_progress';
+                            $saveNotification->redirect_to_id = 0;
+                            $saveNotification->save();
+
+                            $tokens = DeviceToken::where('user_id', $user->user_id)->get();
+                            if(count($tokens) > 0)
+                            {
+                                $collectedTokenArray = $tokens->pluck('device_token');
+
+                                $this->sendNotification($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id,null,null,null,null,null,null,null,null,null,null);
+
+                                $this->sendNotificationToIOS($collectedTokenArray, $title, $saveNotification->redirect_to, $saveNotification->redirect_to_id,null,null,null,null,null,null,null,null,null,null);
+                                
+                            }
 
                             return response()->json(['success' => $this->successStatus,
                                          'data' => $user->only($this->userFieldsArray),

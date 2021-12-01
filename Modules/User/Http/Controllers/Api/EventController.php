@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use App\Http\Controllers\CoreController;
 use Modules\User\Entities\User;
 use Modules\User\Entities\Event;
+use Modules\User\Entities\EventLike;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth; 
 use Validator;
@@ -34,6 +35,158 @@ class EventController extends CoreController
         });
     }
 
+    /*
+     * Like Post
+     * @Params $request
+     */
+    public function likeUnlikeEvent(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+            $validator = Validator::make($request->all(), [ 
+                'event_id' => 'required',
+                'like_or_unlike' => 'required', // 1 for like 0 for unlike
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            $checkEvent = Event::where('event_id', $request->event_id)->first();
+            if(!empty($checkEvent))
+            {
+                if($request->like_or_unlike == 1)
+                {
+                    $poster = User::with('avatar_id')->where('user_id', $user->user_id)->first();
+                    $isLikedEvent = EventLike::where('event_id', $request->event_id)->where('user_id', $user->user_id)->first();
+
+
+                    if(!empty($isLikedEvent))
+                    {
+                        $message = "You have already liked this event";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus); 
+                    }
+                    else
+                    {
+                        $eventLike = new EventLike;
+                        $eventLike->event_id = $request->event_id;
+                        $eventLike->user_id = $user->user_id;
+                        $eventLike->save();
+
+                        $checkEvent->like_counts = $checkEvent->like_counts + 1;
+                        $checkEvent->save();
+
+                        //$this->likeUnlikeInFirebase($eventLike->id, $user->user_id, $request->event_id);
+
+                        if($poster->role_id == 7 || $poster->role_id == 10)
+                        {
+                            $name = ucwords(strtolower($poster->first_name)) . ' ' . ucwords(strtolower($poster->last_name));
+                        }
+                        elseif($poster->role_id == 9)
+                        {
+                            $name = $poster->restaurant_name;
+                        }
+                        else
+                        {
+                            $name = $poster->company_name;
+                        }
+
+                        $title1 = $name." liked your event";
+                        $title = "liked your event";
+
+                        /*$saveNotification = new Notification;
+                        $saveNotification->from = $poster->user_id;
+                        $saveNotification->to = $checkEvent->subject_id;
+                        $saveNotification->notification_type = 8; //liked a post
+                        $saveNotification->title = $this->translate('messages.'.$title,$title);
+                        $saveNotification->redirect_to = 'post_screen';
+                        $saveNotification->redirect_to_id = $request->post_id;
+
+                        $saveNotification->sender_id = $request->user_id; 
+                        $saveNotification->sender_name = $name;
+                        $saveNotification->sender_image = null;
+                        $saveNotification->post_id = $request->post_id;
+                        $saveNotification->connection_id = null;
+                        
+                        $saveNotification->comment_id = null;
+                        $saveNotification->reply = null;
+                        $saveNotification->likeUnlike = $request->like_or_unlike;
+
+                        $saveNotification->save();
+
+                        $tokens = DeviceToken::where('user_id', $checkEvent->user_id)->get();
+                        if(count($tokens) > 0)
+                        {
+                            $collectedTokenArray = $tokens->pluck('device_token');
+                            $this->sendNotification($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ 
+                                //null, $request->post_id, null, null, null,null, $request->like_or_unlike);
+
+                            /*$this->sendNotificationToIOS($collectedTokenArray, $title1, $saveNotification->redirect_to, $saveNotification->redirect_to_id, $saveNotification->notification_type, $request->user_id, $name, /*$poster->avatar_id->attachment_url*/ 
+                                //null, $request->post_id, null, null, null,null, $request->like_or_unlike);
+                        //}*/
+                        $eventLikeData = EventLike::where('id', $eventLike->id)->first();
+
+                        $message = "You liked this event";
+                        return response()->json(['success' => $this->successStatus,
+                                                 'total_likes' => $checkEvent->like_counts,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                 'data' => $eventLikeData
+                                                ], $this->successStatus);
+                    }
+                }
+                elseif($request->like_or_unlike == 0)
+                {
+                    $isLikedEvent = EventLike::where('event_id', $request->event_id)->where('user_id', $user->user_id)->first();
+                    if(!empty($isLikedEvent))
+                    {
+                        //$this->removeLikes($isLikedEvent->id);
+                        $isUnlikedEvent = EventLike::where('event_id', $request->event_id)->where('user_id', $user->user_id)->delete();
+                        if($isUnlikedEvent == 1)
+                        {
+                            $checkEvent->like_counts = $checkEvent->like_counts - 1;
+                            $checkEvent->save();
+
+                            
+
+                            $message = "You unliked this event";
+                            return response()->json(['success' => $this->successStatus,
+                                                 'total_likes' => $checkEvent->like_counts,
+                                                 'message' => $this->translate('messages.'.$message,$message),
+                                                ], $this->successStatus);
+                        }
+                        else
+                        {
+                            $message = "You have to first like this event";
+                            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                        }
+                    }
+                    else
+                    {
+                        $message = "You have not liked this event";
+                        return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                    }
+                }
+                else
+                {
+                    $message = "Invalid like/unlike type";
+                    return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+                }
+                
+            }
+            else
+            {
+                $message = "Invalid event id";
+                return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }
+
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
     /***
     Get blog listing
     ***/
@@ -58,6 +211,8 @@ class EventController extends CoreController
                 {
                     $eventLists[$key]->event_name = $this->translate('messages.'.$eventList->event_name, $eventList->event_name);
                     $eventLists[$key]->host_name = $this->translate('messages.'.$eventList->host_name, $eventList->host_name);
+                    $isLikedEvent = EventLike::where('event_id', $eventList->event_id)->where('user_id', $loggedInUser->user_id)->first();
+                    $eventLists[$key]->like_flag = (!empty($isLikedEvent) ? 1 : 0);
                 }
                 return response()->json(['success' => $this->successStatus,
                                          'data' => $eventLists,
@@ -111,6 +266,7 @@ class EventController extends CoreController
             $createBLog->website = $request->website;
             $createBLog->event_type = $request->event_type;
             $createBLog->registration_type = $request->registration_type;
+            $createBLog->url = $request->url;
             $createBLog->image_id = $this->uploadImage($request->file('image_id'));
             $createBLog->save();
 
@@ -188,6 +344,7 @@ class EventController extends CoreController
                 $event->website = $request->website;
                 $event->event_type = $request->event_type;
                 $event->registration_type = $request->registration_type;
+                $event->url = $request->url;
                 //$event->status = $request->status;
 
                 if(!empty($request->image_id))

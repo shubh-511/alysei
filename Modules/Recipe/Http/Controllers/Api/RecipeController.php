@@ -280,6 +280,46 @@ class RecipeController extends CoreController
     }
 
     /*
+     * Search meals
+     * 
+     */
+    public function searchMeals(Request $request)
+    {
+        try
+        {
+            $user = $this->user;
+
+            $validator = Validator::make($request->all(), [ 
+                'keyword' => 'required', 
+            ]);
+
+            if ($validator->fails()) { 
+                return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
+            }
+
+            
+            $ingredients = RecipeMeal::with('image_id')->where('name','LIKE','%'.$request->keyword.'%')->get();
+            
+            if(count($ingredients) > 0)
+            {
+                return response()->json(['success' => $this->successStatus,
+                                        'count' =>  count($ingredients),
+                                        'data' => $ingredients,
+                                    ], $this->successStatus);
+            }
+            else
+            {
+                $message = "No meals found";
+                return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
+            }            
+        }
+        catch(\Exception $e)
+        {
+            return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
+        }
+    }
+
+    /*
      * Search ingredients
      * 
      */
@@ -1572,6 +1612,8 @@ class RecipeController extends CoreController
                 $isRated->review = $request->review;
                 $isRated->save();*/
                 RecipeReviewRating::where('recipe_review_rating_id', $request->recipe_review_rating_id)->update(['rating'=>$request->rating]);
+                if(!empty($request->review))
+                    RecipeReviewRating::where('recipe_review_rating_id', $request->recipe_review_rating_id)->update(['review'=>$request->review]);
                 $isRated = RecipeReviewRating::where('user_id', $user->user_id)->where('recipe_review_rating_id', $request->recipe_review_rating_id)->first();
                 $message = "Your rating has been updated";
                 return response()->json(['success' => $this->successStatus,
@@ -1610,12 +1652,12 @@ class RecipeController extends CoreController
                 return response()->json(['errors'=>$validator->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $getAllRatings = RecipeReviewRating::with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $request->recipe_id)->orderBy('recipe_review_rating_id', 'DESC')->get();
+            $getAllRatings = RecipeReviewRating::with('user:user_id,name,email,company_name,first_name,last_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $request->recipe_id)->orderBy('recipe_review_rating_id', 'DESC')->get()->toArray();
             if(count($getAllRatings) > 0)
             {
                 foreach($getAllRatings as $key => $rating)
                 {
-                    $userDataName = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $rating->user_id)->first();
+                    $userDataName = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $rating['user_id'])->first();
                     if($userDataName->role_id == 7 || $userDataName->role_id == 10)
                     {
                         $names = ucwords(strtolower($userDataName->first_name)) . ' ' . ucwords(strtolower($userDataName->last_name));
@@ -1628,7 +1670,14 @@ class RecipeController extends CoreController
                     {
                         $names = $userDataName->company_name;
                     }
-                    $getAllRatings[$key]->user->name = $names;
+                    $getAllRatings[$key]['user']['name'] = $names;
+
+                    if($rating['user_id'] == $user->user_id)
+                    {
+                        $new_value = $getAllRatings[$key];
+                        unset($getAllRatings[$key]);
+                        array_unshift($getAllRatings, $new_value);    
+                    }
                 }
                 $isRated = RecipeReviewRating::where('recipe_id', $request->recipe_id)->where('user_id', $user->user_id)->first();
                 return response()->json(['success' => $this->successStatus,

@@ -37,6 +37,7 @@ Route::group(['middleware' => 'auth:api'], function(){
     Route::post('add/tools', 'Api\RecipeController@addTool');
 
     Route::get('get/cooking/skills', 'Api\RecipeController@getCookingSkills');
+    Route::get('search/meal', 'Api\RecipeController@searchMeals');
     Route::get('get/diet/list', 'Api\RecipeController@getRecipeDiets');
 
     Route::get('get/recipe/detail/{id}', 'Api\RecipeController@getRecipeDetail');

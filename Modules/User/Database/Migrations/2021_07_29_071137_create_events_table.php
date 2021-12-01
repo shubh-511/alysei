@@ -26,7 +26,9 @@ class CreateEventsTable extends Migration
             $table->string('website');
             $table->enum('event_type',['public','private']);
             $table->enum('registration_type',['free','paid']);
+            $table->string('url')->nullable();
             $table->integer('image_id');
+            $table->integer('like_counts')->default(0);
             $table->enum('status',['1','0'])->default('1')->comment('1= active, 0=inactive');
             $table->softDeletes();
             $table->timestamps();

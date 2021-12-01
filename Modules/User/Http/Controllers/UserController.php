@@ -81,7 +81,7 @@ class UserController extends CoreController
     {
         if($request->progress_level == 'alysei_review')
         {
-            $title = "Your profile has been reviwed from admin";
+            $title = "Welcome on board! You are now a Certified Alysei member. You can now complete your profile to access the Alysei world.";
             $user = User::where('user_id', $userId)->update(['alysei_review' => '1']);
         }
         elseif($request->progress_level == 'alysei_certification')

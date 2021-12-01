@@ -10,6 +10,7 @@ use Modules\User\Entities\Role;
 use Modules\User\Entities\BlockList;
 use Modules\Activity\Entities\ActivityAction;
 use Modules\User\Entities\FeaturedListing;
+use Modules\User\Entities\UserProfileProgress;
 use Modules\Activity\Entities\Connection;
 use Modules\Activity\Entities\Follower;
 use Modules\User\Entities\UserSelectedHub;
@@ -1183,13 +1184,15 @@ class UserController extends CoreController
                     $about = "Our Menu";
                     $userFieldId = 37;
                 }
+                $description = UserProfileProgress::where('role_id', $loggedInUser->role_id)->first();
                 
-                $aboutUs = ['title' => $about,'status' => $status, 'redirect_to' => 'edit_profile', 'user_field_id' => $userFieldId];
+                $aboutUs = ['title' => $about,'status' => $status, 'redirect_to' => 'edit_profile', 'user_field_id' => $userFieldId,'description' => $description->products];
 
                 $fieldsType = $this->getFeaturedType($this->user->role_id);
-                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing', 'user_field_id' => 0];
+                $dataFeaturedListing = ['title' => $fieldsType->title,'status' => $userFeaturedListing, 'redirect_to' => 'edit_listing', 'user_field_id' => 0,'description' => $description->featured];
 
                 $data = ['user_id' => $loggedInUser->user_id,'role_id' => $loggedInUser->role_id, 'profile_percentage' => $profilePercentage, 'featured_listing_type_id' => $fieldsType->featured_listing_type_id, 'user_details' => $userData];
+
             }
             else
             {
@@ -1197,24 +1200,47 @@ class UserController extends CoreController
             }
             
 
-            $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0];
+            /*$dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0];
             $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image', 'user_field_id' => 0];
             $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $userAbout, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId];
 
             $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub', 'user_field_id' => 0];
-            $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0];
+            $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0];*/
             
 
             if($loggedInUser->role_id == 10)
             {
+                $description = UserProfileProgress::where('role_id', $loggedInUser->role_id)->first();
+                $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0,'description' => $description->profile_img];
+                $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image', 'user_field_id' => 0,'description' => $description->cover_img];
+                $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $userAbout, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId,'description' => $description->about];
+
+                $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0,'description' => $description->contact];
+
                 $dataProgress = [$dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo];
             }
             elseif($loggedInUser->role_id == 7)
             {
+                $description = UserProfileProgress::where('role_id', $loggedInUser->role_id)->first();
+                $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0,'description' => $description->profile_img];
+                $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image', 'user_field_id' => 0,'description' => $description->cover_img];
+                $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $userAbout, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId,'description' => $description->about];
+
+                $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub', 'user_field_id' => 0,'description' => $description->hub];
+                $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0,'description' => $description->contact];
+
                 $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $dataContactInfo];
             }
             else
             {
+                $description = UserProfileProgress::where('role_id', $loggedInUser->role_id)->first();
+                $dataProfileImage = ['title' => $this->translate('messages.'.'Profile Picture','Profile Picture'),'status' => $userAvatar, 'redirect_to' => 'edit_profile_image', 'user_field_id' => 0,'description' => $description->profile_img];
+                $dataCoverImage = ['title' => $this->translate('messages.'.'Cover Image','Cover Image'),'status' => $userCover, 'redirect_to' => 'edit_cover_image', 'user_field_id' => 0,'description' => $description->cover_img];
+                $dataAbout = ['title' => $this->translate('messages.'.$aboutLabel,$aboutLabel),'status' => $userAbout, 'redirect_to' => 'edit_profile', 'user_field_id' => $aboutUserFieldId,'description' => $description->about];
+
+                $dataHubSelection = ['title' => $this->translate('messages.'.'Hub Selection','Hub Selection'),'status' => $userSelectedHub, 'redirect_to' => 'edit_hub', 'user_field_id' => 0,'description' => $description->hub];
+                $dataContactInfo = ['title' => $this->translate('messages.'.'Contact Info','Contact Info'),'status' => $userContact, 'redirect_to' => 'edit_contact', 'user_field_id' => 0,'description' => $description->contact];
+
                 $dataProgress = [$dataHubSelection, $dataProfileImage, $dataCoverImage, $dataAbout, $aboutUs, $dataContactInfo, $dataFeaturedListing];
             }
 

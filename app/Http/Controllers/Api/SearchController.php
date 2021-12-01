@@ -373,7 +373,7 @@ class SearchController extends CoreController
                     $users = $users->pluck('user_id');
                     if($user->role_id != 10)
                     {
-                        $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer','voyagers'])->orderBy('order')->get();
+                        $roles = Role::select('role_id','name','slug')->whereNotIn('slug',['super_admin','admin','importer','distributer'])->orderBy('order')->get();
                     }
                     else
                     {
@@ -472,17 +472,12 @@ class SearchController extends CoreController
                     $userWithRole = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', '!=', $user->user_id)->where('role_id', $request->role_id)->whereIn('user_id', $users)->orderBy('user_id', 'DESC')->get();
                 }
                 
-                /*foreach($userWithRole as $key => $getUser)
+                foreach($userWithRole as $key => $getUser)
                 {
-                    if(in_array($getUser->user_id, $users))
-                    {
-                        $newArr[] = $userWithRole[$key];    
-                    }                    
+                    $followerCount = Follower::where('follow_user_id', $getUser->user_id)->count();  
+                    $userWithRole[$key]->follower_count = $followerCount;                
                 }
-                if(!empty($newArr))
-                {
-                    $userWithRole = $newArr;
-                }*/
+                
                     
                 return response()->json(['success' => $this->successStatus,
                                 'count' => count($userWithRole),
@@ -895,6 +890,11 @@ class SearchController extends CoreController
         
         if(count($users) > 0)
         {
+            foreach($users as $key => $getUser)
+            {
+                $followerCount = Follower::where('follow_user_id', $getUser->user_id)->count();  
+                $users[$key]->follower_count = $followerCount;                
+            }
             return response()->json(['success' => $this->successStatus,
                                 'data' => $users
                                 ], $this->successStatus);
