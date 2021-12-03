@@ -806,6 +806,7 @@ class ActivityController extends CoreController
                 }
 
                 return response()->json(['success' => $this->successStatus,
+                                         'share_post_id' => $activityAction->activity_action_id,
                                          'message' => $this->translate('messages.'."Post shared successfuly!","Post shared successfuly!"),
                                         ], $this->successStatus);
             }
