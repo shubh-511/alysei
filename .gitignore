@@ -1,8 +1,9 @@
 /node_modules
 /public/hot
-/public/*
 /public/storage
+/public/uploads
 /storage/*.key
+/storage/*
 /vendor
 /phpminiadmin.php
 .env
