@@ -17,6 +17,7 @@ class CreateActivityAttachmentLinksTable extends Migration
             $table->increments('activity_attachment_link_id');
             $table->string('attachment_url');
             $table->string('attachment_type');
+            $table->string('base_url')->default("https://alyseiapi.ibyteworkshop.com/");
             $table->timestamps();
         });
     }

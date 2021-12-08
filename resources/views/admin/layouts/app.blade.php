@@ -219,7 +219,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="{{url('login/users')}}" class="nav-link">
+                <a href="{{url('dashboard/users')}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Users</p>
                 </a>
@@ -239,6 +239,36 @@
             </ul>
           </li>
           
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-th"></i>
+              <p>
+                Recipe Manager
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{url('dashboard/recipe/ingredients')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Ingredients</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{url('dashboard/recipe')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Meals</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{url('login/users')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Tools</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -305,5 +335,16 @@
 <script src="{{asset('admin/dist/js/demo.js')}}"></script>
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{asset('admin/dist/js/pages/dashboard.js')}}"></script>
+<script>
+  $(function(){
+      $("#parent").click(function() {
+        if($(this).is(':checked')){
+          $(".ingredient_list").css("display","none");
+        }else{
+          $(".ingredient_list").css("display","block");
+        }
+      });
+  })
+</script>
 </body>
 </html>

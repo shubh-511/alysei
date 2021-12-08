@@ -10,7 +10,7 @@
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="{{url('login/dashboard')}}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{url('dashboard')}}">Home</a></li>
           <li class="breadcrumb-item active">Users</li>
         </ol>
       </div>
@@ -69,7 +69,7 @@
                   </td>
 
                   <td>
-                      <a class="fa fa-edit" href="{{url('login/users/edit', [$user->user_id])}}" title="Edit"></a> | 
+                      <a class="fa fa-edit" href="{{url('dashboard/users/edit', [$user->user_id])}}" title="Edit"></a> | 
                       <a class="fa fa-trash" onclick="deleteUser(163)" title="Delete"></a>
                       
                   </td>
@@ -161,7 +161,7 @@ var dataId = [];
      
      if (confirm("Are you sure you want to change the status?") == true) {
      $.ajax({
-                url:"{{url('login/user-status')}}",
+                url:"{{url('dashboard/user-status')}}",
                 type:'post',
                 data:{'id':dataId,'status':status,'_token':'{{ csrf_token() }}'},
                 success: function(path){

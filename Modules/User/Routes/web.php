@@ -25,9 +25,9 @@ Route::get('/logout', 'AdminController@logout');
 
 
 //Route::get('/home', 'HomeController@index')->name('home');
-Route::group(['prefix'=>'login','middleware'=>['web','isAdminLogin']], function(){
+Route::group(['prefix'=>'dashboard','middleware'=>['web','isAdminLogin']], function(){
 
-	Route::get('dashboard', 'AdminController@dashboard');
+	Route::get('/', 'AdminController@dashboard');
 	Route::get('/users', 'UserController@list');
 	Route::get('/users/edit/{id}', 'UserController@edit');
 	Route::post('/users/update/{id}', 'UserController@update');

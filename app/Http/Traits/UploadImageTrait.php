@@ -28,8 +28,10 @@ trait UploadImageTrait
     public function uploadImage($img)
     {
         $date = date("Y/m");
-    	$target='uploads/'.$date;
+    	$target='uploads/'.$date."/";
         $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+
+        $basePath = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/';
 
         if(env('FILESYSTEM') == 'storage_file')
         {
@@ -61,6 +63,7 @@ trait UploadImageTrait
         $attachment = new Attachment;
         $attachment->attachment_url = $headerTarget;
         $attachment->attachment_type = $ext1;
+        $attachment->base_url = $basePath;
         $attachment->save();
 
         return $attachment->id;

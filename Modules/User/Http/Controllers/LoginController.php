@@ -11,7 +11,7 @@ class LoginController extends Controller
     {
     	if(Auth::check())
         {
-            return redirect('login/dashboard');
+            return redirect('dashboard');
         }
     	return view('auth.login');
     }
@@ -37,7 +37,7 @@ class LoginController extends Controller
                 'role_id' => 1,
             ]))
         {
-            return redirect('login/dashboard');
+            return redirect('dashboard');
         } 
         else
         {

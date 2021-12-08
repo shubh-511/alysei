@@ -56,12 +56,12 @@ class Handler extends ExceptionHandler
         if ($e instanceof FatalThrowableError) {
             return response()->json(['success' => 500,'errors' =>['exception' => $e->getMessage()]], 500);
         }
-        if ($exception instanceof OAuthServerException || $exception instanceof AuthenticationException) {
+        if ($e instanceof OAuthServerException || $e instanceof AuthenticationException) {
 
-            if(isset($exception->guards) && isset($exception->guards()[0]) ==='api')
-            return response()->json(['success' => 401,'errors' =>['exception' => $exception->getMessage()]], 401);
-            else if ($exception instanceof OAuthServerException)
-            return response()->json(['success' => 401,'errors' =>['exception' => $exception->getMessage()]], 401);
+            if(isset($e->guards) && isset($e->guards()[0]) ==='api')
+            return response()->json(['success' => 401,'errors' =>['exception' => $e->getMessage()]], 401);
+            else if ($e instanceof OAuthServerException)
+            return response()->json(['success' => 401,'errors' =>['exception' => $e->getMessage()]], 401);
         }
 
         return parent::render($request, $e);

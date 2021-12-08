@@ -10,7 +10,9 @@
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-Route::prefix('recipe')->group(function() {
+Route::group(['prefix'=>'dashboard/recipe','middleware'=>['web','isAdminLogin']], function(){
     Route::get('/', 'RecipeController@index');
+    Route::get('/ingredients', 'IngredientsController@index');
+    Route::get('/ingredient/add', 'IngredientsController@create');
+    Route::post('/ingredient/store', 'IngredientsController@store');
 });

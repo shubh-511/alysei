@@ -152,7 +152,7 @@
                         <h3 class="modal-title" style="font-weight: 400;">Membership State</h3>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                         </div>
-                        <form action="{{url('login/update-progress',[$user->user_id])}}" method="post">
+                        <form action="{{url('dashboard/update-progress',[$user->user_id])}}" method="post">
                           @csrf
                         <div class="modal-body">
                         <?php  

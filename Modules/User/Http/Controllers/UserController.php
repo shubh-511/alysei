@@ -101,7 +101,7 @@ class UserController extends CoreController
         }
         elseif($request->progress_level == 'level_empty')
         {
-            return redirect('login/users/edit/'.$userId)->with('success','All steps has been completed');
+            return redirect('dashboard/users/edit/'.$userId)->with('success','All steps has been completed');
         }
 
         $admin = User::where('role_id', '1')->first();
@@ -130,7 +130,7 @@ class UserController extends CoreController
             
         }
              
-        return redirect('login/users/edit/'.$userId)->with('success','Updated successfully');
+        return redirect('dashboard/users/edit/'.$userId)->with('success','Updated successfully');
     }
 
     /***

@@ -14,6 +14,11 @@ class RecipeIngredient extends Model
     {
         return $this->belongsTo(Attachment::class, 'image_id','id');
     }
+
+    public function attachment()
+    {
+        return $this->belongsTo(Attachment::class, 'image_id','id');
+    }
    
 
     

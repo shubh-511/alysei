@@ -12,7 +12,7 @@
         <div class="col-lg-9 col-md-8 col-xs-12 d-flex justify-content-start justify-content-md-end align-self-center">
             <nav aria-label="breadcrumb" class="mt-2">
                 <ol class="breadcrumb mb-0 p-0">
-                    <li class="breadcrumb-item"><a href="{{url('login/dashboard')}}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{url('dashboard')}}">Dashboard</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Users</li>
                 </ol>
             </nav>
@@ -55,7 +55,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <a href="{{url('login/users/edit', [$user->user_id])}}" class="pr-2" data-toggle="tooltip" title="" data-original-title="Edit"><i class="ti-marker-alt"></i></a>
+                                    <a href="{{url('dashboard/users/edit', [$user->user_id])}}" class="pr-2" data-toggle="tooltip" title="" data-original-title="Edit"><i class="ti-marker-alt"></i></a>
 
                                     <!-- <a href="" title=""data-toggle="tooltip" data-original-title="Delete"><i class="ti-trash"></i></a> -->
                                 </td>
@@ -95,7 +95,7 @@ var dataId = [];
      }
      if (confirm("Are you sure you want to change the status?") == true) {
      $.ajax({
-                 url:"{{url('login/user-status')}}",
+                 url:"{{url('dashboard/user-status')}}",
                 type:'post',
                 data:{'id':dataId,'status':status,'_token':'{{ csrf_token() }}'},
                 success: function(path){

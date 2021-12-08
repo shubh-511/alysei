@@ -19,6 +19,7 @@ class CreateAttachmentsTable extends Migration
             $table->string('attachment_type');
             $table->string('height');
             $table->string('width');
+            $table->string('base_url')->default("https://alyseiapi.ibyteworkshop.com/");
             $table->timestamps();
         });
     }
