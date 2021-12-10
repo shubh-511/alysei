@@ -12,6 +12,7 @@ use Validator;
 use App\Notification;
 use Modules\User\Entities\DeviceToken; 
 use App\Http\Traits\NotificationTrait;
+use DB;
 //use App\Events\UserRegisterEvent;
 
 class UserController extends CoreController
@@ -54,9 +55,38 @@ class UserController extends CoreController
         return view('user::admin.user.list', compact('users'));
     }
     
+    
     public function userDelete(Request $request)
     {
         User::where('user_id', $request->id)->delete();
+        DB::table('events')->where('user_id', $request->id)->delete();
+        DB::table('blogs')->where('user_id', $request->id)->delete();
+        DB::table('trips')->where('user_id', $request->id)->delete();
+        DB::table('marketplace_stores')->where('user_id', $request->id)->delete();
+        DB::table('recipes')->where('user_id', $request->id)->delete();
+        DB::table('awards')->where('user_id', $request->id)->delete();
+        DB::table('featured_listings')->where('user_id', $request->id)->delete();
+        DB::table('marketplace_products')->where('user_id', $request->id)->delete();
+        DB::table('certificates')->where('user_id', $request->id)->delete();
+        DB::table('connections')->where('user_id', $request->id)->delete();
+        DB::table('followers')->where('user_id', $request->id)->delete();
+        DB::table('user_selected_hubs')->where('user_id', $request->id)->delete();
+        DB::table('device_tokens')->where('user_id', $request->id)->delete();
+        DB::table('featured_listing_values')->where('user_id', $request->id)->delete();
+        DB::table('event_likes')->where('user_id', $request->id)->delete();
+        DB::table('temp_hubs')->where('user_id', $request->id)->delete();
+        DB::table('preference_map_users')->where('user_id', $request->id)->delete();
+        DB::table('recipe_review_ratings')->where('user_id', $request->id)->delete();
+        DB::table('recipe_favourites')->where('user_id', $request->id)->delete();
+        DB::table('marketplace_favourites')->where('user_id', $request->id)->delete();
+        DB::table('marketplace_review_ratings')->where('user_id', $request->id)->delete();
+        DB::table('marketplace_recent_search')->where('user_id', $request->id)->delete();
+        DB::table('marketplace_product_enqueries')->where('user_id', $request->id)->delete();
+        DB::table('activity_actions')->where('subject_id', $request->id)->where('subject_type','user')->delete();
+        DB::table('core_comments')->where('resource_id', $request->id)->where('poster_type','user')->delete();
+        DB::table('activity_likes')->where('resource_id', $request->id)->where('poster_type','user')->delete();
+        DB::table('block_lists')->where('block_user_id', $request->id)->delete();
+        
     }
 
     /***
