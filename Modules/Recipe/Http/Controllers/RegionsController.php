@@ -5,11 +5,12 @@ namespace Modules\Recipe\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Modules\Recipe\Entities\RecipeIngredient; 
+use Modules\Recipe\Entities\RecipeRegion; 
 use App\Http\Traits\UploadImageTrait;
+use Modules\User\Entities\Cousin;
 use Validator;
 
-class IngredientsController extends Controller
+class RegionsController extends Controller
 {
     use UploadImageTrait;
     /**
@@ -18,8 +19,8 @@ class IngredientsController extends Controller
      */
     public function index()
     {
-        $ingredients = RecipeIngredient::with('attachment')->paginate('10');
-        return view('recipe::ingredients.index',compact('ingredients'));
+        $regions = RecipeRegion::with('attachment')->paginate('10');
+        return view('recipe::regions.index',compact('regions'));
     }
 
     /**
@@ -28,8 +29,8 @@ class IngredientsController extends Controller
      */
     public function create()
     {
-        $ingredients = RecipeIngredient::select("title","recipe_ingredient_id")->where('parent',0)->get();
-        return view('recipe::ingredients.create',compact('ingredients'));
+        $cousines = Cousin::where('status',1)->get();
+        return view('recipe::regions.create',compact('cousines'));
     }
 
     /**
@@ -51,16 +52,15 @@ class IngredientsController extends Controller
                 return redirect()->back()->with('error', $validator->errors()->first());   
             }
 
-            $newIngredient = new RecipeIngredient;
-            $newIngredient->image_id = $this->uploadImage($request->file('image'));
-            $newIngredient->title = $request->name;
-            $newIngredient->name = strtolower(str_replace(' ', '_', $request->title));
-            $newIngredient->parent = isset($request->parent) ? 0 : $request->parent_id;
-            $newIngredient->featured = isset($request->featured) ? 1 : 0;
-            $newIngredient->priority = $request->priority;
-            $newIngredient->save();
+            $newRegion = new RecipeRegion;
+            $newRegion->image_id = $this->uploadImage($request->file('image'));
+            $newRegion->name = $request->name;
+            $newRegion->featured = isset($request->featured) ? 1 : 0;
+            $newRegion->priority = $request->priority;
+            $newRegion->cousin_id = $request->cousin_id;
+            $newRegion->save();
 
-            $message = "ingredient added successfuly";
+            $message = "Region added successfuly";
             return redirect()->back()->with('success', $message); 
 
         }catch(\Exception $e)
@@ -79,7 +79,7 @@ class IngredientsController extends Controller
      */
     public function show($id)
     {
-        return view('recipe::show');
+        return view('recipe::show',compact('cousines'));
     }
 
     /**
@@ -89,10 +89,9 @@ class IngredientsController extends Controller
      */
     public function edit($id)
     {
-        $ingredient = RecipeIngredient::where('recipe_ingredient_id',$id)->with("attachment")->first();
-        $parentIngredients = RecipeIngredient::select("title","recipe_ingredient_id")->where('parent',0)->get();
-        $displayNone = "style=display:none";
-        return view('recipe::ingredients.edit',compact('ingredient','parentIngredients','displayNone','id'));
+        $region = RecipeRegion::where('recipe_region_id',$id)->with("attachment")->first();
+        $cousines = Cousin::where('status',1)->get();
+        return view('recipe::regions.edit',compact('region','id','cousines'));
     }
 
     /**
@@ -120,15 +119,14 @@ class IngredientsController extends Controller
                 $updatedData['image_id'] = $this->uploadImage($request->file('image'));    
             }
 
-            $updatedData['title'] = $request->name;
-            $updatedData['name'] = strtolower(str_replace(' ', '_', $request->title));
-            $updatedData['parent'] = isset($request->parent) ? 0 : $request->parent_id;
+            $updatedData['name'] = $request->name;
             $updatedData['featured'] = isset($request->featured) ? 1 : 0;
             $updatedData['priority'] = $request->priority;
+            $updatedData['cousin_id'] = $request->cousin_id;
+            
+            RecipeRegion::where('recipe_region_id',$id)->update($updatedData);
 
-            RecipeIngredient::where('recipe_ingredient_id',$id)->update($updatedData);
-
-            $message = "ingredient updated successfuly";
+            $message = "Region updated successfuly";
             return redirect()->back()->with('success', $message); 
 
         }catch(\Exception $e)

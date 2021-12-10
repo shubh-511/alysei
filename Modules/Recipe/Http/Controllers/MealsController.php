@@ -5,11 +5,11 @@ namespace Modules\Recipe\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
-use Modules\Recipe\Entities\RecipeIngredient; 
+use Modules\Recipe\Entities\RecipeMeal; 
 use App\Http\Traits\UploadImageTrait;
 use Validator;
 
-class IngredientsController extends Controller
+class MealsController extends Controller
 {
     use UploadImageTrait;
     /**
@@ -18,8 +18,8 @@ class IngredientsController extends Controller
      */
     public function index()
     {
-        $ingredients = RecipeIngredient::with('attachment')->paginate('10');
-        return view('recipe::ingredients.index',compact('ingredients'));
+        $meals = RecipeMeal::with('attachment')->paginate('10');
+        return view('recipe::meals.index',compact('meals'));
     }
 
     /**
@@ -28,8 +28,7 @@ class IngredientsController extends Controller
      */
     public function create()
     {
-        $ingredients = RecipeIngredient::select("title","recipe_ingredient_id")->where('parent',0)->get();
-        return view('recipe::ingredients.create',compact('ingredients'));
+        return view('recipe::meals.create');
     }
 
     /**
@@ -51,16 +50,14 @@ class IngredientsController extends Controller
                 return redirect()->back()->with('error', $validator->errors()->first());   
             }
 
-            $newIngredient = new RecipeIngredient;
-            $newIngredient->image_id = $this->uploadImage($request->file('image'));
-            $newIngredient->title = $request->name;
-            $newIngredient->name = strtolower(str_replace(' ', '_', $request->title));
-            $newIngredient->parent = isset($request->parent) ? 0 : $request->parent_id;
-            $newIngredient->featured = isset($request->featured) ? 1 : 0;
-            $newIngredient->priority = $request->priority;
-            $newIngredient->save();
+            $newMeal = new RecipeMeal;
+            $newMeal->image_id = $this->uploadImage($request->file('image'));
+            $newMeal->name = $request->name;
+            $newMeal->featured = isset($request->featured) ? 1 : 0;
+            $newMeal->priority = $request->priority;
+            $newMeal->save();
 
-            $message = "ingredient added successfuly";
+            $message = "Meal added successfuly";
             return redirect()->back()->with('success', $message); 
 
         }catch(\Exception $e)
@@ -89,10 +86,8 @@ class IngredientsController extends Controller
      */
     public function edit($id)
     {
-        $ingredient = RecipeIngredient::where('recipe_ingredient_id',$id)->with("attachment")->first();
-        $parentIngredients = RecipeIngredient::select("title","recipe_ingredient_id")->where('parent',0)->get();
-        $displayNone = "style=display:none";
-        return view('recipe::ingredients.edit',compact('ingredient','parentIngredients','displayNone','id'));
+        $meal = RecipeMeal::where('recipe_meal_id',$id)->with("attachment")->first();
+        return view('recipe::meals.edit',compact('meal','id'));
     }
 
     /**
@@ -120,15 +115,13 @@ class IngredientsController extends Controller
                 $updatedData['image_id'] = $this->uploadImage($request->file('image'));    
             }
 
-            $updatedData['title'] = $request->name;
-            $updatedData['name'] = strtolower(str_replace(' ', '_', $request->title));
-            $updatedData['parent'] = isset($request->parent) ? 0 : $request->parent_id;
+            $updatedData['name'] = $request->name;
             $updatedData['featured'] = isset($request->featured) ? 1 : 0;
             $updatedData['priority'] = $request->priority;
+            
+            RecipeMeal::where('recipe_meal_id',$id)->update($updatedData);
 
-            RecipeIngredient::where('recipe_ingredient_id',$id)->update($updatedData);
-
-            $message = "ingredient updated successfuly";
+            $message = "Meal updated successfuly";
             return redirect()->back()->with('success', $message); 
 
         }catch(\Exception $e)

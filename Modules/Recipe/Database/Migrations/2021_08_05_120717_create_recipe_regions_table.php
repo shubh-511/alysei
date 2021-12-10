@@ -18,6 +18,8 @@ class CreateRecipeRegionsTable extends Migration
             $table->integer('cousin_id');
             $table->string('name');
             $table->integer('image_id');
+            $table->tinyInteger('featured');
+            $table->integer('priority');
             $table->timestamps();
         });
     }

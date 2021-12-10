@@ -17,6 +17,8 @@ class CreateRecipeMealsTable extends Migration
             $table->increments('recipe_meal_id');
             $table->string('name');
             $table->integer('image_id');
+            $table->tinyInteger('featured')->default(0);
+            $table->integer('priority');
             $table->timestamps();
         });
     }

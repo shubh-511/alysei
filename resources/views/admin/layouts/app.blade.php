@@ -255,15 +255,15 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{url('dashboard/recipe')}}" class="nav-link">
+                <a href="{{url('dashboard/recipe/meals')}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Meals</p>
                 </a>
               </li>
               <li class="nav-item">
-                <a href="{{url('login/users')}}" class="nav-link">
+                <a href="{{url('dashboard/recipe/regions')}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Tools</p>
+                  <p>Regions</p>
                 </a>
               </li>
             </ul>
@@ -344,6 +344,9 @@
           $(".ingredient_list").css("display","block");
         }
       });
+
+      $(".alert-danger").fadeOut(5000);
+      $(".alert-success").fadeOut(5000);
   })
 </script>
 </body>

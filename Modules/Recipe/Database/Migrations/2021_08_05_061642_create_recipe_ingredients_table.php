@@ -20,6 +20,7 @@ class CreateRecipeIngredientsTable extends Migration
             $table->integer('image_id');
             $table->integer('parent')->default(0)->comment('parent store self table id i.e., recipe_ingredient_id');
             $table->integer('featured')->default(0);
+            $table->integer('priority');
             $table->timestamps();
         });
     }

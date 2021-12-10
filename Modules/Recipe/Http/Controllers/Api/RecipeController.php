@@ -1993,14 +1993,14 @@ class RecipeController extends CoreController
             {
                 $categories[$key]->name = $this->translate('messages.'.$category->name,$category->name);
             }*/
-            $meals = RecipeMeal::with('image_id')->get();
+            $meals = RecipeMeal::with('image_id')->orderBy('priority', 'asc')->get();
             
             foreach($meals as $key => $meal)
             {
                 $meals[$key]->name = $this->translate('messages.'.$meal->name,$meal->name);
             }
 
-            $parentIngredients = RecipeIngredient::with('image_id')->where('parent','=', 0)->get();
+            $parentIngredients = RecipeIngredient::with('image_id')->where('parent','=', 0)->orderBy('priority', 'asc')->get();
             if(count($parentIngredients) > 0)
             {
                 foreach($parentIngredients as $key => $parentIngredient)
