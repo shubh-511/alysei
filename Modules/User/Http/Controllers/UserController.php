@@ -53,6 +53,11 @@ class UserController extends CoreController
         $users = User::where('role_id','!=',1)->orderBy('user_id', 'DESC')->paginate(25);
         return view('user::admin.user.list', compact('users'));
     }
+    
+    public function userDelete(Request $request)
+    {
+        User::where('user_id', $request->id)->delete();
+    }
 
     /***
     update user status

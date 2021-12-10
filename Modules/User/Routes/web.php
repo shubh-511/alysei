@@ -35,6 +35,7 @@ Route::group(['prefix'=>'dashboard','middleware'=>['web','isAdminLogin']], funct
 	Route::post('/update-progress/{user_id}', 'UserController@updateProgressStatus');
 
 	Route::post('/user-status', 'UserController@userStatus');
+	Route::post('/users/delete', 'UserController@userDelete');
 
 	Route::post('/review-status', 'UserController@reviewStatus');
 	Route::post('/certified-status', 'UserController@certifiedStatus');
