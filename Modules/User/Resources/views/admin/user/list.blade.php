@@ -70,7 +70,7 @@
 
                   <td>
                       <a class="fa fa-edit" href="{{url('dashboard/users/edit', [$user->user_id])}}" title="Edit"></a> | 
-                      <a class="fa fa-trash" onclick="deleteUser(163)" title="Delete"></a>
+                      <a class="fa fa-trash" onclick="deleteUser({{$user->user_id}})" title="Delete"></a>
                       
                   </td>
               </tr>
@@ -88,6 +88,24 @@
     </div>
   </div>
 </section>
+<script type="text/javascript">
+  function deleteUser(id)
+    {
+        
+        if (confirm("Are you sure you want to delete?") == true) {
+        $.ajax({
+        url:"{{url('dashboard/users/delete')}}",
+        type:'post',
+        data:{'id':id,'_token':'{{ csrf_token() }}'},
+        success: function(path){
+        location.reload();
+        }
+        });
+        } else {
+        return false;
+        }
+      }
+</script>
                 
 @endsection            
 
