@@ -2071,35 +2071,39 @@ class RecipeController extends CoreController
             foreach($quickEasyRecipes as $keyRecipe => $quickEasyRecipe)
             {
                 $quickRecipeOwner = User::where('user_id', $quickEasyRecipe->user_id)->first();
-                if($quickRecipeOwner->role_id == 7 || $quickRecipeOwner->role_id == 10)
-                {
-                    $recipeOwnerName = ucwords(strtolower($quickRecipeOwner->first_name)) . ' ' . ucwords(strtolower($quickRecipeOwner->last_name));
-                }
-                elseif($quickRecipeOwner->role_id == 9)
-                {
-                    $recipeOwnerName = $quickRecipeOwner->restaurant_name;
-                }
-                else
-                {
-                    $recipeOwnerName = $quickRecipeOwner->company_name;
-                }
 
-                $isLikedQuickRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $quickEasyRecipe->recipe_id)->first();
-                if(!empty($isLikedQuickRecipe))
-                {
-                    $quickEasyRecipes[$keyRecipe]->is_favourite = 1;
-                }
-                else
-                {
-                    $quickEasyRecipes[$keyRecipe]->is_favourite = 0;   
-                }
+                if($quickRecipeOwner){
+                    
+                    if($quickRecipeOwner->role_id == 7 || $quickRecipeOwner->role_id == 10)
+                    {
+                        $recipeOwnerName = ucwords(strtolower($quickRecipeOwner->first_name)) . ' ' . ucwords(strtolower($quickRecipeOwner->last_name));
+                    }
+                    elseif($quickRecipeOwner->role_id == 9)
+                    {
+                        $recipeOwnerName = $quickRecipeOwner->restaurant_name;
+                    }
+                    else
+                    {
+                        $recipeOwnerName = $quickRecipeOwner->company_name;
+                    }
 
-                $avgRatingOfQuickRecipe = RecipeReviewRating::where('recipe_id', $quickEasyRecipe->recipe_id)->avg('rating');
-                $totalLikesOfQuickRecipe = RecipeFavourite::where('recipe_id', $quickEasyRecipe->recipe_id)->count();
+                    $isLikedQuickRecipe = RecipeFavourite::where('user_id', $user->user_id)->where('recipe_id', $quickEasyRecipe->recipe_id)->first();
+                    if(!empty($isLikedQuickRecipe))
+                    {
+                        $quickEasyRecipes[$keyRecipe]->is_favourite = 1;
+                    }
+                    else
+                    {
+                        $quickEasyRecipes[$keyRecipe]->is_favourite = 0;   
+                    }
 
-                $quickEasyRecipes[$keyRecipe]->avg_rating = number_format((float)$avgRatingOfQuickRecipe, 1, '.', '');
-                $quickEasyRecipes[$keyRecipe]->total_likes = $totalLikesOfQuickRecipe;
-                $quickEasyRecipes[$keyRecipe]->username = $recipeOwnerName;
+                    $avgRatingOfQuickRecipe = RecipeReviewRating::where('recipe_id', $quickEasyRecipe->recipe_id)->avg('rating');
+                    $totalLikesOfQuickRecipe = RecipeFavourite::where('recipe_id', $quickEasyRecipe->recipe_id)->count();
+
+                    $quickEasyRecipes[$keyRecipe]->avg_rating = number_format((float)$avgRatingOfQuickRecipe, 1, '.', '');
+                    $quickEasyRecipes[$keyRecipe]->total_likes = $totalLikesOfQuickRecipe;
+                    $quickEasyRecipes[$keyRecipe]->username = $recipeOwnerName;
+                }
             }
 
 
