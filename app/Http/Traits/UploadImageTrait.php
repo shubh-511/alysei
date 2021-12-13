@@ -151,7 +151,7 @@ trait UploadImageTrait
     public function postGallery($img, $moduleId, $storeOrProduct)
     {
         $date = date("Y/m");
-        $target='uploads/'.$date;
+        $target='uploads/'.$date."/";
         $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
         $basePath = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/';
 
