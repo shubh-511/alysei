@@ -34,4 +34,11 @@ Route::group(['prefix'=>'dashboard/recipe','middleware'=>['web','isAdminLogin']]
     Route::post('/region/store', 'RegionsController@store');
     Route::get('/region/edit/{id}', 'RegionsController@edit');
     Route::post('/region/update/{id}', 'RegionsController@update');
+
+    //Admin Tool Routes
+    Route::get('/tools', 'ToolsController@index');
+    Route::get('/tool/add', 'ToolsController@create');
+    Route::post('/tool/store', 'ToolsController@store');
+    Route::get('/tool/edit/{id}', 'ToolsController@edit');
+    Route::post('/tool/update/{id}', 'ToolsController@update'); 
 });

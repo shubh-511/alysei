@@ -6,13 +6,13 @@
   <div class="container-fluid">
     <div class="row mb-2">
       <div class="col-sm-6">
-        <h1>Recipe Meals</h1>
+        <h1>Recipe Tools</h1>
       </div>
       <div class="col-sm-6">
         <ol class="breadcrumb float-sm-right">
           <li class="breadcrumb-item"><a href="{{url('dashboard')}}">Home</a></li>
           <li class="breadcrumb-item"><a href="{{url('dashboard/recipe')}}">Recipe</a></li>
-          <li class="breadcrumb-item active">Meals</li>
+          <li class="breadcrumb-item active">Tools</li>
         </ol>
       </div>
     </div>
@@ -23,9 +23,9 @@
   <div class="container-fluid">
     <div class="card">
       <div class="card-header">
-        <h3>Meals</h3>
+        <h3>Tools</h3>
         <div style="float:right;">
-            <a class="nav-link" href="{{url('dashboard/recipe/meal/add')}}">
+            <a class="nav-link" href="{{url('dashboard/recipe/tool/add')}}">
               Add New
             </a>
         </div>
@@ -37,6 +37,7 @@
           <thead>
             <tr>
               <th style="width: 4.75em;"><input type="checkbox" name="" onclick="selectAll();" class="allSelect">  All </th>
+              <th>Title</th>
               <th>Name</th>
               <th>Image</th>
               <th>Featured</th>
@@ -45,24 +46,27 @@
             </tr>
           </thead>
           <tbody>
-              @foreach($meals as $meal)  
+              @foreach($tools as $tool)  
               <tr role="row">
-                  <td ><input type="checkbox" name="" class="singleSelect" data-id="{{$meal->recipe_meal_id}}"></td>
+                  <td ><input type="checkbox" name="" class="singleSelect" data-id="{{$tool->recipe_tool_id}}"></td>
                   <td>                  
-                    {{ $meal->name }}
+                    {{ $tool->title }}
                   </td>
                   <td>                  
-                        <img src="{{ $meal->attachment->base_url }}{{ $meal->attachment->attachment_url }}" width="50px">
+                    {{ $tool->name }}
+                  </td>
+                  <td>                  
+                        <img src="{{ $tool->attachment->base_url }}{{ $tool->attachment->attachment_url }}" width="50px">
                   </td>
                   <td>
-                    {{ $meal->featured == 1 ? 'yes' : 'No' }}
+                    {{ $tool->featured == 1 ? 'yes' : 'No' }}
                   </td>
                   <td>
-                    {{ $meal->priority }}
+                    {{ $tool->priority }}
                   </td>
 
                   <td>
-                      <a class="fa fa-edit" href="{{url('dashboard/recipe/meal/edit', [$meal->recipe_meal_id])}}" title="Edit"></a> | 
+                      <a class="fa fa-edit" href="{{url('dashboard/recipe/tool/edit', [$tool->recipe_tool_id])}}" title="Edit"></a> | 
                       <a class="fa fa-trash" title="Delete"></a>
                       
                   </td>
@@ -73,7 +77,7 @@
       </div>
       <!-- /.card-body -->
       <div class="card-footer clearfix">
-        {{$meals->links()}}
+        {{$tools->links()}}
       </div>
     </div>
   </div>

@@ -261,6 +261,12 @@
                 </a>
               </li>
               <li class="nav-item">
+                <a href="{{url('dashboard/recipe/tools')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Tools</p>
+                </a>
+              </li>
+              <li class="nav-item">
                 <a href="{{url('dashboard/recipe/regions')}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>Regions</p>
