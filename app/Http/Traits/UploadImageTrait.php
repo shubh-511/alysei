@@ -152,6 +152,8 @@ trait UploadImageTrait
     {
         $date = date("Y/m");
         $target='uploads/'.$date;
+        $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+        $basePath = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/';
 
         if(env('FILESYSTEM') == 'storage_file')
         {
@@ -172,8 +174,6 @@ trait UploadImageTrait
         else
         {
             $status = [];
-            $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
-            
             $ext1 = $img->getClientOriginalExtension();
             $name = $img->getClientOriginalName();
             $headerTarget = $target.''. $name;
@@ -194,6 +194,7 @@ trait UploadImageTrait
         
         $activityAttachmentLink->attachment_url = $headerTarget;
         $activityAttachmentLink->attachment_type = $ext1;
+        $activityAttachmentLink->base_url = $basePath;
         $activityAttachmentLink->save();
 
         /*if($storeOrProduct == 1)
