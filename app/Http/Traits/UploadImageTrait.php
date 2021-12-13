@@ -56,7 +56,7 @@ trait UploadImageTrait
             
             $ext1 = $img->getClientOriginalExtension();
             $name = $img->getClientOriginalName();
-            $headerTarget = $target.''. $name;
+            echo $headerTarget = $target.''. $name;exit;
             $url = Storage::disk('s3')->put($headerTarget, file_get_contents($img));
 
         }
