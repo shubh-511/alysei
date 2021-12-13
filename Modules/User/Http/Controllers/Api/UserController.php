@@ -1732,7 +1732,13 @@ class UserController extends CoreController
                 $userAbout = User::select('about')->where('user_id', $request->visitor_profile_id)->first();
 
                 $postCount = ActivityAction::where('subject_id', $request->visitor_profile_id)->count();
-                $connectionsCount = Connection::where('is_approved', '1')->where('resource_id', $request->visitor_profile_id)->orWhere('user_id', $request->visitor_profile_id)->count();
+                
+                $connectionsCount = Connection::where(function ($query) use ($request) {
+                    $query->where('is_approved', '1');
+                      })->where(function ($query) use ($request) {
+                          $query->where('resource_id', $request->visitor_profile_id)->orWhere('user_id', $request->visitor_profile_id);
+                      })->count();
+
                 $followerCount = Follower::where('follow_user_id', $request->visitor_profile_id)->count();
 
                 $followingCount = Follower::where('user_id', $request->visitor_profile_id)->count();

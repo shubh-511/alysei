@@ -660,16 +660,16 @@ class ConnectUserController extends CoreController
      * Get Pending Sent Requests
      * 
      */
-    public function getMyPendingSentRequest($user)
+    public function getMyPendingSentRequest($userArr)
     {
         try
         {
-            $requests = Connection::where('resource_id', $user->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
+            $requests = Connection::where('resource_id', $userArr->user_id)->where('is_approved', '0')->orderBy('connection_id', 'DESC')->get();
             if(count($requests) > 0)
             {
                 foreach($requests as $key => $request)
                 {
-                    if($request->resource_id == $user->user_id)
+                    if($request->resource_id == $userArr->user_id)
                     {
                         $user = User::select('user_id','email','company_name','first_name','last_name','restaurant_name','role_id','avatar_id')->with('avatar_id')->where('user_id', $request->user_id)->first();
                         $requests[$key]->user = $user;
