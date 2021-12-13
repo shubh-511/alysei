@@ -103,6 +103,7 @@ trait UploadImageTrait
         $date = date("Y/m");
         $target='uploads/'.$date;
         $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
+        $basePath = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/';
 
         if(env('FILESYSTEM') == 'storage_file')
         {
@@ -140,6 +141,7 @@ trait UploadImageTrait
         $activityAttachmentLink->attachment_type = $ext1;
         $activityAttachmentLink->height = $height;
         $activityAttachmentLink->width = $width;
+        $activityAttachmentLink->base_url = $basePath;
         $activityAttachmentLink->save();
         
         return $activityAttachmentLink->activity_attachment_link_id;
