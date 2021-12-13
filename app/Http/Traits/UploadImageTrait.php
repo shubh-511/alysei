@@ -89,7 +89,13 @@ trait UploadImageTrait
         $attachment = Attachment::where('id',$attachmentId)->first();
         
         if($attachment){
-            unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$attachment->attachment_url);
+            if(env('FILESYSTEM') == 'storage_file')
+            {
+                unlink('/home/ibyteworkshop/alyseiapi_ibyteworkshop_com/'.$attachment->attachment_url);
+            }else{
+                Storage::disk('s3')->delete($attachment->attachment_url);
+            }
+
             Attachment::where('id',$attachmentId)->delete();
         }
         
