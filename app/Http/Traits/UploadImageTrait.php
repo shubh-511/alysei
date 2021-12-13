@@ -28,7 +28,7 @@ trait UploadImageTrait
     public function uploadImage($img)
     {
         $date = date("Y/m");
-    	$target='uploads/'.$date."/";
+        $target='uploads/'.$date."/";
         $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
 
         $basePath = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/';
@@ -56,7 +56,7 @@ trait UploadImageTrait
             
             $ext1 = $img->getClientOriginalExtension();
             $name = $img->getClientOriginalName();
-            echo $headerTarget = $target.''. $name;exit;
+            $headerTarget = $target.''. $name;
             $url = Storage::disk('s3')->put($headerTarget, file_get_contents($img));
 
         }
