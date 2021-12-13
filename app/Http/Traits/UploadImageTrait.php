@@ -101,7 +101,7 @@ trait UploadImageTrait
     public function postAttchment($img)
     {
         $date = date("Y/m");
-        $target='uploads/'.$date;
+        $target='uploads/'.$date."/";
         $baseUrl = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/';
         $basePath = 'https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/';
 
@@ -126,13 +126,11 @@ trait UploadImageTrait
         else
         {
             $status = [];
-            
-            
             $ext1 = $img->getClientOriginalExtension();
             $name = $img->getClientOriginalName();
             $headerTarget = $target.''. $name;
             $url = Storage::disk('s3')->put($headerTarget, file_get_contents($img));
-            //list($width, $height, $type, $attr) = getimagesize(env('APP_URL').''.$headerTarget);
+            list($width, $height, $type, $attr) = getimagesize($basePath.''.$headerTarget);
         }
         
 
