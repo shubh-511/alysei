@@ -1194,6 +1194,16 @@ class RecipeController extends CoreController
                 }
 
                 $youMightAlsoLikeData = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('cousin_id', $myRecipes->cousin_id)->limit(6)->get();
+
+                foreach($youMightAlsoLikeData as $lkey => $youMightAlsoLike)
+                {
+                    $count = User::where('user_id', $youMightAlsoLike->user_id)->whereNull('deleted_at')->count();
+                    if($count == 0){
+                        unset($youMightAlsoLikeData[$lkey]);
+                    }
+                       
+                }
+
                 foreach($youMightAlsoLikeData as $lkey => $youMightAlsoLike)
                 {
                     $userDetail = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $youMightAlsoLike->user_id)->first();
