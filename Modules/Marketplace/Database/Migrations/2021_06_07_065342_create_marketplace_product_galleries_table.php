@@ -17,6 +17,7 @@ class CreateMarketplaceProductGalleriesTable extends Migration
             $table->increments('marketplace_product_gallery_id');
             $table->integer('marketplace_product_id');
             $table->string('attachment_url');
+            $table->string('base_url');
             $table->string('attachment_type');
             $table->timestamps();
         });
