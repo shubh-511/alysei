@@ -894,6 +894,7 @@ class ActivityController extends CoreController
         try
         {
             $user = $this->user;
+            
             $validator = Validator::make($request->all(), [ 
                 'post_id' => 'required', 
             ]);
@@ -903,6 +904,7 @@ class ActivityController extends CoreController
             }
 
             $activityPost = ActivityAction::where('activity_action_id', $request->post_id)->where('subject_id', $user->user_id)->first();
+
             if(!empty($activityPost))
             {
                 $this->deleteSelectedPost($request->post_id, $user->user_id);

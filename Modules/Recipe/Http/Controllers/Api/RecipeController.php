@@ -1045,11 +1045,12 @@ class RecipeController extends CoreController
      */
     public function getRecipeDetail($recipeId)
     {
-        /*try
-        {*/
+        try
+        {
             $user = $this->user;
 
             $myRecipes = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->first();
+
             if(!empty($myRecipes))
             {
                 $userData = User::select('user_id','name','email','first_name','last_name','company_name','restaurant_name','role_id','avatar_id')->where('user_id', $myRecipes->user_id)->first();
@@ -1069,6 +1070,7 @@ class RecipeController extends CoreController
                 $avgRating = RecipeReviewRating::where('recipe_id', $recipeId)->avg('rating');
                 $totalReviews = RecipeReviewRating::where('recipe_id', $recipeId)->count();
                 $getLatestReview = RecipeReviewRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->orderBy('recipe_review_rating_id', 'DESC')->first();
+                
 
                 if(!empty($getLatestReview))
                 {
@@ -1225,11 +1227,11 @@ class RecipeController extends CoreController
                 $message = "No recipe found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
-        /*}
+        }
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }*/
+        }
     }
 
     /*
@@ -2234,7 +2236,7 @@ class RecipeController extends CoreController
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
-                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url','attachments.base_url')
                     ->whereNull('deleted_at')
                     ->whereRaw('('.$condition.')')
                     ->where(function ($query) use ($request, $recipesId) {
@@ -2252,7 +2254,7 @@ class RecipeController extends CoreController
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
-                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url','attachments.base_url')
                     ->whereNull('deleted_at')
                     ->where(function ($query) use ($request, $recipesId) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')
@@ -2273,7 +2275,7 @@ class RecipeController extends CoreController
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
-                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url','attachments.base_url')
                     ->whereRaw('('.$condition.')')
                     ->whereNull('deleted_at')
                     ->where(function ($query) use ($request) {
@@ -2289,7 +2291,7 @@ class RecipeController extends CoreController
                     ->join('recipe_meals', 'recipe_meals.recipe_meal_id', '=', 'recipes.meal_id')
                     ->join('attachments', 'attachments.id', '=', 'recipes.image_id')
                     ->join('recipe_regions', 'recipe_regions.recipe_region_id', '=', 'recipes.region_id')
-                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url')
+                    ->select('recipes.name as recipe_name','recipes.*', 'recipe_meals.name as meal_name', 'recipe_meals.*','attachments.attachment_url','attachments.base_url')
                     ->whereNull('deleted_at')
                     ->where(function ($query) use ($request) {
                         $query->where('recipes.name', 'LIKE', '%'.$request->keyword.'%')

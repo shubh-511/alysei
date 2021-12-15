@@ -774,11 +774,13 @@ class HomepageController extends CoreController
 
                     if(!empty($productImg->attachment_url))
                     {
-                        $allProducts[$key]->logo_id = $productImg->attachment_url;    
+                        $allProducts[$key]->logo_id = $productImg->attachment_url;
+                        $allProducts[$key]->base_url = $productImg->base_url;    
                     }
                     else
                     {
                         $allProducts[$key]->logo_id = "";
+                        $allProducts[$key]->base_url="";
                     }
                     
                     $allProducts[$key]->avg_rating = number_format((float)$avgRating, 1, '.', '');

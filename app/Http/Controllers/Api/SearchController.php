@@ -453,7 +453,7 @@ class SearchController extends CoreController
                 return response()->json(['errors'=>$validateSearchType->errors()->first(),'success' => $this->validationStatus], $this->validationStatus);
             }
 
-            $users = UserSelectedHub::where('hub_id', $request->hub_id)->get();
+            $users = UserSelectedHub::where('hub_id', $request->hub_id)->paginate(10);
             if(count($users) > 0)
             {
                 $users = $users->pluck('user_id');
