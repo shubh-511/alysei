@@ -256,7 +256,8 @@ trait UploadImageTrait
         
         if($attachment){
             //unlink(env('APP_URL').''.$attachment->attachment_url);
-            unlink('https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/'.$attachment->attachment_url);
+            //unlink('https://' . env('AWS_BUCKET') . '.s3.' . env('AWS_DEFAULT_REGION') . '.amazonaws.com/' . env('AWS_BUCKET') . '/'.$attachment->attachment_url);
+            Storage::disk('s3')->delete($attachment->attachment_url);
             ActivityAttachmentLink::where('activity_attachment_link_id',$attachmentId)->delete();
         }
         
