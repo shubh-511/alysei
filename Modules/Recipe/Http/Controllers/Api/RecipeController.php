@@ -1045,8 +1045,8 @@ class RecipeController extends CoreController
      */
     public function getRecipeDetail($recipeId)
     {
-        /*try
-        {*/
+        try
+        {
             $user = $this->user;
 
             $myRecipes = Recipe::with('image','meal','region')->with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->first();
@@ -1071,6 +1071,7 @@ class RecipeController extends CoreController
                 $avgRating = RecipeReviewRating::where('recipe_id', $recipeId)->avg('rating');
                 $totalReviews = RecipeReviewRating::where('recipe_id', $recipeId)->count();
                 $getLatestReview = RecipeReviewRating::with('user:user_id,name,email,company_name,restaurant_name,role_id,avatar_id','user.avatar_id')->where('recipe_id', $recipeId)->orderBy('recipe_review_rating_id', 'DESC')->first();
+                
 
                 if(!empty($getLatestReview))
                 {
@@ -1227,11 +1228,11 @@ class RecipeController extends CoreController
                 $message = "No recipe found";
                 return response()->json(['success' => $this->exceptionStatus,'errors' =>['exception' => $this->translate('messages.'.$message,$message)]], $this->exceptionStatus);
             }            
-        /*}
+        }
         catch(\Exception $e)
         {
             return response()->json(['success'=>$this->exceptionStatus,'errors' =>['exception' => [$e->getMessage()]]], $this->exceptionStatus); 
-        }*/
+        }
     }
 
     /*
